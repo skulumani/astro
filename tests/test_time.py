@@ -21,3 +21,11 @@ def test_finddays_newyears():
     ddays = time.finddays(2017, 1, 1, 0, 0, 0)
     np.testing.assert_equal(ddays, 0)
 
+def test_dayofyr2mdhms_january():
+    yr = 2017
+    days = 1.5
+
+    expected_output = (1, 1, 12, 0, 0)
+    actual_output = time.dayofyr2mdhms(yr, days)
+    np.testing.assert_array_almost_equal(actual_output, expected_output)
+
