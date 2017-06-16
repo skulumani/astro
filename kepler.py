@@ -1,7 +1,7 @@
 """Keplerian method to do astrodynamics
 """
 import numpy as np
-from .kinematics import attitude
+from ..kinematics import attitude
 
 
 def coe2rv(p, ecc, inc, raan, arg_p, nu, mu):
