@@ -44,7 +44,6 @@ def date2jd(yr, mon, day, hr, minute, sec):
     return (JD, MJD)
 
 def dayofyr2mdhms(yr, days):
-
     """
     This function converts the day of the year, days, to the month
         day, hour, minute and second.
@@ -97,7 +96,7 @@ def dayofyr2mdhms(yr, days):
         temp += lmonth[ii]
         ii += 1
 
-    mon = ii
+    mon = ii + 1
     day = dayofyr - temp
 
     # find hour, min, and seconds
