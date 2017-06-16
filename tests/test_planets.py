@@ -11,3 +11,4 @@ def test_sun_earth_eci_vallado():
     expected_dec = 4.788425 * np.pi/180
     rsun, ra, dec = planets.sun_earth_eci(jd)
     np.testing.assert_array_almost_equal(rsun, expected_rsun, decimal=0)
+
