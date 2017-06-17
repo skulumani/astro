@@ -3,6 +3,15 @@
 import numpy as np
 import ephem
 import pdb
+from collections import defaultdict, namedtuple
+
+# tuple to hold all the items from a single TLE 
+TLE = namedtuple('TLE', [
+    'satname', 'satnum', 'classification', 'id_year', 'id_launch',
+    'id_piece', 'epoch_year', 'epoch_day', 'ndot_over_2', 'nddot_over_6',
+    'bstar', 'ephtype', 'elnum', 'checksum1',
+    'inc', 'raan', 'ecc', 'argp', 'ma', 'mean_motion', 'epoch_rev',
+    'checksum2'])
 
 def get_tle_ephem(filename):
     """Load TLEs from a file
@@ -58,37 +67,43 @@ def stringScientificNotationToFloat(sn):
 def parsetle(l0, l1, l2):
     """Get all the elements out of a TLE
     """
-    elements = {}
     # parse line zero 
-    elements['satname'] = l0[0:23]
+    satname = l0[0:23]
     
     # parse line one
-    elements['satnum'] = int(l1[2:7])
-    elements['classification'] = l1[7:8]
-    elements['id_year'] = int(l1[9:11])
-    elements['id_launch'] = int(l1[11:14])
-    elements['id_piece'] = l1[14:17]
-    elements['epoch_year'] = int(l1[18:20])
-    elements['epoch_day'] = float(l1[20:32])
-    elements['ndot_over_2'] = float(l1[33:43])
-    elements['nddot_over_6'] = stringScientificNotationToFloat(l1[44:52])
-    elements['bstar'] = stringScientificNotationToFloat(l1[53:61])
-    elements['ephtype'] = int(l1[62:63])
-    elements['elnum'] = int(l1[64:68])
-    elements['checksum1'] = int(l1[68:69])
+    satnum = int(l1[2:7])
+    classification = l1[7:8]
+    id_year = int(l1[9:11])
+    id_launch = int(l1[11:14])
+    id_piece = l1[14:17]
+    epoch_year = int(l1[18:20])
+    epoch_day = float(l1[20:32])
+    ndot_over_2 = float(l1[33:43])
+    nddot_over_6 = stringScientificNotationToFloat(l1[44:52])
+    bstar = stringScientificNotationToFloat(l1[53:61])
+    ephtype = int(l1[62:63])
+    elnum = int(l1[64:68])
+    checksum1 = int(l1[68:69])
 
     # parse line 2
     # satellite        = int(line2[2:7])
-    elements['inc'] = float(l2[8:16])
-    elements['raan'] = float(l2[17:25])
-    elements['ecc'] = float(l2[26:33]) * 0.0000001
-    elements['argp'] = float(l2[34:42])
-    elements['ma'] = float(l2[43:51])
-    elements['mean_motion'] = float(l2[52:63])
-    elements['epoch_rev'] = float(l2[63:68])
-    elements['checksum2'] = float(l2[68:69])
+    inc = float(l2[8:16])
+    raan = float(l2[17:25])
+    ecc = float(l2[26:33]) * 0.0000001
+    argp = float(l2[34:42])
+    ma = float(l2[43:51])
+    mean_motion = float(l2[52:63])
+    epoch_rev = float(l2[63:68])
+    checksum2 = float(l2[68:69])
     
-    return elements
+    return TLE(satnum=satnum, classification=classification, id_year=id_year,
+            id_launch=id_launch, id_piece=id_piece, epoch_year=epoch_year,
+            epoch_day=epoch_day, ndot_over_2=ndot_over_2, 
+            nddot_over_6=nddot_over_6, bstar=bstar, ephtype=ephtype, 
+            elnum=elnum, checksum1=checksum1, inc=inc, raan=raan, ecc=ecc,
+            argp=argp, ma=ma, mean_motion=mean_motion, epoch_rev=epoch_rev,
+            checksum2=checksum2,
+            satname=satname)
 
 def get_tle(filename):
     """Assuming a file with 3 Line TLEs is given this will parse the file

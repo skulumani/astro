@@ -21,70 +21,70 @@ class TestTLEISS():
         np.testing.assert_equal(tle.checksum(self.l2), 9)
 
     def test_satname(self):
-        np.testing.assert_string_equal(self.elements['satname'], "0 ISS (ZARYA)")
+        np.testing.assert_string_equal(self.elements.satname, "0 ISS (ZARYA)")
 
     def test_satnum(self):
-        np.testing.assert_equal(self.elements['satnum'], 25544)
+        np.testing.assert_equal(self.elements.satnum, 25544)
 
     def test_classification(self):
-        np.testing.assert_string_equal(self.elements['classification'], 'U')
+        np.testing.assert_string_equal(self.elements.classification, 'U')
 
     def test_id_year(self):
-        np.testing.assert_allclose(self.elements['id_year'], 98)
+        np.testing.assert_allclose(self.elements.id_year, 98)
 
     def test_id_launch(self):
-        np.testing.assert_allclose(self.elements['id_launch'], 67)
+        np.testing.assert_allclose(self.elements.id_launch, 67)
 
     def test_id_piece(self):
-        np.testing.assert_string_equal(self.elements['id_piece'], 'A  ')
+        np.testing.assert_string_equal(self.elements.id_piece, 'A  ')
 
     def test_epoch_year(self):
-        np.testing.assert_allclose(self.elements['epoch_year'], 17)
+        np.testing.assert_allclose(self.elements.epoch_year, 17)
 
     def test_epoch_day(self):
-        np.testing.assert_allclose(self.elements['epoch_day'], 168.12419852)
+        np.testing.assert_allclose(self.elements.epoch_day, 168.12419852)
 
     def test_ndot_over_2(self):
-        np.testing.assert_allclose(self.elements['ndot_over_2'], 0.00002055)
+        np.testing.assert_allclose(self.elements.ndot_over_2, 0.00002055)
         
     def test_nddot_over_6(self):
-        np.testing.assert_allclose(self.elements['nddot_over_6'], 0)
+        np.testing.assert_allclose(self.elements.nddot_over_6, 0)
 
     def test_bstar(self):
-        np.testing.assert_allclose(self.elements['bstar'], 38402e-4/1e5)
+        np.testing.assert_allclose(self.elements.bstar, 38402e-4/1e5)
 
     def test_ephtype(self):
-        np.testing.assert_allclose(self.elements['ephtype'], 0)
+        np.testing.assert_allclose(self.elements.ephtype, 0)
 
     def test_elnum(self):
-        np.testing.assert_allclose(self.elements['elnum'], 999)
+        np.testing.assert_allclose(self.elements.elnum, 999)
 
     def test_checksum1(self):
-        np.testing.assert_allclose(self.elements['checksum1'], 8)
+        np.testing.assert_allclose(self.elements.checksum1, 8)
 
     def test_inc(self):
-        np.testing.assert_allclose(self.elements['inc'], 51.6427)
+        np.testing.assert_allclose(self.elements.inc, 51.6427)
 
     def test_raan(self):
-        np.testing.assert_allclose(self.elements['raan'], 38.6434)
+        np.testing.assert_allclose(self.elements.raan, 38.6434)
 
     def test_ecc(self):
-        np.testing.assert_allclose(self.elements['ecc'], 0.0004440)
+        np.testing.assert_allclose(self.elements.ecc, 0.0004440)
 
     def test_argp(self):
-        np.testing.assert_allclose(self.elements['argp'], 287.0211)
+        np.testing.assert_allclose(self.elements.argp, 287.0211)
 
     def test_ma(self):
-        np.testing.assert_allclose(self.elements['ma'], 207.7840)
+        np.testing.assert_allclose(self.elements.ma, 207.7840)
 
     def test_mean_motion(self):
-        np.testing.assert_allclose(self.elements['mean_motion'], 15.54043832)
+        np.testing.assert_allclose(self.elements.mean_motion, 15.54043832)
 
     def test_epoch_rev(self):
-        np.testing.assert_allclose(self.elements['epoch_rev'], 6174)
+        np.testing.assert_allclose(self.elements.epoch_rev, 6174)
 
     def test_checksum2(self):
-        np.testing.assert_allclose(self.elements['checksum2'], 9)
+        np.testing.assert_allclose(self.elements.checksum2, 9)
 
 
 class TestTLESL3():
@@ -104,70 +104,70 @@ class TestTLESL3():
         np.testing.assert_equal(tle.checksum(self.l2), 2)
 
     def test_satname(self):
-        np.testing.assert_string_equal(self.elements['satname'], "0 SL-3 R/B")
+        np.testing.assert_string_equal(self.elements.satname, "0 SL-3 R/B")
 
     def test_satnum(self):
-        np.testing.assert_equal(self.elements['satnum'], 56)
+        np.testing.assert_equal(self.elements.satnum, 56)
 
     def test_classification(self):
-        np.testing.assert_string_equal(self.elements['classification'], 'U')
+        np.testing.assert_string_equal(self.elements.classification, 'U')
 
     def test_id_year(self):
-        np.testing.assert_allclose(self.elements['id_year'], 60)
+        np.testing.assert_allclose(self.elements.id_year, 60)
 
     def test_id_launch(self):
-        np.testing.assert_allclose(self.elements['id_launch'], 11 )
+        np.testing.assert_allclose(self.elements.id_launch, 11 )
 
     def test_id_piece(self):
-        np.testing.assert_string_equal(self.elements['id_piece'], '  B')
+        np.testing.assert_string_equal(self.elements.id_piece, '  B')
 
     def test_epoch_year(self):
-        np.testing.assert_allclose(self.elements['epoch_year'], 60)
+        np.testing.assert_allclose(self.elements.epoch_year, 60)
 
     def test_epoch_day(self):
-        np.testing.assert_allclose(self.elements['epoch_day'], 267.06075999)
+        np.testing.assert_allclose(self.elements.epoch_day, 267.06075999)
 
     def test_ndot_over_2(self):
-        np.testing.assert_allclose(self.elements['ndot_over_2'], 0.41473555)
+        np.testing.assert_allclose(self.elements.ndot_over_2, 0.41473555)
         
     def test_nddot_over_6(self):
-        np.testing.assert_allclose(self.elements['nddot_over_6'], 0)
+        np.testing.assert_allclose(self.elements.nddot_over_6, 0)
 
     def test_bstar(self):
-        np.testing.assert_allclose(self.elements['bstar'], 0)
+        np.testing.assert_allclose(self.elements.bstar, 0)
 
     def test_ephtype(self):
-        np.testing.assert_allclose(self.elements['ephtype'], 0)
+        np.testing.assert_allclose(self.elements.ephtype, 0)
 
     def test_elnum(self):
-        np.testing.assert_allclose(self.elements['elnum'], 999)
+        np.testing.assert_allclose(self.elements.elnum, 999)
 
     def test_checksum1(self):
-        np.testing.assert_allclose(self.elements['checksum1'], 9)
+        np.testing.assert_allclose(self.elements.checksum1, 9)
 
     def test_inc(self):
-        np.testing.assert_allclose(self.elements['inc'], 64.9400)
+        np.testing.assert_allclose(self.elements.inc, 64.9400)
 
     def test_raan(self):
-        np.testing.assert_allclose(self.elements['raan'], 8.300)
+        np.testing.assert_allclose(self.elements.raan, 8.300)
 
     def test_ecc(self):
-        np.testing.assert_allclose(self.elements['ecc'], 0.0007000)
+        np.testing.assert_allclose(self.elements.ecc, 0.0007000)
 
     def test_argp(self):
-        np.testing.assert_allclose(self.elements['argp'], 15.2810)
+        np.testing.assert_allclose(self.elements.argp, 15.2810)
 
     def test_ma(self):
-        np.testing.assert_allclose(self.elements['ma'], 344.7297)
+        np.testing.assert_allclose(self.elements.ma, 344.7297)
 
     def test_mean_motion(self):
-        np.testing.assert_allclose(self.elements['mean_motion'], 16.373528140)
+        np.testing.assert_allclose(self.elements.mean_motion, 16.373528140)
 
     def test_epoch_rev(self):
-        np.testing.assert_allclose(self.elements['epoch_rev'], 555)
+        np.testing.assert_allclose(self.elements.epoch_rev, 555)
 
     def test_checksum2(self):
-        np.testing.assert_allclose(self.elements['checksum2'], 2)
+        np.testing.assert_allclose(self.elements.checksum2, 2)
         
 
 
