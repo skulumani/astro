@@ -39,5 +39,5 @@ def sun_earth_eci(jd):
     rsun = rsun_mag * np.array([np.cos(eclplong), np.cos(obliquity)*np.sin(eclplong),
         np.sin(obliquity)*np.sin(eclplong)])
 
-    rsun = rsun * 149597870.7 # output in km
+    rsun = np.squeeze(rsun * 149597870.7) # output in km
     return rsun, ra, dec
