@@ -92,7 +92,7 @@ def test_kepler_eq_E():
     E_matlab = 2.475786297687611 
     nu_matlab = 2.983273149717047
 
-    E_python, nu_python, count_python =kepler.kepler_eq_E(M,ecc)
+    E_python, nu_python, count_python = kepler.kepler_eq_E(M,ecc)
 
     np.testing.assert_allclose((E_python, nu_python),(E_matlab,nu_matlab))
 
@@ -104,7 +104,7 @@ def test_kepler_eq_E_zero():
     ecc = 1.2
     E_true = 0.0
     nu_true = 0.0
-
+    
     E_python, nu_python, count_python = kepler.kepler_eq_E(M,ecc)
 
     np.testing.assert_array_almost_equal((E_python,nu_python),(E_true,nu_true))
@@ -134,7 +134,8 @@ def test_nu2anom():
 
     E_python, M_python = kepler.nu2anom(nu_matlab,ecc)
 
-    np.testing.assert_allclose((E_python, M_python),(E_matlab,M_matlab))
+    np.testing.assert_allclose(E_python, E_matlab)
+    np.testing.assert_allclose(M_python, M_matlab)
 
 def test_nu2anom_zero():
     """
@@ -161,7 +162,8 @@ def test_nu2anom_pi():
     
     E_python, M_python = kepler.nu2anom(nu_true,ecc)
 
-    np.testing.assert_allclose((E_python, M_python),(E_true,M_true))
+    np.testing.assert_allclose(E_python, E_true)
+    np.testing.assert_allclose(M_python, M_true)
 
 
 def test_tof_delta_t():

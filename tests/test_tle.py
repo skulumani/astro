@@ -1,7 +1,7 @@
 """Test the TLE parsing and transformations
 """
 import numpy as np
-from tle_predict.astro import tle
+from .. import tle
 import pdb
 
 class TestTLEISS():
