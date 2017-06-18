@@ -7,7 +7,8 @@ import ephem
 import pdb
 from collections import defaultdict, namedtuple
 
-from astro import time
+from tle_predict.astro import time, kepler
+from kinematics import attitude
 
 deg2rad = np.pi/180
 rad2deg = 180/np.pi
@@ -209,8 +210,7 @@ def get_tle(filename):
     """Assuming a file with 3 Line TLEs is given this will parse the file
     and save all the elements to a list or something. 
     """
-    sats = defaultdict(lambda: defaultdict(list))
-
+    sats = []
     with open(filename, 'r') as f:
         l0 = f.readline().strip()
         while l0:
@@ -221,31 +221,142 @@ def get_tle(filename):
                 # now we parse the tle
                 elements = parsetle(l0, l1, l2)
 
-                # now do some conversions of the TLE components
-                epoch_year = (2000 + elements.epoch_year 
-                        if elements.epoch_year < 70 
-                        else 1900 + elements.epoch_year) 
-                # working units 
-                ndot2 = elements.ndot_over_2 * (2*np.pi) * (sec2day**2)
-                inc0 = elements.inc * deg2rad
-                raan0 = elements.raan * deg2rad
-                argp0 = elements.argp * deg2rad
-                ma0 = elements.ma * deg2rad
-                mean_motion0 = elements.mean_motion * 2 * np.pi * sec2day**2
-                ecc0 = elements.ecc
-                n0 = elements.mean_motion
-                epoch_day = elements.epoch_day
-
-                # calculate perturbations raan, argp, ecc
-                raandot, argpdot, eccdot = j2dragpert(inc0, ecc0, n0, ndot2)
-
-                # calculate epoch julian date
-                mo, day, hour, mn, sec = time.dayofyr2mdhms(epoch_year, epoch_day)
-                epoch_jd = time.date2jd(epoch_year, mo, day, hour, mn, sec)
-
-                # store into dictionary
+                # instantiate a bunch of instances of a Satellite class 
+                sats.append(Satellite(elements))
             else:
                 print("Invalid TLE")
 
             l0 = f.readline().strip()
+
+    return sats
+
+class Satellite(object):
+    """Satellite class storing all the necessary information for a single
+    satellite extracted from a TLE from space-track.org
+    """
+
+    def __init__(self, elements):
+        # now do some conversions of the TLE components
+        epoch_year = (2000 + elements.epoch_year 
+                if elements.epoch_year < 70 
+                else 1900 + elements.epoch_year) 
+        # working units 
+        ndot2 = elements.ndot_over_2 * (2*np.pi) * (sec2day**2)
+        inc0 = elements.inc * deg2rad
+        raan0 = elements.raan * deg2rad
+        argp0 = elements.argp * deg2rad
+        ma0 = elements.ma * deg2rad
+        mean_motion0 = elements.mean_motion * 2 * np.pi * sec2day**2
+        ecc0 = elements.ecc
+        n0 = elements.mean_motion
+        epoch_day = elements.epoch_day
+
+        # calculate perturbations raan, argp, ecc
+        raandot, argpdot, eccdot = j2dragpert(inc0, ecc0, n0, ndot2)
+
+        # calculate epoch julian date
+        mo, day, hour, mn, sec = time.dayofyr2mdhms(epoch_year, epoch_day)
+        epoch_jd, _ = time.date2jd(epoch_year, mo, day, hour, mn, sec)
+
+        # store with class
+        self.satname = elements.satname
+        self.satnum = elements.satnum
+        self.tle = elements
+        self.ndot2 = ndot2
+        self.inc0 = inc0
+        self.raan0 = raan0
+        self.ecc0 = ecc0
+        self.argp0 = argp0
+        self.mean0 = ma0
+        self.n0 = mean_motion0
+        self.raandot = raandot
+        self.argpdot = argpdot
+        self.eccdot = eccdot
+        self.epoch_jd = epoch_jd
+
+    def tle_update(self, jd_span, mu=398600.5):
+        """Update the state of satellite given a JD time span
+        
+        This procedure uses the method of general perturbations to update
+        classical elements from epoch to a future time for inclined elliptical
+        orbits.  It includes the effects due to first order secular rates
+        (second order for mean motion) caused by drag and J2.
+
+        Author:   C2C Shankar Kulumani   USAFA/CS-19   719-333-4741
+
+        Inputs:
+            deltat - elapsed time since epoch (sec)
+            n0 - mean motion at epoch (rad/sec)
+            ndot2 - mean motion rate divided by 2 (rad/sec^2)
+            ecc0 - eccentricity at epoch (unitless)
+            eccdot - eccentricity rate (1/sec)
+            raan0 - RAAN at epoch (rad)
+            raandot - RAAN rate (rad/sec)
+            argp0 - argument of periapsis at epoch (rad)
+            argdot - argument of periapsis rate (rad/sec)
+            mean0 - mean anomaly at epoch
+
+        Outputs:
+            n - mean motion at epoch + deltat (rad/sec)
+            ecc -  eccentricity at epoch + deltat (unitless)
+            raan - RAAN at epoch + deltat (rad)
+            argp - argument of periapsis at epoch + deltat (rad)
+            nu -  true anomaly at epoch + deltat (rad)
+        
+        Globals: None
+        
+        Constants: None
+        
+        Coupling: 
+            newton.m
+
+        References:
+            Astro 321 PREDICT LSN 24-25
+        """
+        
+        deltat = (jd_span - self.epoch_jd) * day2sec
+        n0 = self.n0
+        ecc0 = self.ecc0
+        ndot2 = self.ndot2
+        eccdot = self.eccdot
+        raan0 = self.raan0
+        raandot = self.raandot
+        argp0 = self.argp0
+        argpdot = self.argpdot
+        mean0 = self.mean0
+
+        # mean motion at future time
+        n = n0 + ndot2 * 2 * deltat
+        ecc = ecc0 + eccdot * deltat
+        raan = raan0 + raandot * deltat
+        argp = argp0 + argpdot * deltat
+
+        # get true anomaly at future time
+        mean = mean0 + n0 * deltat + ndot2 * deltat**2
+        mean = attitude.normalize(mean, 0, 2 * np.pi)
+        
+        E, nu, count = kepler.kepler_eq_E(mean, ecc)
+        pdb.set_trace()
+        a = (mu / n**2)**(1/3)
+        p = a * ( 1 - ecc**2)
+        inc = self.inc0 * np.ones_like(p) 
+        
+        # save all of the variables to the object
+        self.jd_span = jd_span
+        self.n = n
+        self.ecc = ecc
+        self.raan = raan
+        self.argp = argp
+        self.mean = mean
+        self.E = E
+        self.nu = nu
+        self.a = p
+        self.inc = inc
+
+        return 0
+
+    def visible(self, site):
+        """Check if current sat is visible from the site
+        """
+        pass
 
