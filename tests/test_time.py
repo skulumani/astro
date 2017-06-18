@@ -29,3 +29,26 @@ def test_dayofyr2mdhms_january():
     actual_output = time.dayofyr2mdhms(yr, days)
     np.testing.assert_array_almost_equal(actual_output, expected_output)
 
+def test_dayofyr2mdhms_start():
+    yr = 2006
+    day = 170
+    expected_output = (6, 19, 0, 0, 0)
+    actual_output = time.dayofyr2mdhms(yr, day)
+    np.testing.assert_allclose(actual_output, expected_output)
+
+def test_dayofyr2mdhms_end():
+    yr = 2006
+    day = 180
+    expected_output = (6, 29, 0, 0, 0)
+    actual_output = time.dayofyr2mdhms(yr, day)
+    np.testing.assert_allclose(actual_output, expected_output)
+
+def test_date2jd_start():
+    expected_output = 2453905.5
+    actual_output = time.date2jd(2006, 6, 19, 0, 0, 0)
+    np.testing.assert_allclose(actual_output[0], expected_output)
+
+def test_date2jd_end():
+    expected_output = 2453915.5
+    actual_output = time.date2jd(2006, 6, 29, 0, 0, 0)
+    np.testing.assert_allclose(actual_output[0], expected_output)
