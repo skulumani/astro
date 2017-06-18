@@ -208,10 +208,9 @@ def j2dragpert(inc0, ecc0, n0, ndot2, mu=398600.5, re=6378.137, J2=0.00108263):
 def get_tle(filename):
     """Assuming a file with 3 Line TLEs is given this will parse the file
     and save all the elements to a list or something. 
-
-    Only reading and error checking is done in this function, other
-    transformations can happen later
     """
+    sats = defaultdict(lambda: defaultdict(list))
+
     with open(filename, 'r') as f:
         l0 = f.readline().strip()
         while l0:
@@ -221,6 +220,30 @@ def get_tle(filename):
             if validtle(l0, l1, l2):
                 # now we parse the tle
                 elements = parsetle(l0, l1, l2)
+
+                # now do some conversions of the TLE components
+                epoch_year = (2000 + elements.epoch_year 
+                        if elements.epoch_year < 70 
+                        else 1900 + elements.epoch_year) 
+                # working units 
+                ndot2 = elements.ndot_over_2 * (2*np.pi) * (sec2day**2)
+                inc0 = elements.inc * deg2rad
+                raan0 = elements.raan * deg2rad
+                argp0 = elements.argp * deg2rad
+                ma0 = elements.ma * deg2rad
+                mean_motion0 = elements.mean_motion * 2 * np.pi * sec2day**2
+                ecc0 = elements.ecc
+                n0 = elements.mean_motion
+                epoch_day = elements.epoch_day
+
+                # calculate perturbations raan, argp, ecc
+                raandot, argpdot, eccdot = j2dragpert(inc0, ecc0, n0, ndot2)
+
+                # calculate epoch julian date
+                mo, day, hour, mn, sec = time.dayofyr2mdhms(epoch_year, epoch_day)
+                epoch_jd = time.date2jd(epoch_year, mo, day, hour, mn, sec)
+
+                # store into dictionary
             else:
                 print("Invalid TLE")
 
