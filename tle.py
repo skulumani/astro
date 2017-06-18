@@ -75,11 +75,49 @@ def stringScientificNotationToFloat(sn):
     return 1e-5*float(sn[:6]) * 10**int(sn[6:]) 
 
 def parsetle(l0, l1, l2):
-    """Get all the elements out of a TLE
     """
-    # parse line zero 
+    The function parsetle extracts the elements of a two line element set.
+    This takes in the three lines of a TLE and parses the values.
+
+    Inputs:
+    l0 - first line consiting of the name of TLE (optional)
+    l1 - second line  
+    l2 - third line
+
+    Outputs - namedtuple TLE:
+    satname - satellite name  
+    satnum - satellite number found (0 if the requested sat was not found)
+    classfication  - classification (classified, unclassified)
+    id_year - launch year (last 2 digits)
+    id_launch - launch number of the year
+    id_piece - piece of launch (a string 3 characters long)
+    epoch_year - epoch year (last 2 digits)
+    epoch_day - epoch day of year
+    ndot_over_2 - first time derive of mean mot. divided by 2 (rev/day^2)
+    nddot_over_6 - 2nd deriv of mean mot div by 6 (rev/day^3)
+    bstar - bstar drag term
+    ephtype- ephemeris type
+    elnum  - element number (modulo 1000)
+    checksum1 - checksum of first line 
+
+    inc    - inclination (deg)
+    raan   - right ascension of asc. node (deg)
+    ecc    - eccentricity
+    argp    - argument of perigee (deg)
+    ma     - mean anomaly (deg)
+    mean_motion - mean motion (revs per day)
+    epoch_rev - revolution number(modulo 100,000)
+    checksum2 - checksum of second line
+
+    References:
+    "Fundamental of Astrodynamics and Applictions, 2nd Ed", by Vallado
+    www.celestrak.com/NORAD/documentation/tle-fmt.asp
+    manpages.debian.net/cgi-bin/...
+    display_man.cgi?id=e2095ebad4eb81b943fcdd55ec9b7521&format=html
+    """
+    # parse line zero
     satname = l0[0:23]
-    
+
     # parse line one
     satnum = int(l1[2:7])
     classification = l1[7:8]
@@ -108,12 +146,64 @@ def parsetle(l0, l1, l2):
     
     return TLE(satnum=satnum, classification=classification, id_year=id_year,
             id_launch=id_launch, id_piece=id_piece, epoch_year=epoch_year,
-            epoch_day=epoch_day, ndot_over_2=ndot_over_2, 
-            nddot_over_6=nddot_over_6, bstar=bstar, ephtype=ephtype, 
+            epoch_day=epoch_day, ndot_over_2=ndot_over_2,
+            nddot_over_6=nddot_over_6, bstar=bstar, ephtype=ephtype,
             elnum=elnum, checksum1=checksum1, inc=inc, raan=raan, ecc=ecc,
             argp=argp, ma=ma, mean_motion=mean_motion, epoch_rev=epoch_rev,
-            checksum2=checksum2,
-            satname=satname)
+            checksum2=checksum2, satname=satname)
+
+def j2dragpert(inc0, ecc0, n0, ndot2, mu=398600.5, re=6378.137, J2=0.00108263):
+
+    """
+    This file calculates the rates of change of the right ascension of the
+    ascending node(raandot), argument of periapsis(argdot), and
+    eccentricity(eccdot).  The perturbations are limited to J2 and drag only.
+
+    Author:   C2C Shankar Kulumani   USAFA/CS-19   719-333-4741
+            12 5 2014 - modified to remove global varaibles
+            17 Jun 2017 - Now in Python for awesomeness
+
+    Inputs:
+    inc0 - initial inclination (radians)
+    ecc0 - initial eccentricity (unitless)
+    n0 - initial mean motion (rad/sec)
+    ndot2 - mean motion rate divided by 2 (rad/sec^2)
+
+    Outputs:
+    raandot - nodal rate (rad/sec)
+    argdot - argument of periapsis rate (rad/sec)
+    eccdot - eccentricity rate (1/sec)
+
+    Globals: None
+
+    Constants:
+    mu - 398600.5 Earth gravitational parameter in km^3/sec^2
+    re - 6378.137 Earth radius in km
+    J2 - 0.00108263 J2 perturbation factor
+
+    Coupling: None
+
+    References:
+    Vallado
+    """     
+    
+    # calculate initial semi major axis and semilatus rectum
+    a0 = (mu / n0**2) ** (1/3)
+    p0 = a0 * (1 - ecc0**2)
+
+    # mean motion with J2
+    nvec = n0 * (1 + 1.5 * J2 * (re/p0)**2 * np.sqrt(1-ecc0**2) * (1-1.5*np.sin(inc0)**2))
+
+    # eccentricity rate
+    eccdot = (-2 * (1-ecc0)*2*ndot2)/(3*nvec)
+
+    # calculate nodal rate
+    raandot = (-1.5*J2*(re/p0)**2*np.cos(inc0))*nvec
+
+    # argument of periapsis rate
+    argdot = (2.5*J2*(re/p0)**2*(2-2.5*np.sin(inc0)**2))*nvec
+
+    return (raandot, argdot, eccdot)
 
 def get_tle(filename):
     """Assuming a file with 3 Line TLEs is given this will parse the file
