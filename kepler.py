@@ -4,13 +4,14 @@ import numpy as np
 from ..kinematics import attitude
 import pdb
 
-def coe2rv(p, ecc, inc, raan, arg_p, nu, mu):
+def coe2rv(p_in, ecc_in, inc_in, raan_in, arg_p_in, nu_in, mu):
     """
        Purpose:
            - Convert the classical orbital elements (COEs) to position (R)
                and velocity (V) vectors.
 
-       [R_ijk,V_ijk,R_pqw,V_pqw] = coe2rv(p,ecc,inc,raan,arg_p,nu,mu,arglat,truelon,lonper )
+       [R_ijk,V_ijk,R_pqw,V_pqw] =
+       coe2rv(p,ecc,inc,raan,arg_p,nu,mu,arglat,truelon,lonper )
 
        Inputs:
            - p - semi-major axis (km)
@@ -51,43 +52,76 @@ def coe2rv(p, ecc, inc, raan, arg_p, nu, mu):
     """
 
     tol = 1e-9
+    # check if array inputs
+    if not hasattr(p_in, '__iter__'):    
+        (p_in, ecc_in, inc_in, raan_in, arg_p_in, nu_in) = (
+                np.array([p_in]), 
+                np.array([ecc_in]),
+                np.array([inc_in]), 
+                np.array([raan_in]), 
+                np.array([arg_p_in]), 
+                np.array([nu_in]))
+    # make sure all inputs are the same size
+    if not (p_in.shape == ecc_in.shape == inc_in.shape == raan_in.shape ==
+            arg_p_in.shape == nu_in.shape):
+        print("All inputs must be the same shape")
+        print("p: {}".format(p_in.shape))
+        print("ecc: {}".format(ecc_in.shape))
+        print("inc: {}".format(inc_in.shape))
+        print("raan: {}".format(raan_in.shape))
+        print("argp: {}".format(arg_p_in.shape))
+        print("nu: {}".format(nu_in.shape))
 
-    # check eccentricity for special cases
-    if (ecc < tol):
-        # circular equatorial
-        if (inc < tol) or (abs(inc - np.pi) < tol):
-            arg_p = 0.0
+
+    r_pqw_out = []
+    v_pqw_out = []
+    r_ijk_out = []
+    v_ijk_out = []
+
+    for p, ecc, inc, raan, arg_p, nu in zip(p_in, ecc_in, inc_in, raan_in, 
+            arg_p_in, nu_in):
+        # check eccentricity for special cases
+        if (ecc < tol):
+            # circular equatorial
+            if (inc < tol) or (abs(inc - np.pi) < tol):
+                arg_p = 0.0
+                raan = 0.0
+                # nu   = truelon
+                nu = raan + arg_p + nu
+            else:
+                # circular inclined
+                arg_p = 0.0
+                nu = arg_p + nu
+                # nu = arglat
+        elif ((inc < tol) or (abs(inc - np.pi) < tol)):    # elliptical equatorial
+            arg_p = raan + arg_p
             raan = 0.0
-            # nu   = truelon
-            nu = raan + arg_p + nu
-        else:
-            # circular inclined
-            arg_p = 0.0
-            nu = arg_p + nu
-            # nu = arglat
-    elif ((inc < tol) or (abs(inc - np.pi) < tol)):    # elliptical equatorial
-        arg_p = raan + arg_p
-        raan = 0.0
-        # arg_p=lonper
+            # arg_p=lonper
 
-    cosnu = np.cos(nu)
-    sinnu = np.sin(nu)
-    radius = p/(1+ecc*cosnu)
-    # semi latus rectum check
-    if (abs(p) < 0.0001):
-        p = 0.0001
-    
-    # calculate postion and velocity in perifocal frame
-    R_pqw = radius*np.array([cosnu,sinnu,0])
-    V_pqw = np.sqrt(mu/p)*np.array([-sinnu,(ecc+cosnu),0])
-    
-    PI = attitude.rot3(raan).dot(attitude.rot1(inc)).dot(attitude.rot3(arg_p))
-    
-    # rotate postion and velocity vectors to inertial frame
-    R_ijk = np.dot(PI,R_pqw)
-    V_ijk = np.dot(PI,V_pqw)
+        cosnu = np.cos(nu)
+        sinnu = np.sin(nu)
+        radius = p/(1+ecc*cosnu)
+        # semi latus rectum check
+        if (abs(p) < 0.0001):
+            p = 0.0001
+        
+        # calculate postion and velocity in perifocal frame
+        r_pqw = radius*np.array([cosnu,sinnu,0])
+        v_pqw = np.sqrt(mu/p)*np.array([-sinnu,(ecc+cosnu),0])
+        
+        PI = attitude.rot3(raan).dot(attitude.rot1(inc)).dot(attitude.rot3(arg_p))
+        
+        # rotate postion and velocity vectors to inertial frame
+        r_ijk = np.dot(PI,r_pqw)
+        v_ijk = np.dot(PI,v_pqw)
 
-    return (R_ijk,V_ijk,R_pqw,V_pqw)
+        r_pqw_out.append(r_pqw)
+        v_pqw_out.append(v_pqw)
+        r_ijk_out.append(r_ijk)
+        v_ijk_out.append(v_ijk)
+
+    return (np.squeeze(r_ijk_out), np.squeeze(v_ijk_out), np.squeeze(r_pqw_out),
+            np.squeeze(v_pqw_out))
 
 
 def kepler_eq_E(M_in,ecc_in):
@@ -215,9 +249,9 @@ def kepler_eq_E(M_in,ecc_in):
                     nu = M
                     E = M
 
-    E_out.append(E)
-    nu_out.append(nu)
-    count_out.append(count)
+        E_out.append(E)
+        nu_out.append(nu)
+        count_out.append(count)
 
     return (np.squeeze(E_out), np.squeeze(nu_out), np.squeeze(count_out))
 
