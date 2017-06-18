@@ -58,3 +58,11 @@ def test_gd2gc_vallado():
     actual_latgc = geodetic.gd2gc(latgd)
     np.testing.assert_allclose(actual_latgc, expected_latgc)
 
+def test_lla2ecef_usafa():
+    lat = 39.006 * np.pi/180
+    lon = -104.883 * np.pi/180
+    alt = 2.184
+    expected_ecef = [-1275.139, -4798.054, 3994.209]
+    actual_ecef = geodetic.lla2ecef(lat, lon, alt)
+    np.testing.assert_allclose(actual_ecef, expected_ecef, rtol=1e-3)
+
