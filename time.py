@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
-from kinematics import attitude
+from tle_predict.kinematics import attitude
 import pdb
 def date2jd(yr, mon, day, hr, minute, sec):
     """Convert date to Julian Date
@@ -103,9 +103,9 @@ def dayofyr2mdhms(yr, days):
 
     # find hour, min, and seconds
     temp = (days - dayofyr) * 24
-    hour = np.fix(temp)
+    hour = np.fix(temp) - 0
     temp = (temp - hour) * 60.0
-    minute = np.fix(temp)
+    minute = np.fix(temp) - 0
     sec = (temp - minute) * 60.0
 
     return (mon, day, hour, minute, sec)
@@ -217,8 +217,7 @@ def gsttime0(yr):
             np.fix(275.0/9.0) + 1721014.5)
     Tu = (np.fix(JD) + 0.5 - 2451545.0) / 36525.0
     GST0 = 1.753368559 + 628.3319705*Tu + 6.770708127E-06*Tu*Tu
-
-    GST0 = attitude.normalize(GST0,0,TwoPI)
+    GST0 = attitude.normalize(GST0, 0, 2*np.pi)
     return GST0
 
 def gstlst(jd, site_lon, sidepersol=1.00273790935):
