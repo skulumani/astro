@@ -3,6 +3,9 @@
 import numpy as np
 from .. import tle
 import pdb
+import os
+
+cwd = os.path.realpath(os.path.dirname(__file__))
 
 class TestTLEISS():
     l0 = "0 ISS (ZARYA)"
@@ -169,7 +172,15 @@ class TestTLESL3():
     def test_checksum2(self):
         np.testing.assert_allclose(self.elements.checksum2, 2)
         
-
+class TestISSUSAFA():
+    l0 = "0 ISS (ZARYA)             "
+    l1 = "1 25544U 98067A   06164.43693594  .00014277  00000-0  10780-3 0  6794"
+    l2 = "2 25544  51.6455 280.1294 0004346 245.9311 226.9658 15.72751720375095"
+    ifile = 'Predict.dat'
+    sat = tle.get_tle(os.path.join(cwd,ifile))
+    pdb.set_trace()
+    def test_epoch_year(self):
+        np.testing.assert_allclose(self.sat[0].tle.epoch_year, 2006) 
 
 
 
