@@ -2,7 +2,7 @@
 """
 import numpy as np
 from tle_predict.kinematics import attitude
-
+import pdb
 def lla2ecef(lat, lon, alt, r=6378.137, ee=8.1819190842622e-2):
     """Convert latitude, longitude, and altitude to the Earth centered
     Earth fixed frame (ECEF)
@@ -86,3 +86,43 @@ def gc2gd(latgc, eesqrd=0.081819221456**2):
     """
     latgd = np.arctan(np.tan(latgc) / (1 - eesqrd))
     return latgd
+
+def rhoazel(sat_eci, site_eci, site_lat, site_lst):
+    """
+    This function calculates the topcentric range,azimuth and elevation from
+    the site vector and satellite position vector.
+
+    Author:   C2C Shankar Kulumani   USAFA/CS-19   719-333-4741
+
+    Inputs:
+        sat_eci - satellite ECI position vector (km)
+        site_eci - site ECI position vector (km)
+        site_lat - site geodetic latitude (radians)
+        site_lst - site local sidereal time (radians)
+
+    Outputs:
+        rho - range (km)
+        az - asimuth (radians)
+        el - elevation (radians)
+    
+    Globals: None
+    
+    Constants: None
+    
+    Coupling: 
+
+    References:
+        Astro 321 Predict LSN 22 
+    """
+
+    site2sat_eci = sat_eci - site_eci
+
+    site2sat_sez = attitude.rot3(-site_lst).dot(site2sat_eci)
+    site2sat_sez = attitude.rot2(-(np.pi/2 - site_lat)).dot(site2sat_sez)
+    
+    rho = np.linalg.norm(site2sat_sez)
+    el = np.arcsin(site2sat_sez[2] / rho)
+    az = attitude.normalize(np.arctan2(site2sat_sez[1], -site2sat_sez[0]), 0, 
+            2*np.pi)[0]
+
+    return rho, az, el
