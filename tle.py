@@ -1,9 +1,18 @@
 """Download and handle TLEs
 """
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import numpy as np
 import ephem
 import pdb
 from collections import defaultdict, namedtuple
+
+from astro import time
+
+deg2rad = np.pi/180
+rad2deg = 180/np.pi
+sec2day = 1 / ( 24 * 3600)
+day2sec = 24 * 3600
 
 # tuple to hold all the items from a single TLE 
 TLE = namedtuple('TLE', [
@@ -57,6 +66,7 @@ def checksum(line):
     """
     return sum(map(int, filter(
         lambda c: c >= '0' and c <= '9', line[:-1].replace('-','1')))) % 10
+
 
 def stringScientificNotationToFloat(sn):
     """Specific format is 5 digits, a + or -, and 1 digit, ex: 01234-5 which is
