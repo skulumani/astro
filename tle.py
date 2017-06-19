@@ -6,9 +6,10 @@ import numpy as np
 import ephem
 import pdb
 from collections import defaultdict, namedtuple
+from spacetrack import SpaceTrackClient
 
-from tle_predict.astro import time, kepler
-from kinematics import attitude
+from tle_predict.astro import time, kepler, geodetic
+from tle_predict.kinematics import attitude
 
 deg2rad = np.pi/180
 rad2deg = 180/np.pi
@@ -22,6 +23,28 @@ TLE = namedtuple('TLE', [
     'bstar', 'ephtype', 'elnum', 'checksum1',
     'inc', 'raan', 'ecc', 'argp', 'ma', 'mean_motion', 'epoch_rev',
     'checksum2'])
+
+COE = namedtuple( 'COE', ['n', 'ecc', 'raan', 'argp', 'mean', 'E', 'nu', 'a',
+    'p', 'inc'])
+
+def get_tle_spacetrack(filename, flag='all'):
+    """Download TLE from SpaceTrack
+    """
+    password = input('Enter SpaceTrack.org password: ')
+    st = SpaceTrackClient('shanks.k', password) 
+    with open(filename, 'w') as f:
+        if flag == 'all':
+            all_tles = st.tle_latest(ordinal=1, format='3le')
+        elif flag == 'testing':
+            all_tles = st.tle_latest(favorites='Testing', ordinal=1, format='3le')
+        elif flag == 'visible':
+            all_tles = st.tle_latest(favorites='Visible', ordinal=1, format='3le')
+        else:
+            print("Incorrect TLE favorites flag")
+            all_tles = "Incorrect flag"
+
+        f.write(all_tles)
+
 
 def get_tle_ephem(filename):
     """Load TLEs from a file
@@ -245,10 +268,9 @@ class Satellite(object):
         inc0 = elements.inc * deg2rad
         raan0 = elements.raan * deg2rad
         argp0 = elements.argp * deg2rad
-        ma0 = elements.ma * deg2rad
-        mean_motion0 = elements.mean_motion * 2 * np.pi * sec2day**2
+        mean0 = elements.ma * deg2rad
+        n0 = elements.mean_motion * 2 * np.pi * sec2day
         ecc0 = elements.ecc
-        n0 = elements.mean_motion
         epoch_day = elements.epoch_day
 
         # calculate perturbations raan, argp, ecc
@@ -267,8 +289,8 @@ class Satellite(object):
         self.raan0 = raan0
         self.ecc0 = ecc0
         self.argp0 = argp0
-        self.mean0 = ma0
-        self.n0 = mean_motion0
+        self.mean0 = mean0
+        self.n0 = n0
         self.raandot = raandot
         self.argpdot = argpdot
         self.eccdot = eccdot
@@ -336,27 +358,84 @@ class Satellite(object):
         mean = attitude.normalize(mean, 0, 2 * np.pi)
         
         E, nu, count = kepler.kepler_eq_E(mean, ecc)
-        pdb.set_trace()
+
         a = (mu / n**2)**(1/3)
         p = a * ( 1 - ecc**2)
         inc = self.inc0 * np.ones_like(p) 
+
+        # convert to ECI
+        r_eci, v_eci, _, _ = kepler.coe2rv(p, ecc, inc, raan, argp, nu, mu)
         
         # save all of the variables to the object
         self.jd_span = jd_span
-        self.n = n
-        self.ecc = ecc
-        self.raan = raan
-        self.argp = argp
-        self.mean = mean
-        self.E = E
-        self.nu = nu
-        self.a = p
-        self.inc = inc
-
+        self.coe = COE(n=n, ecc=ecc, raan=raan, argp=argp, mean=mean, 
+                E=E, nu=nu, a=a, p=p, inc=inc)
+        self.r_eci = r_eci
+        self.v_eci = v_eci
         return 0
 
     def visible(self, site):
         """Check if current sat is visible from the site
         """
-        pass
+        sat_eci = self.r_eci
+        site_eci = site['eci']
+        sun_eci = site['sun_eci']
 
+        alpha = np.arccos(np.einsum('ij,ij->i', site_eci, sun_eci) /
+                np.linalg.norm(site_eci, axis=1) / np.linalg.norm(sun_eci,
+                    axis=1))
+        beta = np.arccos(np.einsum('ij,ij->i', sat_eci, sun_eci) /
+                np.linalg.norm(sat_eci, axis=1) / np.linalg.norm(sun_eci,
+                    axis=1))
+        sun_alt = np.linalg.norm(sun_eci, axis=1)*np.sin(beta)
+        
+        jd_vis = []
+        rho_vis = []
+        az_vis = []
+        el_vis = []
+
+        for jd, a, b, sa, si, su, su_alt, lst, gst in zip(self.jd_span, alpha,
+                beta, sat_eci, site_eci, sun_eci, sun_alt, site['lst'],
+                site['gst']):
+            if a > np.pi/2:
+                rho, az, el = geodetic.rhoazel(sa, si, site['lat'], lst)
+
+                if rho < 2500 and el > 10 * deg2rad:
+                    if b < np.pi/2 or su_alt > 6378.137:
+                    
+                        jd_vis.append(jd)
+                        rho_vis.append(rho)
+                        az_vis.append(az)
+                        el_vis.append(el)
+
+        self.jd_vis = jd_vis
+        self.rho_vis = rho_vis
+        self.az_vis = az_vis
+        self.el_vis = el_vis
+
+    def output(self, filename):
+        """Write to output file
+        """
+        with open(filename, 'w') as f:
+
+            f.write('%s %05.0f\n' % (self.satname, self.satnum))
+            f.write(' MON/DAY   HR:MIN(UT)    RHO(KM)     AZ(DEG)    EL(DEG)    SAT    \n')
+            f.write('---------------------------------------------------------------------------\n\n')
+
+            for jd, rho, az, el in zip(self.jd_vis, self.rho_vis, self.az_vis, self.el_vis):
+                # convert julian day to normal date
+                yr, mo, day, hr, mn, sec = time.jd2date(jd)
+                
+                if sec > 30:
+                    mn = mn + 1
+                    if mn == 60:
+                        hr = hr + 1
+                        mn = 0
+                
+                f.write('%4.0f/% 3.0f' % (mo,day))
+                f.write('   %02.0f:%02.0f' % (hr,mn))
+                f.write('% 14.3f' % (rho))
+                f.write('% 12.3f' % (az*180/np.pi))
+                f.write('% 11.3f' % (el * 180/np.pi))
+                f.write('%3s %10s \n' % ('   ',self.satname))
+                
