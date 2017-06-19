@@ -2,7 +2,8 @@
 """
 import numpy as np
 
-from .. import planets
+from astro import planets
+import pdb
 
 def test_sun_earth_eci_vallado():
     jd = 2453827.5

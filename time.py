@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
-from tle_predict.kinematics import attitude
+from kinematics import attitude
 import pdb
 def date2jd(yr, mon, day, hr, minute, sec):
     """Convert date to Julian Date

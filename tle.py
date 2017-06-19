@@ -8,8 +8,8 @@ import pdb
 from collections import defaultdict, namedtuple
 from spacetrack import SpaceTrackClient
 
-from tle_predict.astro import time, kepler, geodetic
-from tle_predict.kinematics import attitude
+from astro import time, kepler, geodetic
+from kinematics import attitude
 
 deg2rad = np.pi/180
 rad2deg = 180/np.pi
@@ -382,7 +382,7 @@ class Satellite(object):
         sat_eci = self.r_eci
         site_eci = site['eci']
         sun_eci = site['sun_eci']
-
+        
         alpha = np.arccos(np.einsum('ij,ij->i', site_eci, sun_eci) /
                 np.linalg.norm(site_eci, axis=1) / np.linalg.norm(sun_eci,
                     axis=1))

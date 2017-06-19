@@ -1,7 +1,7 @@
 """Geodetic transformations
 """
 import numpy as np
-from tle_predict.kinematics import attitude
+from kinematics import attitude
 import pdb
 def lla2ecef(lat, lon, alt, r=6378.137, ee=8.1819190842622e-2):
     """Convert latitude, longitude, and altitude to the Earth centered
