@@ -295,6 +295,8 @@ class Satellite(object):
         self.argpdot = argpdot
         self.eccdot = eccdot
         self.epoch_jd = epoch_jd
+        self.epoch_year = epoch_year
+        self.epoch_day = epoch_day
 
     def tle_update(self, jd_span, mu=398600.5):
         """Update the state of satellite given a JD time span
