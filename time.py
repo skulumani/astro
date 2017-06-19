@@ -220,7 +220,86 @@ def gsttime0(yr):
     GST0 = attitude.normalize(GST0, 0, 2*np.pi)
     return GST0
 
-def gstlst(jd, site_lon, sidepersol=1.00273790935):
+def gstlst3(jd, site_lon):
+    """
+    This program calculates GST and LST giveen the Julian Day and site
+    longitude.
+
+    Author:  Shankar Kulumani GWU 18 Jun 2017 
+
+    Inputs:
+        jd - Julian Day
+        sitlon - site longitude (radians)
+    Outputs:
+        gst - Greenwich Sidereal Time (radians)
+        lst - Local Sidereal Time (radians)
+    
+    Constants: None
+    
+    Coupling: 
+
+    Modifications:
+        18 Jun 2017 - use algorithm 15 from Vallado
+
+    References:
+        Astro 321 PREDICT
+        Vallado Algorithm 15 
+    """
+    deg2rad = np.pi/180
+    jd_frac, jd_day = np.modf(jd)
+    Tut1 = (jd_day - 2451545.0) / 36525
+    wprec = 1.002737909350795 + 5.9006e-11*Tut1 - 5.9e-15 * Tut1**2 # rev/day
+    wprec = wprec * 360 / 86400 # deg/sec
+
+    gst0 = (100.4606184 + 36000.77005361 * Tut1 + 0.00038793 * Tut1**2 - 2.6e-8 * Tut1**3)
+    gst = gst0 + wprec * jd_frac * 86400
+    pdb.set_trace()
+    gst = attitude.normalize(gst * deg2rad, 0, 2 * np.pi)
+    lst = gst + site_lon
+
+    return gst, lst
+
+def gstlst(jd, site_lon):
+    """
+    This program calculates GST and LST giveen the Julian Day and site
+    longitude.
+
+    Author:  Shankar Kulumani GWU 18 Jun 2017 
+
+    Inputs:
+        jd - Julian Day
+        sitlon - site longitude (radians)
+    Outputs:
+        gst - Greenwich Sidereal Time
+        lst - Local Sidereal Time
+    
+    Constants: None
+    
+    Coupling: 
+
+    Modifications:
+        18 Jun 2017 - use algorithm 15 from Vallado
+
+    References:
+        Astro 321 PREDICT
+        Vallado Algorithm 15 
+    """
+    deg2rad = np.pi/180
+    hour2sec = 3600
+    sec2deg = 15/3600
+
+    Tut1 = (jd - 2451545.0) / 36525
+
+    gst = (- 6.2e-6 * Tut1 * Tut1 * Tut1 + 0.093104 * Tut1 * Tut1
+              + (876600.0 * 3600.0 + 8640184.812866) * Tut1 + 67310.54841)
+    gst = (gst % 86400) * sec2deg
+
+    gst = attitude.normalize(gst * deg2rad, 0, 2 * np.pi)
+    lst = attitude.normalize(gst + site_lon, 0, 2 * np.pi)
+
+    return gst, lst
+
+def gstlst2(jd, site_lon, sidepersol=1.00273790935):
     """
     This program calculates GST and LST giveen the Julian Day and site
     longitude.

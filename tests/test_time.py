@@ -1,6 +1,9 @@
 import numpy as np
 from .. import time
 
+deg2rad = np.pi / 180
+rad2deg = 180 / np.pi
+
 def test_julian_day_j2000():
     jd, mjd = time.date2jd(2000, 1, 1, 12, 0, 0)
     np.testing.assert_almost_equal(jd,2451545)
@@ -52,3 +55,18 @@ def test_date2jd_end():
     expected_output = 2453915.5
     actual_output = time.date2jd(2006, 6, 29, 0, 0, 0)
     np.testing.assert_allclose(actual_output[0], expected_output)
+
+def test_date2jd_vallado():
+    expected_jd = 2450383.09722222
+    actual_output, _ = time.date2jd(1996, 10, 26, 14, 20, 0)
+    np.testing.assert_allclose(actual_output, expected_jd)
+
+def test_gst_vallado():
+    expected_gst = 152.578787886
+    actual_gst, _ = time.gstlst(2448855.009722, -104*deg2rad)
+    np.testing.assert_allclose(actual_gst * rad2deg, expected_gst, rtol=1e-3)
+
+def test_lst_vallado():
+    expected_lst = 48.578787886
+    _, actual_lst = time.gstlst(2448855.009722, -104 * deg2rad)
+    np.testing.assert_allclose(actual_lst * rad2deg, expected_lst, rtol=1e-3)
