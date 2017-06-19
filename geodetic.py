@@ -21,10 +21,22 @@ def lla2ecef(lat, lon, alt, r=6378.137, ee=8.1819190842622e-2):
     ecef : float numpy array (3,)
         ECEF position vector in (kilometers)
 
+    Notes
+    -----
+    We're assuming an oblate spheroid model for the Earth. To transform this
+    vector to the inertial ECI frame all you need to do is rotate it by the
+    Greenwich Mean Sideral time (GST) or use a fancy ECEF-ECI rotation which
+    accounts for the Earth's precession/nutation.
+
     References
     ----------
+    BATE, Roger R, MUELLER, Donald D WHITE, Jerry E. Fundamentals of
+    Astrodynamics. Courier Dover Publications, 1971. 
+     
+    Nice website to verify computations:
+    http://www.oc.nps.edu/oc2902w/coord/llhxyz.htm
     """
-
+    # Normal distance from teh surface to the Z axis along the ellipsoid normal
     N = r / np.sqrt(1 - ee**2 * np.sin(lat)**2)
 
     x = (N + alt) * np.cos(lat) * np.cos(lon)
