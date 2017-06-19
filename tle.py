@@ -402,7 +402,7 @@ class Satellite(object):
             if a > np.pi/2:
                 rho, az, el = geodetic.rhoazel(sa, si, site['lat'], lst)
 
-                if rho < 2500 and el > 10 * deg2rad:
+                if rho < 1500 and el > 10 * deg2rad:
                     if b < np.pi/2 or su_alt > 6378.137:
                     
                         jd_vis.append(jd)
