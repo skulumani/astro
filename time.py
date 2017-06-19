@@ -253,11 +253,10 @@ def gstlst3(jd, site_lon):
 
     gst0 = (100.4606184 + 36000.77005361 * Tut1 + 0.00038793 * Tut1**2 - 2.6e-8 * Tut1**3)
     gst = gst0 + wprec * jd_frac * 86400
-    pdb.set_trace()
     gst = attitude.normalize(gst * deg2rad, 0, 2 * np.pi)
     lst = gst + site_lon
 
-    return gst, lst
+    return gst[0], lst[0]
 
 def gstlst(jd, site_lon):
     """
@@ -297,7 +296,7 @@ def gstlst(jd, site_lon):
     gst = attitude.normalize(gst * deg2rad, 0, 2 * np.pi)
     lst = attitude.normalize(gst + site_lon, 0, 2 * np.pi)
 
-    return gst, lst
+    return gst[0], lst[0]
 
 def gstlst2(jd, site_lon, sidepersol=1.00273790935):
     """
