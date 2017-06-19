@@ -201,8 +201,41 @@ class TestISSUSAFA():
     def test_argp_deg(self):
         np.testing.assert_allclose(self.sat[0].tle.argp, 245.93110000)
 
+    def test_mean_anomaly_deg(self):
+        np.testing.assert_allclose(self.sat[0].tle.ma, 226.9658000)
+
+    def test_mean_motion_deg(self):
+        np.testing.assert_allclose(self.sat[0].tle.mean_motion, 15.72751720)
+
+    def test_mean_motion_rad(self):
+        np.testing.assert_allclose(self.sat[0].n0, 0.00114373733)
+
+    def test_ecc(self):
+        np.testing.assert_allclose(self.sat[0].ecc0, 0.00043460000)
+
+    def test_inc_rad(self):
+        np.testing.assert_allclose(self.sat[0].inc0, 0.90138401884)
+
+    def test_raan_rad(self):
+        np.testing.assert_allclose(self.sat[0].raan0, 4.88918036164)
+
+    def test_argp_rad(self):
+        np.testing.assert_allclose(self.sat[0].argp0, 4.29230742805)
+
     def test_ndot2_radpersecsquared(self):
         np.testing.assert_allclose(self.sat[0].ndot2, 1.20168141063e-013)
+
+    def test_eccdot_persecond(self):
+        np.testing.assert_allclose(self.sat[0].eccdot, -1.40011545218e-10)
+
+    def test_mean_anomaly_rad(self):
+        np.testing.assert_allclose(self.sat[0].mean0, 3.96130049942e0)
+
+    def test_raandot_radpersecond(self):
+        np.testing.assert_allclose(self.sat[0].raandot, -1.03554877709e-6)
+
+    def test_argpdot_radpersecond(self):
+        np.testing.assert_allclose(self.sat[0].argpdot, 7.72047261206e-7)
 
 
 

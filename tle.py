@@ -225,7 +225,7 @@ def j2dragpert(inc0, ecc0, n0, ndot2, mu=398600.5, re=6378.137, J2=0.00108263):
     raandot = (-1.5*J2*(re/p0)**2*np.cos(inc0))*nvec
 
     # argument of periapsis rate
-    argdot = (2.5*J2*(re/p0)**2*(2-2.5*np.sin(inc0)**2))*nvec
+    argdot = (1.5 * J2 * (re / p0)**2 * (2 - 2.5 * np.sin(inc0)**2)) * nvec
 
     return (raandot, argdot, eccdot)
 
