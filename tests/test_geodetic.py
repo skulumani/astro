@@ -3,6 +3,8 @@ import numpy as np
 
 from .. import geodetic
 
+deg2rad = np.pi/180
+
 def test_equatorial_prime_meridian_lla2ecef():
     lat = 0 * np.pi/180
     lon = 0 * np.pi/180
@@ -66,3 +68,16 @@ def test_lla2ecef_usafa():
     actual_ecef = geodetic.lla2ecef(lat, lon, alt)
     np.testing.assert_allclose(actual_ecef, expected_ecef, rtol=1e-3)
 
+def test_lla2ecef_washington_dc():
+    lat = 38.8895 * deg2rad
+    lon = -77.0353 * deg2rad
+    alt = 0.3
+    expected_ecef = [1115.308, -4844.546, 3982.965]
+    actual_ecef = geodetic.lla2ecef(lat, lon, alt)
+    np.testing.assert_allclose(actual_ecef, expected_ecef, rtol=1e-3)
+
+def test_ecef2lla2_washington_dc():
+    ecef = [1115.308, -4844.546, 3982.965]
+    expected_lla =  (38.8895 * deg2rad, 282.9647 * deg2rad, 0.3)
+    latgc, latgd, longd, hellp  = geodetic.ecef2lla(ecef)
+    np.testing.assert_allclose((latgd, longd, hellp), expected_lla, rtol=1e-3)
