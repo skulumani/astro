@@ -45,7 +45,41 @@ def lla2ecef(lat, lon, alt, r=6378.137, ee=8.1819190842622e-2):
 
     return np.array([x, y, z])
 
+def site2eci(lat, alt, lst, r=6378.137, ee=8.1819190842622e-2):
+    """Calculate the site vector in the IJK coordinate system.
+
+    Author:   C2C Shankar Kulumani   USAFA/CS-19   719-333-4741
+
+    Inputs:
+        sitlat - site latitude (radians)
+        lst - local sidereal time (radians)
+        sitalt - site altitude (meters)
+
+    Outputs:
+        R_site - site vector in IJK system
+
+    Globals: 
+        RE, EEsqrd
+
+    Constants: None
+
+    Coupling: None
+
+    References:
+        Astro 321 COMFIX
+    """
+    N = r / np.sqrt(1 - ee**2 * np.sin(lat)**2)
+    x = (N + alt) * np.cos(lat)
+    z = ((1 - ee**2) * N + alt) * np.sin(lat)
+    eci = np.array([x * np.cos(lst), x * np.sin(lst), z])
+
+    return eci
+
 def ecef2lla(ecef, r=6378.137, ee=8.1819190842622e-2):
+    """Converts a ECEF vector to the equivalent Lat, longitude and Altitude
+    above the reference ellipsoid
+
+    """
     twopi = 2*np.pi
     tol = 1e-6
 
