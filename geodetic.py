@@ -1,11 +1,34 @@
-"""Geodetic transformations
+"""Geodetic transformations. This module holds many functions to peform common
+transformations used in astrodynamics. 
+
+Copyright (C) {2017}  {Shankar Kulumani}
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 """
 import numpy as np
 from kinematics import attitude
-import pdb
+
+
 def lla2ecef(lat, lon, alt, r=6378.137, ee=8.1819190842622e-2):
     """Convert latitude, longitude, and altitude to the Earth centered
     Earth fixed frame (ECEF)
+
+    Will convert between geodetic latitude, longitude, and altitude to the
+    associated planet fixed reference frame.  This assumes an oblate spheroid
+    model for the planetary body. It is applicable to any spherical body given
+    the semi-major axis and the body eccentricity constant.
 
     Parameters:
     -----------
@@ -14,12 +37,12 @@ def lla2ecef(lat, lon, alt, r=6378.137, ee=8.1819190842622e-2):
     lon : float
         Geodetic longitude (radians)
     alt : float
-        height about the WGS84 ellipsoid (kilometers)
+        height about the mean surface ellipsoid (WGS84 for Earth) (kilometers)
 
     Returns
     -------
-    ecef : float numpy array (3,)
-        ECEF position vector in (kilometers)
+    ecef : float ndarray (3,)
+        Body fixed position vector in (kilometers)
 
     Notes
     -----
@@ -30,11 +53,28 @@ def lla2ecef(lat, lon, alt, r=6378.137, ee=8.1819190842622e-2):
 
     References
     ----------
-    BATE, Roger R, MUELLER, Donald D WHITE, Jerry E. Fundamentals of
-    Astrodynamics. Courier Dover Publications, 1971. 
-     
-    Nice website to verify computations:
+    .. [1] BATE, Roger R, MUELLER, Donald D WHITE, Jerry E. Fundamentals of
+    Astrodynamics. Courier Dover Publications, 1971.
+
+    .. [2] Nice website to verify computations:
     http://www.oc.nps.edu/oc2902w/coord/llhxyz.htm
+
+    Examples
+    --------
+    Some examples demonstrating the usage of this function
+
+    >>> import numpy
+
+    Convert the lattitude, longitude, and altitude of Washington, DC to it's
+    equivalent ECEF representation.
+
+    >>> lat, lon, alt = (38.8895 * np.pi / 180, -77.035 * np.pi / 180, 0.054)
+
+    We need to make sure the inputs are in the correct units.
+
+    >>> lla2ecef(lat, lon, alt)
+    [1115.308, -4844.546, 3982.965]
+
     """
     # Normal distance from teh surface to the Z axis along the ellipsoid normal
     N = r / np.sqrt(1 - ee**2 * np.sin(lat)**2)
@@ -44,6 +84,7 @@ def lla2ecef(lat, lon, alt, r=6378.137, ee=8.1819190842622e-2):
     z = ((1 - ee**2) * N + alt) * np.sin(lat)
 
     return np.array([x, y, z])
+
 
 def site2eci(lat, alt, lst, r=6378.137, ee=8.1819190842622e-2):
     """Calculate the site vector in the IJK coordinate system.
@@ -58,7 +99,7 @@ def site2eci(lat, alt, lst, r=6378.137, ee=8.1819190842622e-2):
     Outputs:
         R_site - site vector in IJK system
 
-    Globals: 
+    Globals:
         RE, EEsqrd
 
     Constants: None
@@ -74,6 +115,7 @@ def site2eci(lat, alt, lst, r=6378.137, ee=8.1819190842622e-2):
     eci = np.array([x * np.cos(lst), x * np.sin(lst), z])
 
     return eci
+
 
 def ecef2lla(ecef, r=6378.137, ee=8.1819190842622e-2):
     """Converts a ECEF vector to the equivalent Lat, longitude and Altitude
@@ -108,7 +150,7 @@ def ecef2lla(ecef, r=6378.137, ee=8.1819190842622e-2):
         i = i +1
 
     # calculate the height
-    if (np.pi/2 - np.absolute(latgd)) > np.pi/180:
+    if (np.pi / 2 - np.absolute(latgd)) > np.pi/180:
         hellp = temp/np.cos(latgd) - c
     else:
         s = c * (1 - ee**2)
