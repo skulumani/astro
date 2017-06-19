@@ -5,11 +5,9 @@ import numpy as np
 from astro import planets
 import pdb
 
-def test_sun_earth_eci_vallado():
-    jd = 2453827.5
-    expected_rsun = [146186178.0792,28789122.463592, 12481127.00722]
-    expected_ra = 11.140899 * np.pi/180
-    expected_dec = 4.788425 * np.pi/180
+def test_sun_earth_eci_usafa():
+    jd = 2453905.50000000
+    expected_rsun = [6371243.918400, 139340081.269385, 60407749.811252]
     rsun, ra, dec = planets.sun_earth_eci(jd)
-    np.testing.assert_array_almost_equal(rsun, expected_rsun, decimal=0)
+    np.testing.assert_allclose(rsun, expected_rsun,rtol=1e-4)
 

@@ -9,6 +9,7 @@ import pdb
 twopi = 2 * np.pi
 deg2rad = np.pi/180
 rad2deg = 180 / np.pi
+au2km = 149597870.0
 
 def sun_earth_eci(jd):
     """This function calculates the Geocentric Equatorial position vector for
@@ -82,9 +83,8 @@ def sun_earth_eci(jd):
     sun_dist = 1.00014 - 0.01671 * np.cos(meananomaly) - 0.00014 * np.cos(2 * meananomaly)
     
     semidiameter = 0.2666 / sun_dist # angular semidiamter in deg
-    sun_eci = sun_dist * np.array([np.cos(eclplong), np.cos(obliquity) *
-        np.sin(eclplong), np.sin(obliquity) * np.sin(eclplong)])
+    sun_eci = [np.cos(eclplong) * sun_dist * au2km, 
+               np.cos(obliquity) * np.sin(eclplong) * sun_dist * au2km, 
+               np.sin(obliquity) * np.sin(eclplong) * sun_dist * au2km]
     
-    sun_eci = sun_eci * 149597870.0 # output in kilometers
-
-    return sun_eci, ra, dec
+    return np.squeeze(sun_eci), ra, dec
