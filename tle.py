@@ -4,19 +4,18 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 import ephem
-import pdb
-from collections import defaultdict, namedtuple
+from collections import namedtuple
 from spacetrack import SpaceTrackClient
 
 from astro import time, kepler, geodetic
 from kinematics import attitude
 
-deg2rad = np.pi/180
-rad2deg = 180/np.pi
-sec2day = 1 / ( 24 * 3600)
+deg2rad = np.pi / 180
+rad2deg = 180 / np.pi
+sec2day = 1 / (24 * 3600)
 day2sec = 24 * 3600
 
-# tuple to hold all the items from a single TLE 
+# tuple to hold all the items from a single TLE
 TLE = namedtuple('TLE', [
     'satname', 'satnum', 'classification', 'id_year', 'id_launch',
     'id_piece', 'epoch_year', 'epoch_day', 'ndot_over_2', 'nddot_over_6',
@@ -24,21 +23,24 @@ TLE = namedtuple('TLE', [
     'inc', 'raan', 'ecc', 'argp', 'ma', 'mean_motion', 'epoch_rev',
     'checksum2'])
 
-COE = namedtuple( 'COE', ['n', 'ecc', 'raan', 'argp', 'mean', 'E', 'nu', 'a',
-    'p', 'inc'])
+COE = namedtuple('COE', ['n', 'ecc', 'raan', 'argp', 'mean', 'E', 'nu', 'a',
+                         'p', 'inc'])
+
 
 def get_tle_spacetrack(filename, flag='all'):
     """Download TLE from SpaceTrack
     """
     password = input('Enter SpaceTrack.org password: ')
-    st = SpaceTrackClient('shanks.k', password) 
+    st = SpaceTrackClient('shanks.k', password)
     with open(filename, 'w') as f:
         if flag == 'all':
             all_tles = st.tle_latest(ordinal=1, format='3le')
         elif flag == 'testing':
-            all_tles = st.tle_latest(favorites='Testing', ordinal=1, format='3le')
+            all_tles = st.tle_latest(
+                favorites='Testing', ordinal=1, format='3le')
         elif flag == 'visible':
-            all_tles = st.tle_latest(favorites='Visible', ordinal=1, format='3le')
+            all_tles = st.tle_latest(
+                favorites='Visible', ordinal=1, format='3le')
         else:
             print("Incorrect TLE favorites flag")
             all_tles = "Incorrect flag"
@@ -50,7 +52,7 @@ def get_tle_ephem(filename):
     """Load TLEs from a file
     """
     satlist = []
-    with open(filename,'r') as f:
+    with open(filename, 'r') as f:
         l1 = f.readline()
         while l1:
             l2 = f.readline()
@@ -65,10 +67,65 @@ def get_tle_ephem(filename):
 
 # write my own TLE parser since ephem doesn't save all the values
 
+
 def validtle(l0, l1, l2):
-    """Quick check to make sure we have the three lines of a 3TLE
+    r"""Ensure 3 line TLEs are valid.
+
+    This function will check each line of a 3 line TLE and ensure they are
+    valid. It assumes the format is that which is found on space-track.org.
+
+    Parameters
+    ----------
+    l0 : string
+        First line of TLE. This line holds the object name.
+        Sometimes is starts with a 0 and other times it does not.
+        Both will be valid in this code.
+    l1: string
+        Second line of TLE. This is first real line with real data.
+        Should begin with a 1 and pass a checksum. There is also a line length
+        requirement.
+    l2: string
+        Third line of TLE. This also contains data. Begins with a 2 and has a
+        checksum and line lenght requirement.
+
+    Returns
+    -------
+    boolean:
+        This returns a boolean object which is the concatenation of all the
+        requirements for the checking.  If this output is True then the three
+        lines of the inputted TLE are probably valid.
+
+    Other Parameters
+    ----------------
+        None
+
+    Raises
+    ------
+        None
+
+    See Also
+    --------
+    checksum: another related function to calculate the line checksum
+    parsetle: this will take the three lines and extract out the TLE data
+    stringScientificNotationToFloat: Converts the TLE number format to float
+
+    Notes
+    -----
+    TLEs are an old format, but they are well documented. In addition, the TLE
+    has some inherent limitations on the expected accuracy of the ephemerides
+    and the data contained within it.
+
+    References
+    ----------
+
+    .. [1] VALLADO, David A. Fundamentals of Astrodynamics and Applications. 3
+    ed. Microcosm Press, 2007.
+    .. [2] http://celestrak.com/NORAD/documentation/tle-fmt.asp
+
+    Examples
+    --------
+
     """
-    l0_valid_start = int(l0[0]) == 0
     l1_valid_start = int(l1[0]) == 1
     l2_valid_start = int(l2[0]) == 2
 
@@ -77,9 +134,10 @@ def validtle(l0, l1, l2):
 
     l1_valid_checksum = int(l1[-1]) == checksum(l1)
     l2_valid_checksum = int(l2[-1]) == checksum(l2)
-    return (l0_valid_start and l1_valid_start and l2_valid_start 
-            and l1_valid_length and l2_valid_length and 
-            l1_valid_checksum and l1_valid_checksum)
+    return (l1_valid_start and l2_valid_start and
+            l1_valid_length and l2_valid_length and
+            l1_valid_checksum and l1_valid_checksum and l2_valid_checksum)
+
 
 def checksum(line):
     """The checksums for each line are calculated by adding the all numerical
@@ -89,14 +147,15 @@ def checksum(line):
     thats already there.
     """
     return sum(map(int, filter(
-        lambda c: c >= '0' and c <= '9', line[:-1].replace('-','1')))) % 10
+        lambda c: c >= '0' and c <= '9', line[:-1].replace('-', '1')))) % 10
 
 
 def stringScientificNotationToFloat(sn):
     """Specific format is 5 digits, a + or -, and 1 digit, ex: 01234-5 which is
     0.01234e-5
     """
-    return 1e-5*float(sn[:6]) * 10**int(sn[6:]) 
+    return 1e-5 * float(sn[:6]) * 10**int(sn[6:])
+
 
 def parsetle(l0, l1, l2):
     """
@@ -105,11 +164,11 @@ def parsetle(l0, l1, l2):
 
     Inputs:
     l0 - first line consiting of the name of TLE (optional)
-    l1 - second line  
+    l1 - second line
     l2 - third line
 
     Outputs - namedtuple TLE:
-    satname - satellite name  
+    satname - satellite name
     satnum - satellite number found (0 if the requested sat was not found)
     classfication  - classification (classified, unclassified)
     id_year - launch year (last 2 digits)
@@ -122,7 +181,7 @@ def parsetle(l0, l1, l2):
     bstar - bstar drag term
     ephtype- ephemeris type
     elnum  - element number (modulo 1000)
-    checksum1 - checksum of first line 
+    checksum1 - checksum of first line
 
     inc    - inclination (deg)
     raan   - right ascension of asc. node (deg)
@@ -167,17 +226,17 @@ def parsetle(l0, l1, l2):
     mean_motion = float(l2[52:63])
     epoch_rev = float(l2[63:68])
     checksum2 = float(l2[68:69])
-    
+
     return TLE(satnum=satnum, classification=classification, id_year=id_year,
-            id_launch=id_launch, id_piece=id_piece, epoch_year=epoch_year,
-            epoch_day=epoch_day, ndot_over_2=ndot_over_2,
-            nddot_over_6=nddot_over_6, bstar=bstar, ephtype=ephtype,
-            elnum=elnum, checksum1=checksum1, inc=inc, raan=raan, ecc=ecc,
-            argp=argp, ma=ma, mean_motion=mean_motion, epoch_rev=epoch_rev,
-            checksum2=checksum2, satname=satname)
+               id_launch=id_launch, id_piece=id_piece, epoch_year=epoch_year,
+               epoch_day=epoch_day, ndot_over_2=ndot_over_2,
+               nddot_over_6=nddot_over_6, bstar=bstar, ephtype=ephtype,
+               elnum=elnum, checksum1=checksum1, inc=inc, raan=raan, ecc=ecc,
+               argp=argp, ma=ma, mean_motion=mean_motion, epoch_rev=epoch_rev,
+               checksum2=checksum2, satname=satname)
+
 
 def j2dragpert(inc0, ecc0, n0, ndot2, mu=398600.5, re=6378.137, J2=0.00108263):
-
     """
     This file calculates the rates of change of the right ascension of the
     ascending node(raandot), argument of periapsis(argdot), and
@@ -209,29 +268,31 @@ def j2dragpert(inc0, ecc0, n0, ndot2, mu=398600.5, re=6378.137, J2=0.00108263):
 
     References:
     Vallado
-    """     
-    
+    """
+
     # calculate initial semi major axis and semilatus rectum
-    a0 = (mu / n0**2) ** (1/3)
+    a0 = (mu / n0**2) ** (1 / 3)
     p0 = a0 * (1 - ecc0**2)
 
     # mean motion with J2
-    nvec = n0 * (1 + 1.5 * J2 * (re/p0)**2 * np.sqrt(1-ecc0**2) * (1-1.5*np.sin(inc0)**2))
+    nvec = n0 * (1 + 1.5 * J2 * (re / p0)**2 *
+                 np.sqrt(1 - ecc0**2) * (1 - 1.5 * np.sin(inc0)**2))
 
     # eccentricity rate
-    eccdot = (-2 * (1-ecc0)*2*ndot2)/(3*nvec)
+    eccdot = (-2 * (1 - ecc0) * 2 * ndot2) / (3 * nvec)
 
     # calculate nodal rate
-    raandot = (-1.5*J2*(re/p0)**2*np.cos(inc0))*nvec
+    raandot = (-1.5 * J2 * (re / p0)**2 * np.cos(inc0)) * nvec
 
     # argument of periapsis rate
     argdot = (1.5 * J2 * (re / p0)**2 * (2 - 2.5 * np.sin(inc0)**2)) * nvec
 
     return (raandot, argdot, eccdot)
 
+
 def get_tle(filename):
     """Assuming a file with 3 Line TLEs is given this will parse the file
-    and save all the elements to a list or something. 
+    and save all the elements to a list or something.
     """
     sats = []
     with open(filename, 'r') as f:
@@ -244,7 +305,7 @@ def get_tle(filename):
                 # now we parse the tle
                 elements = parsetle(l0, l1, l2)
 
-                # instantiate a bunch of instances of a Satellite class 
+                # instantiate a bunch of instances of a Satellite class
                 sats.append(Satellite(elements))
             else:
                 print("Invalid TLE")
@@ -253,6 +314,7 @@ def get_tle(filename):
 
     return sats
 
+
 class Satellite(object):
     """Satellite class storing all the necessary information for a single
     satellite extracted from a TLE from space-track.org
@@ -260,11 +322,11 @@ class Satellite(object):
 
     def __init__(self, elements):
         # now do some conversions of the TLE components
-        epoch_year = (2000 + elements.epoch_year 
-                if elements.epoch_year < 70 
-                else 1900 + elements.epoch_year) 
-        # working units 
-        ndot2 = elements.ndot_over_2 * (2*np.pi) * (sec2day**2)
+        epoch_year = (2000 + elements.epoch_year
+                      if elements.epoch_year < 70
+                      else 1900 + elements.epoch_year)
+        # working units
+        ndot2 = elements.ndot_over_2 * (2 * np.pi) * (sec2day**2)
         inc0 = elements.inc * deg2rad
         raan0 = elements.raan * deg2rad
         argp0 = elements.argp * deg2rad
@@ -300,7 +362,7 @@ class Satellite(object):
 
     def tle_update(self, jd_span, mu=398600.5):
         """Update the state of satellite given a JD time span
-        
+
         This procedure uses the method of general perturbations to update
         classical elements from epoch to a future time for inclined elliptical
         orbits.  It includes the effects due to first order secular rates
@@ -326,18 +388,18 @@ class Satellite(object):
             raan - RAAN at epoch + deltat (rad)
             argp - argument of periapsis at epoch + deltat (rad)
             nu -  true anomaly at epoch + deltat (rad)
-        
+
         Globals: None
-        
+
         Constants: None
-        
-        Coupling: 
+
+        Coupling:
             newton.m
 
         References:
             Astro 321 PREDICT LSN 24-25
         """
-        
+
         deltat = (jd_span - self.epoch_jd) * day2sec
         n0 = self.n0
         ecc0 = self.ecc0
@@ -358,20 +420,20 @@ class Satellite(object):
         # get true anomaly at future time
         mean = mean0 + n0 * deltat + ndot2 * deltat**2
         mean = attitude.normalize(mean, 0, 2 * np.pi)
-        
+
         E, nu, count = kepler.kepler_eq_E(mean, ecc)
 
-        a = (mu / n**2)**(1/3)
-        p = a * ( 1 - ecc**2)
-        inc = self.inc0 * np.ones_like(p) 
+        a = (mu / n**2)**(1 / 3)
+        p = a * (1 - ecc**2)
+        inc = self.inc0 * np.ones_like(p)
 
         # convert to ECI
         r_eci, v_eci, _, _ = kepler.coe2rv(p, ecc, inc, raan, argp, nu, mu)
-        
+
         # save all of the variables to the object
         self.jd_span = jd_span
-        self.coe = COE(n=n, ecc=ecc, raan=raan, argp=argp, mean=mean, 
-                E=E, nu=nu, a=a, p=p, inc=inc)
+        self.coe = COE(n=n, ecc=ecc, raan=raan, argp=argp, mean=mean,
+                       E=E, nu=nu, a=a, p=p, inc=inc)
         self.r_eci = r_eci
         self.v_eci = v_eci
         return 0
@@ -382,29 +444,31 @@ class Satellite(object):
         sat_eci = self.r_eci
         site_eci = site['eci']
         sun_eci = site['sun_eci']
-        
+
         alpha = np.arccos(np.einsum('ij,ij->i', site_eci, sun_eci) /
-                np.linalg.norm(site_eci, axis=1) / np.linalg.norm(sun_eci,
-                    axis=1))
+                          np.linalg.norm(site_eci, axis=1) / np.linalg.norm(sun_eci,
+                                                                            axis=1))
         beta = np.arccos(np.einsum('ij,ij->i', sat_eci, sun_eci) /
-                np.linalg.norm(sat_eci, axis=1) / np.linalg.norm(sun_eci,
-                    axis=1))
-        sun_alt = np.linalg.norm(sun_eci, axis=1)*np.sin(beta)
-        
+                         np.linalg.norm(sat_eci, axis=1) / np.linalg.norm(sun_eci,
+                                                                          axis=1))
+        sun_alt = np.linalg.norm(sun_eci, axis=1) * np.sin(beta)
+
         jd_vis = []
         rho_vis = []
         az_vis = []
         el_vis = []
 
-        for jd, a, b, sa, si, su, su_alt, lst, gst in zip(self.jd_span, alpha,
-                beta, sat_eci, site_eci, sun_eci, sun_alt, site['lst'],
-                site['gst']):
-            if a > np.pi/2:
+        for (jd, a, b, sa, si, su, su_alt, lst, gst) in zip(self.jd_span, alpha,
+                                                            beta, sat_eci,
+                                                            site_eci, sun_eci,
+                                                            sun_alt, site['lst'],
+                                                            site['gst']):
+            if a > np.pi / 2:
                 rho, az, el = geodetic.rhoazel(sa, si, site['lat'], lst)
 
                 if rho < 1500 and el > 10 * deg2rad:
-                    if b < np.pi/2 or su_alt > 6378.137:
-                    
+                    if b < np.pi / 2 or su_alt > 6378.137:
+
                         jd_vis.append(jd)
                         rho_vis.append(rho)
                         az_vis.append(az)
@@ -421,23 +485,24 @@ class Satellite(object):
         with open(filename, 'w') as f:
 
             f.write('%s %05.0f\n' % (self.satname, self.satnum))
-            f.write(' MON/DAY   HR:MIN(UT)    RHO(KM)     AZ(DEG)    EL(DEG)    SAT    \n')
-            f.write('---------------------------------------------------------------------------\n\n')
+            f.write(
+                ' MON/DAY   HR:MIN(UT)    RHO(KM)     AZ(DEG)    EL(DEG)    SAT    \n')
+            f.write(
+                '---------------------------------------------------------------------------\n\n')
 
             for jd, rho, az, el in zip(self.jd_vis, self.rho_vis, self.az_vis, self.el_vis):
                 # convert julian day to normal date
                 yr, mo, day, hr, mn, sec = time.jd2date(jd)
-                
+
                 if sec > 30:
                     mn = mn + 1
                     if mn == 60:
                         hr = hr + 1
                         mn = 0
-                
-                f.write('%4.0f/% 3.0f' % (mo,day))
-                f.write('   %02.0f:%02.0f' % (hr,mn))
+
+                f.write('%4.0f/% 3.0f' % (mo, day))
+                f.write('   %02.0f:%02.0f' % (hr, mn))
                 f.write('% 14.3f' % (rho))
-                f.write('% 12.3f' % (az*180/np.pi))
-                f.write('% 11.3f' % (el * 180/np.pi))
-                f.write('%3s %10s \n' % ('   ',self.satname))
-                
+                f.write('% 12.3f' % (az * 180 / np.pi))
+                f.write('% 11.3f' % (el * 180 / np.pi))
+                f.write('%3s %10s \n' % ('   ', self.satname))
