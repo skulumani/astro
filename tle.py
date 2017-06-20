@@ -10,6 +10,8 @@ from spacetrack import SpaceTrackClient
 from astro import time, kepler, geodetic
 from kinematics import attitude
 
+import matplotlib.pyplot as plt
+
 deg2rad = np.pi / 180
 rad2deg = 180 / np.pi
 sec2day = 1 / (24 * 3600)
@@ -529,11 +531,14 @@ class Satellite(object):
 
             f.write('%s %05.0f\n' % (self.satname, self.satnum))
             f.write(
-                ' MON/DAY   HR:MIN(UT)    RHO(KM)     AZ(DEG)    EL(DEG)    SAT    \n')
+                'ID MON/DAY   HR:MIN(UT)    RHO(KM)     AZ(DEG)    EL(DEG)    SAT    \n')
             f.write(
                 '---------------------------------------------------------------------------\n\n')
 
-            for jd, rho, az, el in zip(self.jd_vis, self.rho_vis, self.az_vis, self.el_vis):
+            for ii, (jd, rho, az, el) in enumerate(zip(self.jd_vis,
+                                                       self.rho_vis,
+                                                       self.az_vis,
+                                                       self.el_vis)):
                 # convert julian day to normal date
                 yr, mo, day, hr, mn, sec = time.jd2date(jd)
 
@@ -542,10 +547,63 @@ class Satellite(object):
                     if mn == 60:
                         hr = hr + 1
                         mn = 0
-
-                f.write('%4.0f/% 3.0f' % (mo, day))
+                f.write('%3.0f' % (ii))
+                f.write('%2.0f/%2.0f' % (mo, day))
                 f.write('   %02.0f:%02.0f' % (hr, mn))
                 f.write('% 14.3f' % (rho))
                 f.write('% 12.3f' % (az * 180 / np.pi))
                 f.write('% 11.3f' % (el * 180 / np.pi))
                 f.write('%3s %10s \n' % ('   ', self.satname))
+
+    def plot_pass(self, start, end):
+        """Try and plot a pass on a polar plot
+        """
+        def mapr(r):
+            return 90 - r
+
+        def add_arrow(line, position=None, direction='right', size=15, color=None):
+            """
+            add an arrow to a line.
+
+            line:       Line2D object
+            position:   x-position of the arrow. If None, mean of xdata is taken
+            direction:  'left' or 'right'
+            size:       size of the arrow in fontsize points
+            color:      if None, line color is taken.
+            """
+            if color is None:
+                color = line.get_color()
+
+            xdata = line.get_xdata()
+            ydata = line.get_ydata()
+
+            if position is None:
+                position = xdata.mean()
+            # find closest index
+            start_ind = np.argmin(np.absolute(xdata - position))
+            if direction == 'right':
+                end_ind = start_ind + 1
+            else:
+                end_ind = start_ind - 1
+
+            line.axes.annotate('',
+                xytext=(xdata[start_ind], ydata[start_ind]),
+                xy=(xdata[end_ind], ydata[end_ind]),
+                arrowprops=dict(arrowstyle="->", color=color),
+                size=size
+            )
+
+
+
+        jd = self.jd_vis[start:end]
+        az = self.az_vis[start:end]
+        el = self.el_vis[start:end]
+        
+        ax = plt.subplot(111, projection='polar')
+        line =ax.plot(az, mapr(np.rad2deg(el)))[0]
+        ax.set_yticks(range(0, 90, 10))
+        ax.set_yticklabels(map(str, range(90, 0, -10)))
+        ax.set_theta_zero_location("N")
+        plt.title("%s" % self.satname)
+        add_arrow(line)
+        plt.show()
