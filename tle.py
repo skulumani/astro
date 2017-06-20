@@ -28,7 +28,50 @@ COE = namedtuple('COE', ['n', 'ecc', 'raan', 'argp', 'mean', 'E', 'nu', 'a',
 
 
 def get_tle_spacetrack(filename, flag='all'):
-    """Download TLE from SpaceTrack
+    r"""Download TLEs from spacetrack.org
+
+    This function will download some TLEs from Space - track.org. It requires a
+    valid user account on the website. It uses favorites lists which can be
+    setup in your own account.
+
+    Parameters
+    ----------
+    filename : string
+        Filename to store the downloaded TLEs
+    flag : string
+        This string can take one of three values. It allows you decide which
+        TLE set to download from the website.
+        all - Download bulk catalog
+        visible - Download the visible satellite list
+        testing - Download personal list called Testing
+
+    Returns
+    -------
+    None
+
+    Other Parameters
+    ----------------
+    None
+
+    Raises
+    ------
+    None
+
+    See Also
+    --------
+    None
+
+    Notes
+    -----
+
+    References
+    ----------
+
+    .. [1] spacetrack - https://github.com/python-astrodynamics/spacetrack
+
+    Examples
+    --------
+
     """
     password = input('Enter SpaceTrack.org password: ')
     st = SpaceTrackClient('shanks.k', password)
