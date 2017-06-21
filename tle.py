@@ -566,13 +566,14 @@ class Satellite(object):
     def output(self, filename):
         """Write to output file
         """
+        space = '    '
         with open(filename, 'w') as f:
 
             f.write('%s %05.0f\n' % (self.satname, self.satnum))
             f.write(
-                'ID MON/DAY   HR:MIN(UT)    RHO(KM)     AZ(DEG)    EL(DEG)    SAT    \n')
+                'PASS    MON/DAY    HR:MIN(UT)    RHO(KM)    AZ(DEG)    EL(DEG)    SAT          \n')
             f.write(
-                '---------------------------------------------------------------------------\n\n')
+                '-------------------------------------------------------------------------------\n\n')
 
             for ii, (jd, rho, az, el) in enumerate(zip(self.jd_vis,
                                                        self.rho_vis,
@@ -581,18 +582,18 @@ class Satellite(object):
                 # convert julian day to normal date
                 yr, mo, day, hr, mn, sec = time.jd2date(jd)
 
-                if sec > 30:
-                    mn = mn + 1
-                    if mn == 60:
-                        hr = hr + 1
-                        mn = 0
-                f.write('%3.0f' % (ii))
-                f.write('%2.0f/%2.0f' % (mo, day))
-                f.write('   %02.0f:%02.0f' % (hr, mn))
-                f.write('% 14.3f' % (rho))
-                f.write('% 12.3f' % (az * 180 / np.pi))
-                f.write('% 11.3f' % (el * 180 / np.pi))
-                f.write('%3s %10s \n' % ('   ', self.satname))
+                # if sec > 30:
+                #     mn = mn + 1
+                #     if mn == 60:
+                #         hr = hr + 1
+                #         mn = 0
+                f.write('%4.0f%s' % (ii, space))
+                f.write('%3.0f/%03.0f%s' % (mo, day, space))
+                f.write('%02.0f:%2.0f:%3.1f%s' % (hr, mn, sec, space))
+                f.write('%7.2f%s' % (rho, space))
+                f.write('%7.2f%s' % (az * 180 / np.pi, space))
+                f.write('%7.2f%s' % (el * 180 / np.pi, space))
+                f.write('%13s\n' % (self.satname))
 
     def plot_pass(self, start, end):
         """Try and plot a pass on a polar plot
