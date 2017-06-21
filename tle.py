@@ -11,6 +11,9 @@ from astro import time, kepler, geodetic
 from kinematics import attitude
 
 import matplotlib.pyplot as plt
+import matplotlib.lines as mlines
+import matplotlib.patches as mpatches
+import pdb
 
 deg2rad = np.pi / 180
 rad2deg = 180 / np.pi
@@ -505,7 +508,7 @@ class Satellite(object):
         rho_vis = []
         az_vis = []
         el_vis = []
-        
+
         # create array to store all the passes
         all_passes = []
         current_pass = PASS(jd=[], az=[], el=[], site_eci=[], sat_eci=[],
@@ -518,7 +521,7 @@ class Satellite(object):
                                                             site_eci, sun_eci,
                                                             sun_alt, site['lst'],
                                                             site['gst']):
-            
+
             if a > np.pi / 2:
                 rho, az, el = geodetic.rhoazel(sa, si, site['lat'], lst)
 
@@ -593,53 +596,86 @@ class Satellite(object):
                     f.write('%7.2f%s' % (el * 180 / np.pi, space))
                     f.write('%13s\n' % (self.satname))
 
-    def plot_pass(self, start, end):
+    def plot_pass(self, pass_num):
         """Try and plot a pass on a polar plot
         """
         def mapr(r):
             return 90 - r
 
-        def add_arrow(line, position=None, direction='right', size=15, color=None):
+        def add_arrow_to_line2D(
+                axes, line, arrow_locs=[0.2, 0.4, 0.6, 0.8],
+                arrowstyle='-|>', arrowsize=1, transform=None):
             """
-            add an arrow to a line.
+            Add arrows to a matplotlib.lines.Line2D at selected locations.
 
-            line:       Line2D object
-            position:   x-position of the arrow. If None, mean of xdata is taken
-            direction:  'left' or 'right'
-            size:       size of the arrow in fontsize points
-            color:      if None, line color is taken.
+            Parameters:
+            -----------
+            axes:
+            line: Line2D object as returned by plot command
+            arrow_locs: list of locations where to insert arrows, % of total length
+            arrowstyle: style of the arrow
+            arrowsize: size of the arrow
+            transform: a matplotlib transform instance, default to data coordinates
+
+            Returns:
+            --------
+            arrows: list of arrows
             """
-            if color is None:
-                color = line.get_color()
+            if not isinstance(line, mlines.Line2D):
+                raise ValueError("expected a matplotlib.lines.Line2D object")
+            x, y = line.get_xdata(), line.get_ydata()
 
-            xdata = line.get_xdata()
-            ydata = line.get_ydata()
+            arrow_kw = {
+                "arrowstyle": arrowstyle,
+                "mutation_scale": 10 * arrowsize,
+            }
 
-            if position is None:
-                position = xdata.mean()
-            # find closest index
-            start_ind = np.argmin(np.absolute(xdata - position))
-            if direction == 'right':
-                end_ind = start_ind + 1
+            color = line.get_color()
+            use_multicolor_lines = isinstance(color, np.ndarray)
+            if use_multicolor_lines:
+                raise NotImplementedError("multicolor lines not supported")
             else:
-                end_ind = start_ind - 1
+                arrow_kw['color'] = color
 
-            line.axes.annotate('',
-                               xytext=(xdata[start_ind], ydata[start_ind]),
-                               xy=(xdata[end_ind], ydata[end_ind]),
-                               arrowprops=dict(arrowstyle="->", color=color),
-                               size=size
-                               )
+            linewidth = line.get_linewidth()
+            if isinstance(linewidth, np.ndarray):
+                raise NotImplementedError("multiwidth lines not supported")
+            else:
+                arrow_kw['linewidth'] = linewidth
 
-        jd = self.jd_vis[start:end]
-        az = self.az_vis[start:end]
-        el = self.el_vis[start:end]
+            if transform is None:
+                transform = axes.transData
 
+            arrows = []
+            for loc in arrow_locs:
+                s = np.cumsum(np.sqrt(np.diff(x) ** 2 + np.diff(y) ** 2))
+                n = np.searchsorted(s, s[-1] * loc)
+                arrow_tail = (x[n], y[n])
+                arrow_head = (np.mean(x[n:n + 2]), np.mean(y[n:n + 2]))
+                p = mpatches.FancyArrowPatch(
+                    arrow_tail, arrow_head, transform=transform,
+                    **arrow_kw)
+                axes.add_patch(p)
+                arrows.append(p)
+            return arrows
+
+        jd = self.pass_vis[pass_num].jd
+        az = self.pass_vis[pass_num].az
+        el = self.pass_vis[pass_num].el
+
+        sy, smo, sd, sh, smn, ss = time.jd2date(jd[0])
+        ey, emo, ed, eh, emn, es = time.jd2date(jd[-1])
+        fig = plt.figure()
         ax = plt.subplot(111, projection='polar')
         line = ax.plot(az, mapr(np.rad2deg(el)))[0]
         ax.set_yticks(range(0, 90, 10))
         ax.set_yticklabels(map(str, range(90, 0, -10)))
         ax.set_theta_zero_location("N")
-        plt.title("%s" % self.satname)
-        add_arrow(line)
+        fig.suptitle("%s" %
+                     (self.satname), y=1.05)
+        plt.title('%2d/%2d' % (smo, sd))
+        plt.title('Start\n%2d:%2d:%3.1f' % (sh, smn, ss), loc='left')
+        plt.title('End\n%2d:%2d:%3.1f' % (eh, emn, es), loc='right')
+        add_arrow_to_line2D(ax, line, arrow_locs=[0.25, 0.5, 0.75],
+                            arrowstyle='->')
         plt.show()
