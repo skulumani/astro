@@ -28,6 +28,9 @@ TLE = namedtuple('TLE', [
 COE = namedtuple('COE', ['n', 'ecc', 'raan', 'argp', 'mean', 'E', 'nu', 'a',
                          'p', 'inc'])
 
+PASS = namedtuple('PASS', ['jd', 'az', 'el', 'site_eci', 'sat_eci', 'gst', 'lst',
+                           'sun_alt', 'alpha', 'beta', 'sun_eci', 'rho'])
+
 
 def get_tle_spacetrack(filename, flag='all'):
     r"""Download TLEs from spacetrack.org
