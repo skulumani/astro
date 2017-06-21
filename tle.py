@@ -627,20 +627,18 @@ class Satellite(object):
                 end_ind = start_ind - 1
 
             line.axes.annotate('',
-                xytext=(xdata[start_ind], ydata[start_ind]),
-                xy=(xdata[end_ind], ydata[end_ind]),
-                arrowprops=dict(arrowstyle="->", color=color),
-                size=size
-            )
-
-
+                               xytext=(xdata[start_ind], ydata[start_ind]),
+                               xy=(xdata[end_ind], ydata[end_ind]),
+                               arrowprops=dict(arrowstyle="->", color=color),
+                               size=size
+                               )
 
         jd = self.jd_vis[start:end]
         az = self.az_vis[start:end]
         el = self.el_vis[start:end]
-        
+
         ax = plt.subplot(111, projection='polar')
-        line =ax.plot(az, mapr(np.rad2deg(el)))[0]
+        line = ax.plot(az, mapr(np.rad2deg(el)))[0]
         ax.set_yticks(range(0, 90, 10))
         ax.set_yticklabels(map(str, range(90, 0, -10)))
         ax.set_theta_zero_location("N")
