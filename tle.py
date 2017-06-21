@@ -575,25 +575,23 @@ class Satellite(object):
             f.write(
                 '-------------------------------------------------------------------------------\n\n')
 
-            for ii, (jd, rho, az, el) in enumerate(zip(self.jd_vis,
-                                                       self.rho_vis,
-                                                       self.az_vis,
-                                                       self.el_vis)):
-                # convert julian day to normal date
-                yr, mo, day, hr, mn, sec = time.jd2date(jd)
+            for ii, cur_pass in enumerate(self.pass_vis):
+                for jd, rho, az, el in zip(cur_pass.jd, cur_pass.rho, cur_pass.az, cur_pass.el):
+                    # convert julian day to normal date
+                    yr, mo, day, hr, mn, sec = time.jd2date(jd)
 
-                # if sec > 30:
-                #     mn = mn + 1
-                #     if mn == 60:
-                #         hr = hr + 1
-                #         mn = 0
-                f.write('%4.0f%s' % (ii, space))
-                f.write('%3.0f/%03.0f%s' % (mo, day, space))
-                f.write('%02.0f:%2.0f:%3.1f%s' % (hr, mn, sec, space))
-                f.write('%7.2f%s' % (rho, space))
-                f.write('%7.2f%s' % (az * 180 / np.pi, space))
-                f.write('%7.2f%s' % (el * 180 / np.pi, space))
-                f.write('%13s\n' % (self.satname))
+                    # if sec > 30:
+                    #     mn = mn + 1
+                    #     if mn == 60:
+                    #         hr = hr + 1
+                    #         mn = 0
+                    f.write('%4.0f%s' % (ii, space))
+                    f.write('%3.0f/%3.0f%s' % (mo, day, space))
+                    f.write('%02.0f:%02.0f:%3.1f%s' % (hr, mn, sec, space))
+                    f.write('%7.2f%s' % (rho, space))
+                    f.write('%7.2f%s' % (az * 180 / np.pi, space))
+                    f.write('%7.2f%s' % (el * 180 / np.pi, space))
+                    f.write('%13s\n' % (self.satname))
 
     def plot_pass(self, start, end):
         """Try and plot a pass on a polar plot
