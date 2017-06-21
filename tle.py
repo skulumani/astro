@@ -505,27 +505,63 @@ class Satellite(object):
         rho_vis = []
         az_vis = []
         el_vis = []
+        
+        # create array to store all the passes
+        all_passes = []
+        current_pass = PASS(jd=[], az=[], el=[], site_eci=[], sat_eci=[],
+                            gst=[], lst=[], sun_alt=[], alpha=[], beta=[],
+                            sun_eci=[], rho=[])
 
+        jd_last = self.jd_span[0]
         for (jd, a, b, sa, si, su, su_alt, lst, gst) in zip(self.jd_span, alpha,
                                                             beta, sat_eci,
                                                             site_eci, sun_eci,
                                                             sun_alt, site['lst'],
                                                             site['gst']):
+            
             if a > np.pi / 2:
                 rho, az, el = geodetic.rhoazel(sa, si, site['lat'], lst)
 
                 if rho < 1500 and el > 10 * deg2rad:
                     if b < np.pi / 2 or su_alt > 6378.137:
-
                         jd_vis.append(jd)
                         rho_vis.append(rho)
                         az_vis.append(az)
                         el_vis.append(el)
 
+                        # we have a visible state - save to current pass if
+                        # time since last visible is small enough if not then
+                        # we have to create another pass namedtuple
+                        if np.absolute(jd_last - jd) > (10 / 24 / 60):
+                            if current_pass.jd:  # new pass
+                                all_passes.append(current_pass)
+                                current_pass = PASS(jd=[], az=[], el=[],
+                                                    site_eci=[], sat_eci=[],
+                                                    gst=[], lst=[], sun_alt=[],
+                                                    alpha=[], beta=[],
+                                                    sun_eci=[], rho=[])
+
+                        current_pass.jd.append(jd)
+                        current_pass.az.append(az)
+                        current_pass.el.append(el)
+                        current_pass.site_eci.append(si)
+                        current_pass.sat_eci.append(sa)
+                        current_pass.gst.append(gst)
+                        current_pass.lst.append(lst)
+                        current_pass.sun_alt.append(su_alt)
+                        current_pass.alpha.append(a)
+                        current_pass.beta.append(b)
+                        current_pass.sun_eci.append(su)
+                        current_pass.rho.append(rho)
+                        jd_last = jd
+
+        all_passes.append(current_pass)
+
         self.jd_vis = jd_vis
         self.rho_vis = rho_vis
         self.az_vis = az_vis
         self.el_vis = el_vis
+        self.pass_vis = all_passes
 
     def output(self, filename):
         """Write to output file
