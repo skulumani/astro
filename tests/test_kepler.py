@@ -1,4 +1,5 @@
 import numpy as np
+# namedtuple to hold constants for each body
 from .. import kepler
 
 def test_coe2rv_equatorial_circular():
