@@ -84,29 +84,30 @@ mu_sun = 1.32712438e11              # km^3/sec^2
 Body = namedtuple('Body', ['rot_per', 'radius', 'mu', 'mass', 'orbit_sma',
                            'orbit_per', 'orbit_ecc', 'orbit_inc', 'p'])
 
-Earth = namedtuple('Earth',['rot_per', 'radius', 'mu', 'mass', 'orbit_sma',
-                           'orbit_per', 'orbit_ecc', 'orbit_inc', 'p',
-                            'omega', 'sidepersol', 'radperday', 'flat', 
-                            'eesqrd', 'ee', 'J2', 'J3', 'J4'])
+Earth = namedtuple('Earth', ['rot_per', 'radius', 'mu', 'mass', 'orbit_sma',
+                             'orbit_per', 'orbit_ecc', 'orbit_inc', 'p',
+                             'omega', 'sidepersol', 'radperday', 'flat',
+                             'eesqrd', 'ee', 'J2', 'J3', 'J4'])
 # earth
 earth = Earth(rot_per=1.0027576,
-             radius=6378.137,
-             mu=398600.5,
-             orbit_sma=1.49589800e8,
-             orbit_per=31555647.16,
-             orbit_ecc=.01671020,
-             orbit_inc=4.98816000e-5,
-             mass=398600.5 / G,
-             p=1.49589800e8 * (1 - .01671020**2),
-omega = 0.000072921151467,     # rad/sec
-sidepersol = 1.00273790935,          # Sidereal Days/Solar Day
-radperday = 6.30038809866574,        # rad/day for the Earth
-flat = 1.0 / 298.257223563,            # Earth flattening factor
-eesqrd = (2.0 - (1.0 / 298.257223563)) * (1.0 / 298.257223563),            # Earth eccentricty squared
-ee =8.1819190842622e-2 ,
-J2 = 0.00108263,                     # Zonal Harmonic perturbation
-J3 = -0.00000254,
-J4 = -0.00000161)
+              radius=6378.137,
+              mu=398600.5,
+              orbit_sma=1.49589800e8,
+              orbit_per=31555647.16,
+              orbit_ecc=.01671020,
+              orbit_inc=4.98816000e-5,
+              mass=398600.5 / G,
+              p=1.49589800e8 * (1 - .01671020**2),
+              omega=0.000072921151467,     # rad/sec
+              sidepersol=1.00273790935,          # Sidereal Days/Solar Day
+              radperday=6.30038809866574,        # rad/day for the Earth
+              flat=1.0 / 298.257223563,            # Earth flattening factor
+              # Earth eccentricty squared
+              eesqrd=(2.0 - (1.0 / 298.257223563)) * (1.0 / 298.257223563),
+              ee=8.1819190842622e-2,
+              J2=0.00108263,                     # Zonal Harmonic perturbation
+              J3=-0.00000254,
+              J4=-0.00000161)
 
 # define sun constants
 sun = Body(rot_per=0.0394011,
