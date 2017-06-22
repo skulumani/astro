@@ -87,7 +87,7 @@ Body = namedtuple('Body', ['rot_per', 'radius', 'mu', 'mass', 'orbit_sma',
 Earth = namedtuple('Earth',['rot_per', 'radius', 'mu', 'mass', 'orbit_sma',
                            'orbit_per', 'orbit_ecc', 'orbit_inc', 'p',
                             'omega', 'sidepersol', 'radperday', 'flat', 
-                            'eesqrd', 'ee', 'J2', 'J3', 'J4']
+                            'eesqrd', 'ee', 'J2', 'J3', 'J4'])
 # earth
 earth = Earth(rot_per=1.0027576,
              radius=6378.137,
@@ -98,12 +98,12 @@ earth = Earth(rot_per=1.0027576,
              orbit_inc=4.98816000e-5,
              mass=398600.5 / G,
              p=1.49589800e8 * (1 - .01671020**2),
-omega_earth = 0.000072921151467,     # rad/sec
-sidepersol = 1.0027379093,5          # Sidereal Days/Solar Day
+omega = 0.000072921151467,     # rad/sec
+sidepersol = 1.00273790935,          # Sidereal Days/Solar Day
 radperday = 6.30038809866574,        # rad/day for the Earth
 flat = 1.0 / 298.257223563,            # Earth flattening factor
-eesqrd = (2.0 - flat) * flat,            # Earth eccentricty squared
-ee = np.sqrt(eesqrd),
+eesqrd = (2.0 - (1.0 / 298.257223563)) * (1.0 / 298.257223563),            # Earth eccentricty squared
+ee =8.1819190842622e-2 ,
 J2 = 0.00108263,                     # Zonal Harmonic perturbation
 J3 = -0.00000254,
 J4 = -0.00000161)
