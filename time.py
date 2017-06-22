@@ -2,15 +2,16 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 from kinematics import attitude
-import pdb
+
+
 def date2jd(yr, mon, day, hr, minute, sec):
     """Convert date to Julian Date
-        
+
            Purpose:
                - Converts UTC date to julian date valid 1 Mar 1900 to 28 Feb 2100
-        
+
            JD = date2jd(yr, mon, day, hr, min, sec)
-        
+
            Inputs:
                - yr - 4 digit year (between 1900 and 2100)
                - mon - month (between 01 and 12)
@@ -18,14 +19,14 @@ def date2jd(yr, mon, day, hr, minute, sec):
                - hr - UT hour (between 0 and 23)
                - min - UT min (between 0 and 59)
                - sec - UT sec (between 0 and 59.999)
-        
+
            Outputs:
                - JD - julian date (days from 1 Jan 4713 BC 12 Noon)
                - MJD - modified julian date
-        
+
            Dependencies:
                - none
-        
+
            Author:
                - Shankar Kulumani 21 Oct 2012
                    - list revisions
@@ -37,17 +38,17 @@ def date2jd(yr, mon, day, hr, minute, sec):
                - USAFA Astro 321
     """
 
-    JD = 367.0 * yr - np.floor( (7 * (yr + np.floor( (mon + 9) / 12.0) ) ) *
-            0.25 ) + np.floor( 275 * mon / 9.0 ) + day + 1721013.5 + (
-                    (sec/60.0 + minute ) / 60.0 + hr ) / 24.0
+    JD = 367.0 * yr - np.floor((7 * (yr + np.floor((mon + 9) / 12.0))) *
+                               0.25) + np.floor(275 * mon / 9.0) + day + 1721013.5 + (
+        (sec / 60.0 + minute) / 60.0 + hr) / 24.0
 
     MJD = JD - 2400000.5
 
     return (JD, MJD)
 
+
 def dayofyr2mdhms(yr, days):
-    """
-    This function converts the day of the year, days, to the month
+    """This function converts the day of the year, days, to the month
         day, hour, minute and second.
 
     Algorithm     : Set up array for the number of days per month
@@ -110,10 +111,9 @@ def dayofyr2mdhms(yr, days):
 
     return (mon, day, hour, minute, sec)
 
-def jd2date(jd):
 
-    """
-    This function finds the Year, month, day, hour, minute and second
+def jd2date(jd):
+    """This function finds the Year, month, day, hour, minute and second
     given the Julian date.
 
     Algorithm     : Set up starting values
@@ -146,14 +146,15 @@ def jd2date(jd):
         None.
 
     Coupling      :
-        DayofYr2MDHMS  - Finds Month, day, hour, minute and second given Days and Yr
-    
+        DayofYr2MDHMS  - Finds Month, day, hour, minute and second given Days
+        and Yr
+
     References    :
         1988 Almanac for Computers  pg. B2
         Escobal       pg. 17-19
         Kaplan        pg. 329-330
     """
-    
+
     temp = jd - 2415019.5
     tu = temp / 365.25
     yr = 1900 + np.fix(tu)
@@ -162,18 +163,17 @@ def jd2date(jd):
 
     # check for beginning of year
     if days < 1.0:
-        yr = yr  -1
-        leapyrs = np.fix((yr - 1900 - 1)*0.25)
+        yr = yr - 1
+        leapyrs = np.fix((yr - 1900 - 1) * 0.25)
         days = temp - ((yr - 1900) * 365.0 + leapyrs)
 
     mon, day, h, m, s = dayofyr2mdhms(yr, days)
 
-    return (yr, mon, day, h, m, s) 
+    return (yr, mon, day, h, m, s)
 
 
 def gsttime0(yr):
-    """
-    This function finds the Greenwich Sidereal time at the beginning of a
+    """This function finds the Greenwich Sidereal time at the beginning of a
     year.  This formula is derived from the Astronomical Almanac and is good
     only for 0 hr UT, 1 Jan of a year.
 
@@ -211,69 +211,32 @@ def gsttime0(yr):
         BMW           pg. 103-104
     """
 
-    TwoPI = 2*np.pi
+    TwoPI = 2 * np.pi
 
-    JD = (367.0 * yr - np.fix(7.0 * (yr +np.fix(10.0/12.0)) *0.25) +
-            np.fix(275.0/9.0) + 1721014.5)
+    JD = (367.0 * yr - np.fix(7.0 * (yr + np.fix(10.0 / 12.0)) * 0.25) +
+          np.fix(275.0 / 9.0) + 1721014.5)
     Tu = (np.fix(JD) + 0.5 - 2451545.0) / 36525.0
-    GST0 = 1.753368559 + 628.3319705*Tu + 6.770708127E-06*Tu*Tu
-    GST0 = attitude.normalize(GST0, 0, 2*np.pi)
+    GST0 = 1.753368559 + 628.3319705 * Tu + 6.770708127E-06 * Tu * Tu
+    GST0 = attitude.normalize(GST0, 0, 2 * np.pi)
     return GST0
 
-def gstlst3(jd, site_lon):
-    """
-    This program calculates GST and LST giveen the Julian Day and site
-    longitude.
-
-    Author:  Shankar Kulumani GWU 18 Jun 2017 
-
-    Inputs:
-        jd - Julian Day
-        sitlon - site longitude (radians)
-    Outputs:
-        gst - Greenwich Sidereal Time (radians)
-        lst - Local Sidereal Time (radians)
-    
-    Constants: None
-    
-    Coupling: 
-
-    Modifications:
-        18 Jun 2017 - use algorithm 15 from Vallado
-
-    References:
-        Astro 321 PREDICT
-        Vallado Algorithm 15 
-    """
-    deg2rad = np.pi/180
-    jd_frac, jd_day = np.modf(jd)
-    Tut1 = (jd_day - 2451545.0) / 36525
-    wprec = 1.002737909350795 + 5.9006e-11*Tut1 - 5.9e-15 * Tut1**2 # rev/day
-    wprec = wprec * 360 / 86400 # deg/sec
-
-    gst0 = (100.4606184 + 36000.77005361 * Tut1 + 0.00038793 * Tut1**2 - 2.6e-8 * Tut1**3)
-    gst = gst0 + wprec * jd_frac * 86400
-    gst = attitude.normalize(gst * deg2rad, 0, 2 * np.pi)
-    lst = gst + site_lon
-
-    return gst[0], lst[0]
 
 def gstlst(jd, site_lon):
-    """
-    This program calculates GST and LST giveen the Julian Day and site
+    """This program calculates GST and LST given the Julian Day and site
     longitude.
 
-    Author:  Shankar Kulumani GWU 18 Jun 2017 
+    Author:  Shankar Kulumani GWU 18 Jun 2017
 
     Inputs:
-        jd - Julian Day
-        sitlon - site longitude (radians)
+        jd : float
+            Julian Day
+        sitlon : site longitude (radians)
     Outputs:
         gst - Greenwich Sidereal Time
         lst - Local Sidereal Time
-    
+
     Constants: None
-    
+
     Coupling: 
 
     Modifications:
@@ -283,14 +246,14 @@ def gstlst(jd, site_lon):
         Astro 321 PREDICT
         Vallado Algorithm 15 
     """
-    deg2rad = np.pi/180
+    deg2rad = np.pi / 180
     hour2sec = 3600
-    sec2deg = 15/3600
+    sec2deg = 15 / 3600
 
     Tut1 = (jd - 2451545.0) / 36525
 
     gst = (- 6.2e-6 * Tut1 * Tut1 * Tut1 + 0.093104 * Tut1 * Tut1
-              + (876600.0 * 3600.0 + 8640184.812866) * Tut1 + 67310.54841)
+           + (876600.0 * 3600.0 + 8640184.812866) * Tut1 + 67310.54841)
     gst = (gst % 86400) * sec2deg
 
     gst = attitude.normalize(gst * deg2rad, 0, 2 * np.pi)
@@ -298,45 +261,6 @@ def gstlst(jd, site_lon):
 
     return gst[0], lst[0]
 
-def gstlst2(jd, site_lon, sidepersol=1.00273790935):
-    """
-    This program calculates GST and LST giveen the Julian Day and site
-    longitude.
-
-    Author:   C2C Shankar Kulumani   USAFA/CS-19   719-333-4741
-
-    Inputs:
-        jd - Julian Day
-        sitlon - site longitude (radians)
-        sidepersol - sidereal days/solar day (Earth by default)
-    Outputs:
-        gst - Greenwich Sidereal Time
-        lst - Local Sidereal Time
-    
-    Constants: None
-    
-    Coupling: 
-        InvJulianDay
-
-    Modifications:
-        10 Jun 2017 - Move to python
-        7 Dec 2014 - removed global variables
-
-    References:
-        Astro 321 PREDICT
-    """
-    # transform julian day back to normal date
-    yr, mo, d, h, m, s = jd2date(jd)
-
-    gst0 = gsttime0(yr)
-    gst = gst0 + sidepersol * 2 * np.pi * finddays(yr, mo, d, h, m, s)
-
-    lst = gst + site_lon
-
-    gst = attitude.normalize(gst, 0, 2*np.pi)
-    lst = attitude.normalize(lst, 0, 2*np.pi)
-
-    return gst, lst
 
 def finddays(yr, mo, day, hr, m, sec):
     """This function finds the fractional days through a year given the year,
@@ -373,29 +297,30 @@ def finddays(yr, mo, day, hr, m, sec):
 
     """
 
-    LMonth = [31,28,31,30,31,30,31,31,30,31,30,31]
+    LMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
     if (yr - 1900) % 4 == 0:
         LMonth[1] = 29
 
     i = 1
     DDays = 0.0
-    while (i < mo) and ( i < 11 ):
+    while (i < mo) and (i < 11):
         DDays = DDays + LMonth[i]
-        i= i + 1
+        i = i + 1
 
-    DDays = DDays + (day - 1) + hr /24.0 + m/1440.0 + sec/86400.0
+    DDays = DDays + (day - 1) + hr / 24.0 + m / 1440.0 + sec / 86400.0
 
     return DDays
+
 
 if __name__ == "__main__":
     # test JD for J2000
     yr = 2000
     mon = 1
-    day = 1 
+    day = 1
     hour = 12
     minute = 0
-    sec = 0 
+    sec = 0
 
-    JD,MJD = date2jd(yr,mon,day,hour,minute,sec)
+    JD, MJD = date2jd(yr, mon, day, hour, minute, sec)
 
     print("J2000: %9.2f" % JD)
