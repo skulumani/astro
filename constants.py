@@ -153,73 +153,97 @@ venus = Body(rot_per=.0041149,
              mass=3.24859000e5 / G,
              p=1.0820900e8 * (1 - .006773**2))
 
-# % mars
-# constants.mars.rot_per      =   .9746985;
-# constants.mars.radius       =   3397.00;
-# constants.mars.mu           =   4.282840e4;
-# constants.mars.orbit_sma    =   2.27937000e8;
-# constants.mars.orbit_per    =   59353583.28;
-# constants.mars.orbit_ecc    =   .09341230;
-# constants.mars.orbit_inc    =   1.85061;
-# constants.mars.mass          =   constants.mars.mu/constants.G;
-# constants.mars.p            =   constants.mars.orbit_sma*(1-constants.mars.orbit_ecc^2);
-# % jupiter
-# constants.jupiter.rot_per   =   2.4181458;
-# constants.jupiter.radius    =   71492.00;
-# constants.jupiter.mu        =   1.26687000e8;
-# constants.jupiter.orbit_sma =   7.7841200e8;
-# constants.jupiter.orbit_per =   374396573;
-# constants.jupiter.orbit_ecc =   .04839270;
-# constants.jupiter.orbit_inc =   1.30530;
-# constants.jupiter.mass          =   constants.jupiter.mu/constants.G;
-# constants.jupiter.p            =   constants.jupiter.orbit_sma*(1-constants.jupiter.orbit_ecc^2);
-#
-# constants.jupiter.callisto.mu = 7179.29;
-# constants.jupiter.callisto.orbit_sma = 1.883e6;
-# % saturn
-# constants.saturn.rot_per    =   2.2522523;
-# constants.saturn.radius     =   60330.00;
-# constants.saturn.mu         =   3.79313000e7;
-# constants.saturn.orbit_sma  =   1.42673000e9;
-# constants.saturn.orbit_per  =   929341659.8;
-# constants.saturn.orbit_ecc  =   .05415060;
-# constants.saturn.orbit_inc  =   2.48446;
-# constants.saturn.mass          =   constants.saturn.mu/constants.G;
-# constants.saturn.p            =   constants.saturn.orbit_sma*(1-constants.saturn.orbit_ecc^2);
-#
-# constants.saturn.titan.mu   =   8825;
-# constants.saturn.titan.radius = 2575;
-# constants.saturn.titan.orbit_sma = 20*constants.saturn.radius;
-# constants.saturn.titan.orbit_ecc = .2;
-# constants.saturn.titan.p = constants.saturn.titan.orbit_sma*(1-constants.saturn.titan.orbit_ecc^2);
-#
-# % uranus
-# constants.uranus.rot_per    =   1.3921178; % retrograde rotation
-# constants.uranus.radius     =   26200.00;
-# constants.uranus.mu         =   5.79397000e6;
-# constants.uranus.orbit_sma  =   2.87097000e9;
-# constants.uranus.orbit_per  =   2653128427;
-# constants.uranus.orbit_ecc  =   .04716770;
-# constants.uranus.orbit_inc  =   .76986;
-# constants.uranus.mass          =   constants.uranus.mu/constants.G;
-# constants.uranus.p            =   constants.uranus.orbit_sma*(1-constants.uranus.orbit_ecc^2);
-# % neptune
-# constants.neptune.rot_per   =   1.4897579;
-# constants.neptune.radius    =   25225.00;
-# constants.neptune.mu        =   6.835110e6;
-# constants.neptune.orbit_sma =   4.49825000e9;
-# constants.neptune.orbit_per =   5203301252;
-# constants.neptune.orbit_ecc =   .00858587;
-# constants.neptune.orbit_inc =   1.76917;
-# constants.neptune.mass          =   constants.neptune.mu/constants.G;
-# constants.neptune.p            =   constants.neptune.orbit_sma*(1-constants.neptune.orbit_ecc^2);
-# % pluto
-# constants.pluto.rot_per     =   .1565631;
-# constants.pluto.radius      =   1195.00;
-# constants.pluto.mu          =   8.737670e2;
-# constants.pluto.orbit_sma   =   5.906638e9;
-# constants.pluto.orbit_per   =   7829522968;
-# constants.pluto.orbit_ecc   =   .24880800;
-# constants.pluto.orbit_inc   =   17.14180;
-# constants.pluto.mass          =   constants.pluto.mu/constants.G;
-# constants.pluto.p            =   constants.pluto.orbit_sma*(1-constants.pluto.orbit_ecc^2);
+# mars
+mars = Body(
+    rot_per=.9746985,
+    radius=3397.00,
+    mu=4.282840e4,
+    orbit_sma=2.27937000e8,
+    orbit_per=59353583.28,
+    orbit_ecc=.09341230,
+    orbit_inc=1.85061,
+    mass=4.282840e4 / G,
+    p=2.27937000e8 * (1 - .09341230**2))
+
+# jupiter
+jupiter = Body(
+    rot_per=2.4181458,
+    radius=71492.00,
+    mu=1.26687000e8,
+    orbit_sma=7.7841200e8,
+    orbit_per=374396573,
+    orbit_ecc=.04839270,
+    orbit_inc=1.30530,
+    mass=1.26687000e8 / G,
+    p=7.7841200e8 * (1 - .04839270**2))
+
+callisto = Body(
+    rot_per=0,
+    radius=0,
+    mu=7179.29,
+    orbit_sma=1.883e6,
+    orbit_per=0,
+    orbit_ecc=0,
+    orbit_inc=0,
+    mass=0,
+    p=0)
+
+#  saturn
+saturn = Body(
+    rot_per=2.2522523,
+    radius=60330.00,
+    mu=3.79313000e7,
+    orbit_sma=1.42673000e9,
+    orbit_per=929341659.8,
+    orbit_ecc=.05415060,
+    orbit_inc=2.48446,
+    mass=3.79313000e7 / G,
+    p=1.42673000e9 * (1 - .05415060**2))
+
+
+callisto = Body(
+    rot_per=0,
+    radius=2575,
+    mu=8825,
+    orbit_sma=20 * saturn.radius,
+    orbit_per=0,
+    orbit_ecc=0.2,
+    orbit_inc=0,
+    mass=0,
+    p=20 * saturn.radius * (1 - 0.2**2))
+
+# uranus
+uranus = Body(
+    rot_per=1.3921178,  # retrograde rotation
+    radius=26200.00,
+    mu=5.79397000e6,
+    orbit_sma=2.87097000e9,
+    orbit_per=2653128427,
+    orbit_ecc=.04716770,
+    orbit_inc=.76986,
+    mass=5.79397000e6 / G,
+    p=2.87097000e9 * (1 - .04716770**2))
+
+# neptune
+neptune = Body(
+    rot_per=1.4897579,
+    radius=25225.00,
+    mu=6.835110e6,
+    orbit_sma=4.49825000e9,
+    orbit_per=5203301252,
+    orbit_ecc=.00858587,
+    orbit_inc=1.76917,
+    mass=6.835110e6 / G,
+    p=4.49825000e9 * (1 - .00858587**2))
+
+# pluto
+pluto = Body(
+    rot_per=.1565631,
+    radius=1195.00,
+    mu=8.737670e2,
+    orbit_sma=5.906638e9,
+    orbit_per=7829522968,
+    orbit_ecc=.24880800,
+    orbit_inc=17.14180,
+    mass=5.906638e9 / G,
+    p=5.906638e9 * (1 - .24880800**2))
