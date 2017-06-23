@@ -74,6 +74,7 @@ day2sec = 86400.0                   # sec/day
 sec2day = 1 / 86400.5
 
 # Earth Characteristics from WGS 84
+obliquity = np.radians(23.43928)
 
 #  Moon & Sun Characteristics from WGS 84
 mu_moon = 4902.774191985            # km^3/sec^2
