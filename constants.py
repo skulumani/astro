@@ -43,7 +43,7 @@ Shankar Kulumani 21 June 2017
 References
 ----------
 Astro 321 USAFA 2007
-AAE 532 Purdue 2012 planetary_constants.pdf (from AAE532 supplements)	
+AAE 532 Purdue 2012 planetary_constants.pdf (from AAE532 supplements)
 
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
