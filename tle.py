@@ -26,7 +26,7 @@ TLE = namedtuple('TLE', [
     'id_piece', 'epoch_year', 'epoch_day', 'ndot_over_2', 'nddot_over_6',
     'bstar', 'ephtype', 'elnum', 'checksum1',
     'inc', 'raan', 'ecc', 'argp', 'ma', 'mean_motion', 'epoch_rev',
-    'checksum2'])
+    'checksum2', 'good'])
 
 COE = namedtuple('COE', ['n', 'ecc', 'raan', 'argp', 'mean', 'E', 'nu', 'a',
                          'p', 'inc'])
@@ -197,9 +197,20 @@ def checksum(line):
     characters are ignored.  @note this excludes last char for the checksum
     thats already there.
     """
-    return sum(map(int, filter(
-        lambda c: c >= '0' and c <= '9', line[:-1].replace('-', '1')))) % 10
+    L = line.strip()
+    cksum = 0
+    for i in range(68):
+        c = L[i]
+        if c <= '9' and c >= '0':
+            cksum = cksum + int(c)
+        elif c == '-':
+            cksum = cksum + 1
+        else:
+            continue
 
+    cksum = cksum % 10
+
+    return cksum
 
 def stringScientificNotationToFloat(sn):
     """Specific format is 5 digits, a + or -, and 1 digit, ex: 01234-5 which is
@@ -249,34 +260,68 @@ def parsetle(l0, l1, l2):
     manpages.debian.net/cgi-bin/...
     display_man.cgi?id=e2095ebad4eb81b943fcdd55ec9b7521&format=html
     """
-    # parse line zero
-    satname = l0[0:23]
+    try:
+        # parse line zero
+        satname = l0[0:23]
 
-    # parse line one
-    satnum = int(l1[2:7])
-    classification = l1[7:8]
-    id_year = int(l1[9:11])
-    id_launch = int(l1[11:14])
-    id_piece = l1[14:17]
-    epoch_year = int(l1[18:20])
-    epoch_day = float(l1[20:32])
-    ndot_over_2 = float(l1[33:43])
-    nddot_over_6 = stringScientificNotationToFloat(l1[44:52])
-    bstar = stringScientificNotationToFloat(l1[53:61])
-    ephtype = int(l1[62:63])
-    elnum = int(l1[64:68])
-    checksum1 = int(l1[68:69])
+        # parse line one
+        satnum = int(l1[2:7])
+        classification = l1[7:8]
+        id_year = int(l1[9:11])
+        id_launch = int(l1[11:14])
+        id_piece = l1[14:17]
+        epoch_year = int(l1[18:20])
+        epoch_day = float(l1[20:32])
+        ndot_over_2 = float(l1[33:43])
+        nddot_over_6 = stringScientificNotationToFloat(l1[44:52])
+        bstar = stringScientificNotationToFloat(l1[53:61])
+        ephtype = int(l1[62:63])
+        elnum = int(l1[64:68])
+        checksum1 = int(l1[68:69])
 
-    # parse line 2
-    # satellite        = int(line2[2:7])
-    inc = float(l2[8:16])
-    raan = float(l2[17:25])
-    ecc = float(l2[26:33]) * 0.0000001
-    argp = float(l2[34:42])
-    ma = float(l2[43:51])
-    mean_motion = float(l2[52:63])
-    epoch_rev = float(l2[63:68])
-    checksum2 = float(l2[68:69])
+        # parse line 2
+        # satellite        = int(line2[2:7])
+        inc = float(l2[8:16])
+        raan = float(l2[17:25])
+        ecc = float(l2[26:33]) * 0.0000001
+        argp = float(l2[34:42])
+        ma = float(l2[43:51])
+        mean_motion = float(l2[52:63])
+        epoch_rev = float(l2[63:68])
+        checksum2 = float(l2[68:69])
+
+        good = True
+    except: # We have a bad TLE but we're not sure where
+        # parse line zero
+        satname = l0[0:23]
+
+        # parse line one
+        satnum = 0
+        classification = 'U'
+        id_year = 0
+        id_launch = 0
+        id_piece = 'A'
+        epoch_year = 0 
+        epoch_day = 0
+        ndot_over_2 = 0
+        nddot_over_6 = 0
+        bstar = 0
+        ephtype = 0
+        elnum = 0
+        checksum1 = 0
+
+        # parse line 2
+        # satellite        = int(line2[2:7])
+        inc = 0
+        raan = 0
+        ecc = 0
+        argp = 0
+        ma = 0
+        mean_motion = 0
+        epoch_rev = 0
+        checksum2 = 0
+
+        good = False
 
     return TLE(satnum=satnum, classification=classification, id_year=id_year,
                id_launch=id_launch, id_piece=id_piece, epoch_year=epoch_year,
@@ -284,7 +329,7 @@ def parsetle(l0, l1, l2):
                nddot_over_6=nddot_over_6, bstar=bstar, ephtype=ephtype,
                elnum=elnum, checksum1=checksum1, inc=inc, raan=raan, ecc=ecc,
                argp=argp, ma=ma, mean_motion=mean_motion, epoch_rev=epoch_rev,
-               checksum2=checksum2, satname=satname)
+               checksum2=checksum2, satname=satname, good=good)
 
 
 def j2dragpert(inc0, ecc0, n0, ndot2, mu=398600.5, re=6378.137, J2=0.00108263):
@@ -346,23 +391,34 @@ def get_tle(filename):
     and save all the elements to a list or something.
     """
     sats = []
+    tles = 0
+    lines = 0
     with open(filename, 'r') as f:
         l0 = f.readline().strip()
         while l0:
             l1 = f.readline().strip()
+            lines += 1
             l2 = f.readline().strip()
+            lines += 1
             # error check to make sure we have read a complete TLE
             if validtle(l0, l1, l2):
                 # now we parse the tle
                 elements = parsetle(l0, l1, l2)
+                tles += 1
+                # final check to see if we got a good TLE
+                if elements.good:
+                    # instantiate a bunch of instances of a Satellite class
+                    sats.append(Satellite(elements))
 
-                # instantiate a bunch of instances of a Satellite class
-                sats.append(Satellite(elements))
             else:
                 print("Invalid TLE")
 
             l0 = f.readline().strip()
+            lines += 1
 
+    print("Read {} lines which should be {} TLEs".format(lines, lines / 3))
+    print("Found {} TLEs".format(tles))
+    print("Parsed {} SATs".format(len(sats)))
     return sats
 
 
