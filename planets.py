@@ -2,6 +2,7 @@
 Do lots of functions for the planets, sun and/or moon
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
+from collections import namedtuple
 import numpy as np
 from kinematics import attitude
 from astro import kepler, constants
@@ -11,6 +12,8 @@ twopi = 2 * np.pi
 deg2rad = np.pi / 180
 rad2deg = 180 / np.pi
 au2km = 149597870.0
+
+COE = namedtuple('COE', ['p', 'ecc', 'inc', 'raan', 'argp', 'nu'])
 
 
 def sun_earth_eci(jd):
@@ -58,10 +61,10 @@ def sun_earth_eci(jd):
     N = jd - 2451545.0
 
     meanlong = 280.461 + 0.9856474 * N
-    meanlong = attitude.normalize(meanlong, 0, 360)
+    meanlong = attitude.normalize(meanlong, 0, 360)[0]
 
     meananomaly = 357.528 + 0.9856003 * N
-    meananomaly = attitude.normalize(meananomaly * deg2rad, 0, twopi)
+    meananomaly = attitude.normalize(meananomaly * deg2rad, 0, twopi)[0]
     if meananomaly < 0:
         meananomaly = twopi + meananomaly
 
@@ -147,7 +150,7 @@ def planet_coe(JD_curr, planet_flag):
     equinox of J2000. The fundamental plane is the ecliptic, or the orbit of
     the Earth about the sun. The fundamental direction is aligned with the
     first point of Ares or the vernal equinox.
-    
+
     The vectors are defined in both the ecliptic and equatorial system with
     respect to the solar system barycenter
 
@@ -182,32 +185,32 @@ def planet_coe(JD_curr, planet_flag):
     # compute the current elements at this JD
     a = a0 + adot * T
     ecc = e0 + edot * T
-    inc = inc0 + incdot * T
-    L = meanL0 + meanLdot * T
-    lonperi = lonperi0 + lonperidot * T
-    raan = raan0 + raandot * T
+    inc = np.deg2rad(inc0 + incdot * T)
+    L = np.deg2rad(meanL0 + meanLdot * T)
+    lonperi = np.deg2rad(lonperi0 + lonperidot * T)
+    raan = np.deg2rad(raan0 + raandot * T)
 
     # compute argp and M/v to complete the element set
-    argp = lonperi - raan
-    M = L - lonperi + b * T**2 + c * np.cos(f * T) + s * np.sin(f * T)
+    argp = np.deg2rad(lonperi - raan)
+    M = np.deg2rad(L - lonperi + b * T**2 + c * np.cos(f * T) + s * np.sin(f * T))
 
-    M = normalize(np.deg2rad(M), -np.pi, np.pi)
+    M = attitude.normalize(M, -np.pi, np.pi)
     # solve kepler's equation to compute E and v
-    E, nu, count = kepler_eq_E(M, ecc)
+    E, nu, count = kepler.kepler_eq_E(M, ecc)
 
     # package into a vector and output
     p = a * (1 - ecc**2)
-
-    coe = (p, ecc, np.deg2rad(inc), np.deg2rad(raan),
-           np.deg2rad(argp), normalize(nu, 0, 2 * np.pi))
+    
+    coe = COE(p=p, ecc=ecc, inc=inc, raan=raan,
+           argp=argp, nu=attitude.normalize(nu.item(), 0, 2 * np.pi))
 
     # convert to position and velocity vectors in J2000 ecliptic and J2000
     # Earth equatorial (ECI) reference frame
     # need to convert distances to working units of kilometers
     au2km = constants.au2km
-
+    
     r_ecliptic, v_ecliptic, r_pqw, v_pqw = kepler.coe2rv(p * au2km, ecc, inc,
-                                                         raan, argp, nu,
+                                                         raan, argp, nu.item(),
                                                          constants.sun.mu)
 
     # convert to the Earth J2000 frame (ECI) need to rotate by the obliquity of
@@ -489,7 +492,7 @@ def planet_approx(JD, planet_flag):
             inc0 = 7.00559432
             incdot = -0.00590158
 
-            meanL0 =  252.25166724
+            meanL0 = 252.25166724
             meanLdot = 149472.67486623
 
             lonperi0 = 77.45771895
@@ -500,21 +503,149 @@ def planet_approx(JD, planet_flag):
 
         elif planet_flag == 1:  # venus
             a0 = 0.72332102
-            
+            adot = -0.00000026
+
+            e0 = 0.00676399
+            edot = -0.00005107
+
+            inc0 = 3.39777545
+            incdot = 0.00043494
+
+            meanL0 = 181.97970850
+            meanLdot = 58517.81560260
+
+            lonperi0 = 131.76755713
+            lonperidot = 0.05679648
+
+            raan0 = 76.67261496
+            raandot = -0.27274174
+
         elif planet_flag == 2:  # earth moon barycenter
             a0 = 1.00000018
+            adot = -0.00000003
+
+            e0 = 0.01673163
+            edot = -0.00003661
+
+            inc0 = -0.00054346
+            incdot = -0.01337178
+
+            meanL0 = 100.46691572
+            meanLdot = 35999.37306329
+
+            lonperi0 = 102.93005885
+            lonperidot = 0.31795260
+
+            raan0 = -5.11260389
+            raandot = -0.24123856
         elif planet_flag == 3:  # mars
             a0 = 1.52371243
+            adot = 0.00000097
+
+            e0 = 0.09336511
+            edot = 0.00009149
+
+            inc0 = 1.85181869
+            incdot = -0.00724757
+
+            meanL0 = -4.56813164
+            meanLdot = 19140.29934243
+
+            lonperi0 = -23.91744784
+            lonperidot = 0.45223625
+
+            raan0 = 49.71320984
+            raandot = -0.26852431
         elif planet_flag == 4:  # jupiter
             a0 = 5.20248019
+            adot = -0.00002864
+
+            e0 = 0.04853590
+            edot = 0.00018026
+
+            inc0 = 1.29861416
+            incdot = -0.00322699
+
+            meanL0 = 34.33479152
+            meanLdot = 3034.90371757
+
+            lonperi0 = 14.27495244
+            lonperidot = 0.18199196
+
+            raan0 = 100.29282654
+            raandot = 0.13024619
         elif planet_flag == 5:  # saturn
             a0 = 9.54149883
+            adot = -0.00003065
+
+            e0 = 0.05550825
+            edot = -0.00032044
+
+            inc0 = 2.49424102
+            incdot = 0.00451969
+
+            meanL0 = 50.07571329
+            meanLdot = 1222.11494724
+
+            lonperi0 = 92.86136063
+            lonperidot = 0.54179478
+
+            raan0 = 113.63998702
+            raandot = -0.25015002
         elif planet_flag == 6:  # uranus
             a0 = 19.18797948
+            adot = -0.00020455
+
+            e0 = 0.04685740
+            edot = -0.00001550
+
+            inc0 = 0.77298127
+            incdot = -0.00180155
+
+            meanL0 = 314.20276625
+            meanLdot = 428.49512595
+
+            lonperi0 = 172.43404441
+            lonperidot = 0.09266985
+
+            raan0 = 73.96250215
+            raandot = 0.05739699
         elif planet_flag == 7:  # neptune
             a0 = 30.06952752
+            adot = 0.00006447
+
+            e0 = 0.00895439
+            edot = 0.00000818
+
+            inc0 = 1.77005520
+            incdot = 0.00022400
+
+            meanL0 = 304.22289287
+            meanLdot = 218.46515314
+
+            lonperi0 = 46.68158724
+            lonperidot = 0.01009938
+
+            raan0 = 131.78635853
+            raandot = -0.00606302
         elif planet_flag == 8:  # pluto
             a0 = 39.48686035
+            adot = 0.00449751
+
+            e0 = 0.24885238
+            edot = 0.00006016
+
+            inc0 = 17.14104260
+            incdot = 0.00000501
+
+            meanL0 = 238.96535011
+            meanLdot = 145.18042903
+
+            lonperi0 = 224.09702598
+            lonperidot = -0.00968827
+
+            raan0 = 110.30167986
+            raandot = -0.00809981
         else:
             print("Incorrect planet flag should be between 0 and 8")
     else:
@@ -522,11 +653,13 @@ def planet_approx(JD, planet_flag):
 
     return (a0, adot, e0, edot, inc0, incdot, meanL0, meanLdot, lonperi0,
             lonperidot, raan0, raandot, b, c, f, s)
-    def asteroid_epoch(ast_flag):
-    """
-        This holds the orbital elements for the asteroids as taken from JPL
 
-        Return the state at the JD epoch for use in a propogate function
+
+def asteroid_epoch(ast_flag):
+    """
+    This holds the orbital elements for the asteroids as taken from JPL
+
+    Return the state at the JD epoch for use in a propogate function
     """
 
     if ast_flag == 0:
@@ -575,7 +708,7 @@ def planet_approx(JD, planet_flag):
     # convert M to nu for later and output the coe
     E, nu, count = kepler_eq_E(M, ecc)
 
-    epoch = (p, ecc, inc, raan, argp, normalize(nu, 0, 2 * np.pi), JD_epoch)
+    epoch = (p, ecc, inc, raan, argp, attitude.normalize(nu, 0, 2 * np.pi), JD_epoch)
 
     return epoch
 
@@ -597,6 +730,6 @@ def asteroid_coe(JD_curr, ast_flag):
     (E_f, M_f, nu_f) = tof_delta_t(p, ecc, mu, nu_0, delta_t)
 
     # output the current COE
-    coe = (p, ecc, inc, raan, argp, normalize(nu_f, 0, 2 * np.pi))
+    coe = (p, ecc, inc, raan, argp, attitude.normalize(nu_f, 0, 2 * np.pi))
 
     return coe
