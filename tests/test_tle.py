@@ -247,32 +247,32 @@ class TestISSUSAFA():
         np.testing.assert_allclose(self.sat[0].argpdot, 7.72047261206e-7)
 
 
-class TestTLEVallado():
-    l0 = "Vallado Pg 113"
-    l1 = "1 16609U 86017A   93352.53502934  .00007889  00000-0  10529-3 0   342"
-    l2 = "2 16609  51.6190  13.3340 0005770 102.5680 257.5950 15.59114070447869"
-
-    def test_line1_checksum(self):
-        np.testing.assert_allclose(tle.checksum(self.l1), 2)
-
-    def test_line_checksum(self):
-        np.testing.assert_allclose(tle.checksum(self.l2), 9)
-
-    def test_first_example_tle_line1(self):
-        l1 = "1 16609U 86017A   92048.88339427  .00000000      0 0  51786-4 0  7632"
-        np.testing.assert_allclose(tle.checksum(l1), 2)
-
-    def test_first_example_tle_line2(self):
-        l2 = "2 16609  51.6016 131.8518 0014007 157.0182 203.1411 15.62321407     9"
-        np.testing.assert_allclose(tle.checksum(l2), 9)
-
-    def test_second_example_tle_line1(self):
-        l1 = "1    50U 60009B   17095.28396119 -.00000095 +00000-0 -81132-4 0     6"
-        np.testing.assert_allclose(tle.checksum(l1), 6)
-
-    def test_second_example_tle_line2(self):
-        l2 = "2    50  47.2298 149.9498 0112984 081.3681 279.9890 12.20099583     3"
-        np.testing.assert_allclose(tle.checksum(l2), 3)
+# class TestTLEVallado():
+#     l0 = "Vallado Pg 113"
+#     l1 = "1 16609U 86017A   93352.53502934  .00007889  00000-0  10529-3 0   342"
+#     l2 = "2 16609  51.6190  13.3340 0005770 102.5680 257.5950 15.59114070447869"
+# 
+#     def test_line1_checksum(self):
+#         np.testing.assert_allclose(tle.checksum(self.l1), 2)
+# 
+#     def test_line_checksum(self):
+#         np.testing.assert_allclose(tle.checksum(self.l2), 9)
+# 
+#     def test_first_example_tle_line1(self):
+#         l1 = "1 16609U 86017A   92048.88339427  .00000000      0 0  51786-4 0  7632"
+#         np.testing.assert_allclose(tle.checksum(l1), 2)
+# 
+#     def test_first_example_tle_line2(self):
+#         l2 = "2 16609  51.6016 131.8518 0014007 157.0182 203.1411 15.62321407     9"
+#         np.testing.assert_allclose(tle.checksum(l2), 9)
+# 
+#     def test_second_example_tle_line1(self):
+#         l1 = "1    50U 60009B   17095.28396119 -.00000095 +00000-0 -81132-4 0     6"
+#         np.testing.assert_allclose(tle.checksum(l1), 6)
+# 
+#     def test_second_example_tle_line2(self):
+#         l2 = "2    50  47.2298 149.9498 0112984 081.3681 279.9890 12.20099583     3"
+#         np.testing.assert_allclose(tle.checksum(l2), 3)
 
 
 
