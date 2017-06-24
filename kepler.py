@@ -251,9 +251,9 @@ def kepler_eq_E(M_in,ecc_in):
                     count= 0
                     nu = M
                     E = M
-
+        
         E_out.append(E)
-        nu_out.append(nu)
+        nu_out.append(attitude.normalize(nu, 0, 2*np.pi))
         count_out.append(count)
 
     return (np.squeeze(E_out), np.squeeze(nu_out), np.squeeze(count_out))
