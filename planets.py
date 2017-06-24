@@ -185,24 +185,24 @@ def planet_coe(JD_curr, planet_flag):
     # compute the current elements at this JD
     a = a0 + adot * T
     ecc = e0 + edot * T
-    inc = np.deg2rad(inc0 + incdot * T)
-    L = np.deg2rad(meanL0 + meanLdot * T)
-    lonperi = np.deg2rad(lonperi0 + lonperidot * T)
-    raan = np.deg2rad(raan0 + raandot * T)
+    inc = inc0 + incdot * T
+    L = meanL0 + meanLdot * T
+    lonperi = lonperi0 + lonperidot * T
+    raan = raan0 + raandot * T
 
     # compute argp and M/v to complete the element set
-    argp = np.deg2rad(lonperi - raan)
-    M = np.deg2rad(L - lonperi + b * T**2 + c * np.cos(f * T) + s * np.sin(f * T))
+    argp = lonperi - raan
+    M = L - lonperi + b * T**2 + c * np.cos(f * T) + s * np.sin(f * T)
 
-    M = attitude.normalize(M, -np.pi, np.pi)
+    M = attitude.normalize(M, -180, 180)
     # solve kepler's equation to compute E and v
-    E, nu, count = kepler.kepler_eq_E(M, ecc)
-
+    E, nu, count = kepler.kepler_eq_E(np.deg2rad(M), ecc)
+    
     # package into a vector and output
     p = a * (1 - ecc**2)
     
-    coe = COE(p=p, ecc=ecc, inc=inc, raan=raan,
-           argp=argp, nu=attitude.normalize(nu.item(), 0, 2 * np.pi))
+    coe = COE(p=p, ecc=ecc, inc=np.deg2rad(inc), raan=np.deg2rad(raan),
+           argp=attitude.normalize(np.deg2rad(argp), 0, 2*np.pi), nu=nu)
 
     # convert to position and velocity vectors in J2000 ecliptic and J2000
     # Earth equatorial (ECI) reference frame
