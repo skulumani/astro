@@ -55,14 +55,13 @@ def coe2rv(p_in, ecc_in, inc_in, raan_in, arg_p_in, nu_in, mu):
 
     tol = 1e-9
     # check if array inputs
-    if not hasattr(p_in, '__iter__'):    
-        (p_in, ecc_in, inc_in, raan_in, arg_p_in, nu_in) = (
-                np.array([p_in]), 
-                np.array([ecc_in]),
-                np.array([inc_in]), 
-                np.array([raan_in]), 
-                np.array([arg_p_in]), 
-                np.array([nu_in]))
+    if not hasattr(p_in, "__iter__"):
+        p_in = np.asarray([p_in], dtype=np.float)
+        ecc_in = np.asarray([ecc_in], dtype=np.float)
+        inc_in = np.asarray([inc_in], dtype=np.float)
+        raan_in = np.asarray([raan_in], dtype=np.float)
+        arg_p_in = np.asarray([arg_p_in], dtype=np.float)
+        nu_in = np.asarray([nu_in], dtype=np.float)
     # make sure all inputs are the same size
     if not (p_in.shape == ecc_in.shape == inc_in.shape == raan_in.shape ==
             arg_p_in.shape == nu_in.shape):
@@ -166,9 +165,11 @@ def kepler_eq_E(M_in,ecc_in):
     E_out = []
     nu_out = []
     count_out = []
-    
+
     if not hasattr(M_in, "__iter__"):
         M_in = [M_in]
+
+    if not hasattr(ecc_in, "__iter__"):
         ecc_in = [ecc_in]
 
     for M, ecc in zip(M_in, ecc_in):

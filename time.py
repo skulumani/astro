@@ -257,7 +257,7 @@ def gstlst(jd, site_lon):
     gst = (gst % 86400) * sec2deg
 
     gst = attitude.normalize(gst * deg2rad, 0, 2 * np.pi)
-    lst = attitude.normalize(gst + site_lon, 0, 2 * np.pi)
+    lst = attitude.normalize(gst[0] + site_lon, 0, 2 * np.pi)
 
     return gst[0], lst[0]
 
