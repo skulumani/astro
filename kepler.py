@@ -80,7 +80,7 @@ def coe2rv(p_in, ecc_in, inc_in, raan_in, arg_p_in, nu_in, mu):
     v_ijk_out = []
 
     for p, ecc, inc, raan, arg_p, nu in zip(p_in, ecc_in, inc_in, raan_in,
-            arg_p_in, nu_in):
+                                            arg_p_in, nu_in):
         # check eccentricity for special cases
         if (ecc < tol):
             # circular equatorial
@@ -188,9 +188,9 @@ def kepler_eq_E(M_in, ecc_in):
 
             else:
                 if ecc < 3.6 and np.absolute(M) > np.pi:
-                    E_0 = M - np.sign(M) * ecc;
+                    E_0 = M - np.sign(M) * ecc
                 else:
-                    E_0 = M / (ecc - 1.0);
+                    E_0 = M / (ecc - 1.0)
 
             # netwon's method iteration to find hyperbolic anomaly
             count = 1
@@ -205,9 +205,9 @@ def kepler_eq_E(M_in, ecc_in):
             E = E_0
             # find true anomaly
             sinv = -(np.sqrt(ecc * ecc - 1.0) * np.sinh(E_1)) / \
-                     (1.0 - ecc * np.cosh(E_1))
+                (1.0 - ecc * np.cosh(E_1))
             cosv = (np.cosh(E_1) - ecc) / (1.0 - ecc * np.cosh(E_1))
-            nu = np.arctan2(sinv, cosv);
+            nu = np.arctan2(sinv, cosv)
         else:
             """
                 PARABOLIC
@@ -236,18 +236,18 @@ def kepler_eq_E(M_in, ecc_in):
                     # newton's method iteration to find eccentric anomaly
                     count = 1
                     E_1 = E_0 + (M - E_0 + ecc * np.sin(E_0)) / \
-                                 (1.0 - ecc * np.cos(E_0))
+                        (1.0 - ecc * np.cos(E_0))
                     while ((np.absolute(E_1 - E_0) > tol) and (count <= max_iter)):
                         count = count + 1
                         E_0 = E_1
                         E_1 = E_0 + (M - E_0 + ecc * np.sin(E_0)) / \
-                                     (1.0 - ecc * np.cos(E_0))
+                            (1.0 - ecc * np.cos(E_0))
 
                     E = E_0
 
                     # find true anomaly
                     sinv = (np.sqrt(1.0 - ecc * ecc) * np.sin(E_1)) / \
-                            (1.0 - ecc * np.cos(E_1))
+                        (1.0 - ecc * np.cos(E_1))
                     cosv = (np.cos(E_1) - ecc) / (1.0 - ecc * np.cos(E_1))
                     nu = np.arctan2(sinv, cosv)
                 else:
@@ -311,7 +311,7 @@ def conic_orbit(p, ecc, inc, raan, arg_p, nu_i, nu_f):
 
     if ecc - 1 > tol:  # hyperbolic
         turn_angle = np.acos(-1.0 / ecc)
-        v = np.linespace(-turn_angle, turn_angle, step);
+        v = np.linespace(-turn_angle, turn_angle, step)
 
         if nu_i > pi:
             nu_i = nu_i - 2 * np.pi
@@ -320,16 +320,16 @@ def conic_orbit(p, ecc, inc, raan, arg_p, nu_i, nu_f):
         rs = p / (1 + ecc * np.cos(nu_i))
 
     elif np.absolute(ecc - 1) < tol:  # parabolic
-        v = np.linspace(-np.pi, np.pi, step);
+        v = np.linspace(-np.pi, np.pi, step)
         if nu_i > np.pi:
             nu_i = nu_i - 2 * np.pi
 
-        r = p / 2 * (1 + np.tan(v / 2)**2);
-        rs = p / 2 * (1 + np.tan(nu_i / 2)**2);
+        r = p / 2 * (1 + np.tan(v / 2)**2)
+        rs = p / 2 * (1 + np.tan(nu_i / 2)**2)
     else:
         # conic equation for elliptical orbit
-        r = p / (1 + ecc * np.cos(v));
-        rs = p / (1 + ecc * np.cos(nu_i));
+        r = p / (1 + ecc * np.cos(v))
+        rs = p / (1 + ecc * np.cos(nu_i))
 
     x = r * np.cos(v)
     y = r * np.sin(v)
@@ -340,19 +340,19 @@ def conic_orbit(p, ecc, inc, raan, arg_p, nu_i, nu_f):
     zs = 0
     # rotate orbit plane to correct orientation
 
-     # M_rot = [cos(raan) * cos(arg_p) - sin(raan) * cos(inc) * sin(arg_p) -cos(raan) * sin(arg_p) - sin(raan) * cos(inc) * cos(arg_p) sin(raan) * sin(inc);
-     #         sin(raan) * cos(arg_p) + cos(raan) * cos(inc) * sin(arg_p) -sin(raan) * sin(arg_p) + cos(raan) * cos(inc) * cos(arg_p) -cos(raan) * sin(inc);
-     #         sin(inc) * sin(arg_p) sin(inc) * cos(arg_p) cos(inc);];
+    # M_rot = [cos(raan) * cos(arg_p) - sin(raan) * cos(inc) * sin(arg_p) -cos(raan) * sin(arg_p) - sin(raan) * cos(inc) * cos(arg_p) sin(raan) * sin(inc);
+    #         sin(raan) * cos(arg_p) + cos(raan) * cos(inc) * sin(arg_p) -sin(raan) * sin(arg_p) + cos(raan) * cos(inc) * cos(arg_p) -cos(raan) * sin(inc);
+    #         sin(inc) * sin(arg_p) sin(inc) * cos(arg_p) cos(inc);];
     dcm_pqw2eci = np.dot(
-        np.dot(attitude.ROT3(-raan), attitude.ROT1(-inc)), attitude.ROT3(-arg_p));
+        np.dot(attitude.ROT3(-raan), attitude.ROT1(-inc)), attitude.ROT3(-arg_p))
 
-    orbit_plane = np.dot(dcm_pqw2eci, np.array([x, y, z]));
+    orbit_plane = np.dot(dcm_pqw2eci, np.array([x, y, z]))
 
     x = orbit_plane[0, :]
     y = orbit_plane[1, :]
     z = orbit_plane[2, :]
 
-    sat_pos = np.dot(dcm_pqw2eci, np.array([xs, ys, zs]));
+    sat_pos = np.dot(dcm_pqw2eci, np.array([xs, ys, zs]))
 
     xs = sat_pos[0]
     ys = sat_pos[1]
@@ -398,11 +398,11 @@ def nu2anom(nu, ecc):
     small = 1e-9
 
     if ecc <= small:  # circular
-         E = nu
-         M = nu
+        E = nu
+        M = nu
     elif small < ecc and ecc <= 1 - small:  # elliptical
         sine = (np.sqrt(1.0 - ecc * ecc) * np.sin(nu)) / \
-                (1.0 + ecc * np.cos(nu))
+            (1.0 + ecc * np.cos(nu))
         cose = (ecc + np.cos(nu)) / (1.0 + ecc * np.cos(nu))
 
         E = np.arctan2(sine, cose)
@@ -420,14 +420,14 @@ def nu2anom(nu, ecc):
         # E = revcheck(E);
         # M = revcheck(M);
     elif ecc > 1 + small:  # hyperbolic
-            sine = (np.sqrt(ecc**2 - 1) * np.sin(nu)) / \
-                    (1.0 + ecc * np.cos(nu))
-            H = np.arcsinh(sine)
-            E = H
-            M = ecc * np.sinh(H) - H
+        sine = (np.sqrt(ecc**2 - 1) * np.sin(nu)) / \
+            (1.0 + ecc * np.cos(nu))
+        H = np.arcsinh(sine)
+        E = H
+        M = ecc * np.sinh(H) - H
 
-            # E = revcheck(E);
-            # M = revcheck(M);
+        # E = revcheck(E);
+        # M = revcheck(M);
     else:
         print("Eccentricity is out of bounds 0 < ecc < inf")
 
