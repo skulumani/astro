@@ -463,6 +463,55 @@ def tof_delta_t(p, ecc, mu, nu_0, delta_t):
     return (E_f, M_f, nu_f)
 
 
+def fpa_solve(nu, ecc):
+    """Calculate flight path angle
+
+    Inputs:
+        - nu - true anomaly of orbit -2*pi < nu < 2*pi
+        - ecc - eccentricity of orbit 0 < ecc < inf
+
+    Outputs:
+        - fpa - flight path angle in rad -pi < fpa < pi
+
+    Dependencies:
+        - none
+
+    Author:
+        - Shankar Kulumani 15 Sept 2012
+            - created for AAE532 PS4
+        - Shankar Kulumani 29 Sept 2012
+            - modified for diferennt orbit types
+
+    References
+        - AAE532 Notes
+        - Vallado 3rd Ed pg 113
+    """
+    tol = 1e-9
+
+    if ecc - 1 > tol:  # hyperbolic
+        # convert nu to eccentric anomaly
+        H, _ = nu2anom(nu, ecc)
+        sin_fpa = ecc * np.sinh(H) / np.sqrt(ecc**2 * np.cosh(H)**2 - 1)
+        cos_fpa = np.sqrt((ecc**2 - 1) / (ecc**2 * np.cosh(H)**2 - 1))
+        fpa = np.atan2(sin_fpa, cos_fpa)  # rad
+    else:
+        if np.absolute(ecc - 1) < tol:  # parabolic
+            fpa = nu / 2
+        else:
+            if ecc > tol:  # elliptical
+                sin_fpa = ecc * np.sin(nu) / np.sqrt(1 +
+                                                     2 * ecc * np.cos(nu) + ecc**2)
+                cos_fpa = (1 + ecc * np.cos(nu)) / \
+                    np.sqrt(1 + 2 * ecc * np.cos(nu) + ecc**2)
+
+                # atan2 allows for quadrant check
+                fpa = np.atan2(sin_fpa, cos_fpa)  # rad
+            else:  # circular
+                fpa = 0
+
+    return fpa
+
+
 def elp_orbit_el(p, ecc, inc, raan, arg_p, nu, mu):
     """Elliptical Orbit Characteristics/Elements
 
