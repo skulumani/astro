@@ -177,3 +177,24 @@ def test_tof_delta_t():
     # make sure you get back to the same spot
 
     
+
+def test_fpa_solve_circular():
+    fpa_actual = kepler.fpa_solve(0, 0)
+    fpa_expected = 0 
+    np.testing.assert_allclose(fpa_actual, fpa_expected)
+
+def test_fpa_solve_elliptical():
+    fpa_actual = kepler.fpa_solve(0, 0.5)
+    fpa_expected = 0
+    np.testing.assert_allclose(fpa_actual, fpa_expected)
+
+def test_fpa_solve_parabolic():
+    fpa_actual = kepler.fpa_solve(0, 1)
+    fpa_expected = 0
+    np.testing.assert_allclose(fpa_actual, fpa_expected)
+
+def test_fpa_solve_hyperbolic():
+    fpa_actual = kepler.fpa_solve(0, 2)
+    fpa_expected = 0
+    np.testing.assert_allclose(fpa_actual, fpa_expected)
+

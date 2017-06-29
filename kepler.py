@@ -493,7 +493,7 @@ def fpa_solve(nu, ecc):
         H, _ = nu2anom(nu, ecc)
         sin_fpa = ecc * np.sinh(H) / np.sqrt(ecc**2 * np.cosh(H)**2 - 1)
         cos_fpa = np.sqrt((ecc**2 - 1) / (ecc**2 * np.cosh(H)**2 - 1))
-        fpa = np.atan2(sin_fpa, cos_fpa)  # rad
+        fpa = np.arctan2(sin_fpa, cos_fpa)  # rad
     else:
         if np.absolute(ecc - 1) < tol:  # parabolic
             fpa = nu / 2
@@ -505,7 +505,7 @@ def fpa_solve(nu, ecc):
                     np.sqrt(1 + 2 * ecc * np.cos(nu) + ecc**2)
 
                 # atan2 allows for quadrant check
-                fpa = np.atan2(sin_fpa, cos_fpa)  # rad
+                fpa = np.arctan2(sin_fpa, cos_fpa)  # rad
             else:  # circular
                 fpa = 0
 
