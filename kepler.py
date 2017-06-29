@@ -397,66 +397,165 @@ def nu2anom(nu, ecc):
 
     small = 1e-9
 
-    if ecc <= small: # circular
+    if ecc <= small:  # circular
          E = nu
          M = nu
-    elif small < ecc and ecc <= 1-small: # elliptical
-        sine = ( np.sqrt( 1.0 -ecc*ecc ) * np.sin(nu) ) / ( 1.0 +ecc*np.cos(nu) )
-        cose = ( ecc + np.cos(nu) ) / ( 1.0  + ecc*np.cos(nu) )
-        
-        E   = np.arctan2( sine,cose )
-        M   = E - ecc*np.sin(E)
-        
-        E = attitude.normalize(E,0,2*np.pi)
-        M = attitude.normalize(M,0,2*np.pi)
+    elif small < ecc and ecc <= 1 - small:  # elliptical
+        sine = (np.sqrt(1.0 - ecc * ecc) * np.sin(nu)) / \
+                (1.0 + ecc * np.cos(nu))
+        cose = (ecc + np.cos(nu)) / (1.0 + ecc * np.cos(nu))
 
-    elif np.absolute(ecc-1) <= small: # parabolic
-        B = np.tan(nu/2)
+        E = np.arctan2(sine, cose)
+        M = E - ecc * np.sin(E)
+
+        E = attitude.normalize(E, 0, 2 * np.pi)
+        M = attitude.normalize(M, 0, 2 * np.pi)
+
+    elif np.absolute(ecc - 1) <= small:  # parabolic
+        B = np.tan(nu / 2)
 
         E = B
-        M = B + 1.0/3*B**3
+        M = B + 1.0 / 3 * B**3
 
         # E = revcheck(E);
         # M = revcheck(M);
-    elif ecc > 1+small: # hyperbolic
-            sine = ( np.sqrt(ecc**2-1) * np.sin(nu) ) / ( 1.0  + ecc*np.cos(nu) )
-            H = np.arcsinh( sine )
+    elif ecc > 1 + small:  # hyperbolic
+            sine = (np.sqrt(ecc**2 - 1) * np.sin(nu)) / \
+                    (1.0 + ecc * np.cos(nu))
+            H = np.arcsinh(sine)
             E = H
-            M = ecc*np.sinh(H) - H
-            
+            M = ecc * np.sinh(H) - H
+
             # E = revcheck(E);
             # M = revcheck(M);
     else:
         print("Eccentricity is out of bounds 0 < ecc < inf")
-    
+
     return (E, M)
 
-def tof_delta_t(p,ecc,mu,nu_0,delta_t):
+
+def tof_delta_t(p, ecc, mu, nu_0, delta_t):
     """
         Propogate a COE into the future
     """
 
     tol = 1e-9
     # calculate initial eccentric anomaly and mean anomaly
-    E_0, M_0 = nu2anom(nu_0,ecc)
+    E_0, M_0 = nu2anom(nu_0, ecc)
 
     # check eccentricity
-    if np.absolute(ecc-1) < tol: # parabolic
-        n = 2*np.sqrt(mu/p**3)
+    if np.absolute(ecc - 1) < tol:  # parabolic
+        n = 2 * np.sqrt(mu / p**3)
     else:
-        a = p/(1-ecc**2)
+        a = p / (1 - ecc**2)
         # calculate mean motion
-        n = np.sqrt(mu/a**3)
-    
+        n = np.sqrt(mu / a**3)
 
     # calculate mean anomaly after delta t
 
     M_f = M_0 + n * delta_t
-    k = np.floor(M_f/(2*np.pi))
-    M_f = M_f-2*np.pi*k
+    k = np.floor(M_f / (2 * np.pi))
+    M_f = M_f - 2 * np.pi * k
     # calculate eccentric anomaly from mean anomaly (newton iteration)
 
-    E_f,nu_f,count = kepler_eq_E(M_f,ecc)
+    E_f, nu_f, count = kepler_eq_E(M_f, ecc)
 
     return (E_f, M_f, nu_f)
 
+
+def elp_orbit_el(p, ecc, inc, raan, arg_p, nu, mu):
+    """Elliptical Orbit Characteristics/Elements
+
+    Purpose:
+        - Calculates elliptical orbital parameters using conic equations
+
+    Inputs:
+        - p - semi-major axis (km)
+        - ecc - eccentricity
+        - raan - right acsension of the ascending node (rad) 0 < raan <
+        2*pi
+        - inc - inclination (rad) 0 < inc < pi
+        - arg_p - argument of periapsis (rad) 0 < arg_p < 2*pi
+        - nu - true anomaly (rad) 0 < nu < 2*pi
+        - mu - gravitational parameter of central body (km^3/sec^2).
+        - arglat - argument of latitude(CI) rad 0 <arglat < 2*pi
+        - truelon - true longitude (CE) rad 0 < truelon < 2*pi
+        - lonper - longitude of periapsis rad 0 < lonper < 2*pi
+
+    Outputs:
+        - a - semi-major axis in km
+        - h - magnitude of angular momentum vector in km^2/sec
+        - period - period of orbit in seconds
+        - sme - specific mechanical energy of orbit in km^2/sec^2
+        - r_per - radius of periapsis in km
+        - r_apo - radius of apoapsis in km
+        - r - current radius in km
+        - v - current velocity in km/sec
+        - v_circ - equivalent circular orbit velocity at current radius in
+        km/sec
+        - v_esc - escape speed at current radius km/sec
+        - fpa - flight path angle in rad 0 < fpa < pi/2
+        - E - eccentric anomaly in rad 0 < E < 2*pi
+        - M - mean anomaly in rad 0 < M < 2*pi
+        - n - mean motion in 1/sec
+
+    Dependencies:
+        - fpa_solve - find flight path angle
+        - ecc_anomaly - find eccentric and mean anomaly given true
+        anomaly
+        - aae532_constants - AAE532 class constants
+        - ROT3 - simple rotation about third axis
+        - use orbit_el as driver function to print results to screen
+
+    Author:
+        - Shankar Kulumani 16 Sept 2012
+            - used code from AAE532 PS4
+        - Shankar Kulumani 19 Sept 2012
+            - added escape speed
+            - added print capability
+            - added constants
+            - added mean motion
+            - added lvlh and pqw vectors
+        - Shankar Kulumani 28 June 2017
+            - Convert to Python for MAE3145 class
+
+    References
+        - AAE532
+        - Any astrodynamics book/internet
+    """
+    # calculate semi-major axis
+    a = p / (1 - np.ecc**2)  # km
+    # angular momentum scalar
+    h = np.sqrt(p * mu)  # km^2/sec
+    # period of orbit
+    period = 2 * np.pi * np.sqrt(a**3 / mu)  # sec
+    # specific mechanical energy
+    sme = -mu / (2 * a)  # km^2/sec^2
+
+    fpa = fpa_solve(nu, ecc)  # radians
+
+    # radius of periapsis and apoapsis
+    r_per = a * (1 - ecc)  # km
+    r_apo = a * (1 + ecc)  # km
+
+    # convert to pqw (perifocal frame)
+    r_ijk, v_ijk, r_pqw, v_pqw = coe2rv(p, ecc, inc, raan, arg_p, nu, mu)
+
+    r = np.linalg.norm(r_pqw)
+    v = np.linalg.norm(v_pqw)
+
+    # convert position and velocity to lvlh frame
+    r_lvlh = np.array([r, 0, 0])  # [r_hat theta_hat h_hat] km
+    # [r_hat theta_hat h_hat] km/sec
+    v_lvlh = v * np.array([np.sin(fpa), np.cos(fpa), 0])
+
+    v_circ = np.sqrt(mu / r)
+
+    v_esc = np.sqrt(2) * v_circ
+
+    E, M = nu2anom(nu, ecc)  # rad
+
+    n = np.sqrt(mu / a**3)  # mean motion in 1/sec
+
+    return (a, h, period, sme, fpa, r_per, r_apo, r_ijk, v_ijk, r_pqw, v_pqw,
+            r_lvlh, v_lvlh, r, v, v_circ, v_esc, E, M, n)
