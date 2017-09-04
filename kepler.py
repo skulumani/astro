@@ -310,17 +310,17 @@ def conic_orbit(p, ecc, inc, raan, arg_p, nu_i, nu_f):
         v = np.linspace(nu_i, nu_f + 2 * np.pi, step)
 
     if ecc - 1 > tol:  # hyperbolic
-        turn_angle = np.acos(-1.0 / ecc)
-        v = np.linspace(-turn_angle, turn_angle, step)
+        turn_angle = np.arccos(-1.0 / ecc)
+        v = np.linspace(-turn_angle+0.01, turn_angle-0.01, step)
 
-        if nu_i > pi:
+        if nu_i > np.pi:
             nu_i = nu_i - 2 * np.pi
 
         r = p / (1 + ecc * np.cos(v))
         rs = p / (1 + ecc * np.cos(nu_i))
 
     elif np.absolute(ecc - 1) < tol:  # parabolic
-        v = np.linspace(-np.pi, np.pi, step)
+        v = np.linspace(-np.pi+0.1, np.pi-0.1, step)
         if nu_i > np.pi:
             nu_i = nu_i - 2 * np.pi
 

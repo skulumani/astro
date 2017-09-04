@@ -222,3 +222,45 @@ class TestConicOrbitEquatorial():
     def test_circular_orbit(self):
         orbit = np.stack((self.x, self.y, self.z), axis=1)
         np.testing.assert_allclose(np.linalg.norm(orbit, axis=1), self.p)
+
+class TestConicOrbitHyperbolic():
+
+    p = 10000 # km
+    ecc = 2.0
+    inc = 0.0
+    raan = 0.0
+    arg_p = 0.0
+    nu_i = 0.0
+    nu_f = 0.0 
+
+    x, y, z, xs, ys, zs = kepler.conic_orbit(p, ecc, inc, raan, arg_p, nu_i, nu_f)
+    
+    def test_x_axis(self):
+        np.testing.assert_allclose(self.xs, self.p/(1-self.ecc**2)*(1-self.ecc))
+
+    def test_y_axis(self):
+        np.testing.assert_allclose(self.ys, 0)
+
+    def test_z_axis(self):
+        np.testing.assert_allclose(self.zs, 0)
+
+class TestConicOrbitParabolic():
+
+    p = 10000 # km
+    ecc = 1.0
+    inc = 0.0
+    raan = 0.0
+    arg_p = 0.0
+    nu_i = 0.0
+    nu_f = 0.0 
+
+    x, y, z, xs, ys, zs = kepler.conic_orbit(p, ecc, inc, raan, arg_p, nu_i, nu_f)
+    
+    def test_x_axis(self):
+        np.testing.assert_allclose(self.xs, self.p/2)
+
+    def test_y_axis(self):
+        np.testing.assert_allclose(self.ys, 0)
+
+    def test_z_axis(self):
+        np.testing.assert_allclose(self.zs, 0)
