@@ -198,3 +198,27 @@ def test_fpa_solve_hyperbolic():
     fpa_expected = 0
     np.testing.assert_allclose(fpa_actual, fpa_expected)
 
+class TestConicOrbitEquatorial():
+
+    p = 7000 # km
+    ecc = 0.0
+    inc = 0.0
+    raan = 0.0
+    arg_p = 0.0
+    nu_i = 0.0
+    nu_f = 0.0 
+
+    x, y, z, xs, ys, zs = kepler.conic_orbit(p, ecc, inc, raan, arg_p, nu_i, nu_f)
+    
+    def test_x_axis(self):
+        np.testing.assert_allclose(self.xs, self.p)
+
+    def test_y_axis(self):
+        np.testing.assert_allclose(self.ys, 0)
+
+    def test_z_axis(self):
+        np.testing.assert_allclose(self.zs, 0)
+
+    def test_circular_orbit(self):
+        orbit = np.stack((self.x, self.y, self.z), axis=1)
+        np.testing.assert_allclose(np.linalg.norm(orbit, axis=1), self.p)

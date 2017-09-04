@@ -311,7 +311,7 @@ def conic_orbit(p, ecc, inc, raan, arg_p, nu_i, nu_f):
 
     if ecc - 1 > tol:  # hyperbolic
         turn_angle = np.acos(-1.0 / ecc)
-        v = np.linespace(-turn_angle, turn_angle, step)
+        v = np.linspace(-turn_angle, turn_angle, step)
 
         if nu_i > pi:
             nu_i = nu_i - 2 * np.pi
@@ -343,8 +343,7 @@ def conic_orbit(p, ecc, inc, raan, arg_p, nu_i, nu_f):
     # M_rot = [cos(raan) * cos(arg_p) - sin(raan) * cos(inc) * sin(arg_p) -cos(raan) * sin(arg_p) - sin(raan) * cos(inc) * cos(arg_p) sin(raan) * sin(inc);
     #         sin(raan) * cos(arg_p) + cos(raan) * cos(inc) * sin(arg_p) -sin(raan) * sin(arg_p) + cos(raan) * cos(inc) * cos(arg_p) -cos(raan) * sin(inc);
     #         sin(inc) * sin(arg_p) sin(inc) * cos(arg_p) cos(inc);];
-    dcm_pqw2eci = np.dot(
-        np.dot(attitude.ROT3(-raan), attitude.ROT1(-inc)), attitude.ROT3(-arg_p))
+    dcm_pqw2eci = attitude.rot3(-raan).dot(attitude.rot1(-inc)).dot(attitude.rot3(-arg_p))
 
     orbit_plane = np.dot(dcm_pqw2eci, np.array([x, y, z]))
 
