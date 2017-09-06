@@ -25,6 +25,55 @@ def test_coe2rv_equatorial_circular():
     np.testing.assert_array_almost_equal(V_pqw_true,V_pqw)
     np.testing.assert_array_almost_equal(V_pqw_true,V_pqw)
 
+class Testrv2coeEquatorialCircular():
+
+    p_true = 6378.137 # km
+    ecc_true = 0.0
+    inc_true = 0.0
+    raan_true = 0.0
+    arg_p_true = 0.0
+    nu_true = 0.0
+    mu = 398600.5 # km^3 /sec^2
+
+    R_ijk_true = np.array([6378.137,0,0])
+    V_ijk_true = np.sqrt(mu/p_true) * np.array([0,1,0])
+    
+    p, a, ecc, inc, raan, arg_p, nu, m, arglat, truelon, lonper = kepler.rv2coe(R_ijk_true, V_ijk_true, mu)
+    
+    def test_p(self):
+        np.testing.assert_allclose(self.p, self.p_true)
+    
+    def test_a(self):
+        np.testing.assert_allclose(self.a, self.p_true / (1 - self.ecc_true))
+
+    def test_ecc(self):
+        np.testing.assert_allclose(self.ecc, self.ecc_true)
+    
+    def test_inc(self):
+        np.testing.assert_allclose(self.inc, self.inc_true)
+
+    def test_raan(self):
+        np.testing.assert_allclose(self.raan, self.raan_true)
+
+    def test_arg_p(self):
+        np.testing.assert_allclose(self.arg_p, self.arg_p_true)
+    
+    def test_nu(self):
+        np.testing.assert_allclose(self.nu, self.nu_true)
+
+    def test_m(self):
+        E_true, M_true = kepler.nu2anom(self.nu, self.ecc)
+        np.testing.assert_allclose(self.m, M_true)
+
+    def test_arglat(self):
+        np.testing.assert_allclose(self.arglat, self.nu_true + self.arg_p_true)
+
+    def test_truelon(self):
+        np.testing.assert_allclose(self.truelon, self.nu_true + self.raan_true + self.arg_p_true)
+
+    def test_lonper(self):
+        np.testing.assert_allclose(self.lonper, self.arg_p_true + self.raan_true)
+
 def test_coe2rv_polar_circular():
     """Test COE to RV for polar circular orbit around Earth"""
 
@@ -43,6 +92,55 @@ def test_coe2rv_polar_circular():
 
     np.testing.assert_array_almost_equal(R_ijk_true,R_ijk)
     np.testing.assert_array_almost_equal(V_ijk_true,V_ijk)
+
+class Testrv2coePolarCircular():
+
+    p_true = 6378.137 # km
+    ecc_true = 0.0
+    inc_true = np.pi / 2
+    raan_true = 0.0
+    arg_p_true = 0.0
+    nu_true = 0.0
+    mu = 398600.5 # km^3 /sec^2
+
+    R_ijk_true = np.array([6378.137,0,0])
+    V_ijk_true = np.sqrt(mu/p_true) * np.array([0,0,1])
+    
+    p, a, ecc, inc, raan, arg_p, nu, m, arglat, truelon, lonper = kepler.rv2coe(R_ijk_true, V_ijk_true, mu)
+    
+    def test_p(self):
+        np.testing.assert_allclose(self.p, self.p_true)
+    
+    def test_a(self):
+        np.testing.assert_allclose(self.a, self.p_true / (1 - self.ecc_true))
+
+    def test_ecc(self):
+        np.testing.assert_allclose(self.ecc, self.ecc_true)
+    
+    def test_inc(self):
+        np.testing.assert_allclose(self.inc, self.inc_true)
+
+    def test_raan(self):
+        np.testing.assert_allclose(self.raan, self.raan_true)
+
+    def test_arg_p(self):
+        np.testing.assert_allclose(self.arg_p, self.arg_p_true)
+    
+    def test_nu(self):
+        np.testing.assert_allclose(self.nu, self.nu_true)
+
+    def test_m(self):
+        E_true, M_true = kepler.nu2anom(self.nu, self.ecc)
+        np.testing.assert_allclose(self.m, M_true)
+
+    def test_arglat(self):
+        np.testing.assert_allclose(self.arglat, self.nu_true + self.arg_p_true)
+
+    def test_truelon(self):
+        np.testing.assert_allclose(self.truelon, self.nu_true + self.raan_true + self.arg_p_true)
+
+    def test_lonper(self):
+        np.testing.assert_allclose(self.lonper, self.arg_p_true + self.raan_true)
 
 def test_coe2rv_equatorial_circular_quarter():
     """Test COE to RV for equatorial circular orbit around Earth"""
@@ -63,6 +161,57 @@ def test_coe2rv_equatorial_circular_quarter():
     np.testing.assert_array_almost_equal(R_ijk_true,R_ijk)
     np.testing.assert_array_almost_equal(V_ijk_true,V_ijk)    
 
+class Testrv2coeEquatorialCircularQuarer():
+
+    p_true = 6378.137 # km
+    ecc_true = 0.0
+    inc_true = 0.0
+    raan_true = 0.0
+    arg_p_true = 0.0
+    nu_true = np.pi /2
+    mu = 398600.5 # km^3 /sec^2
+
+    R_ijk_true = np.array([0.0, 6378.137,0])
+    V_ijk_true = np.sqrt(mu/p_true) * np.array([-1,0,0])
+    
+    p, a, ecc, inc, raan, arg_p, nu, m, arglat, truelon, lonper = kepler.rv2coe(R_ijk_true, V_ijk_true, mu)
+    
+    def test_p(self):
+        np.testing.assert_allclose(self.p, self.p_true)
+    
+    def test_a(self):
+        np.testing.assert_allclose(self.a, self.p_true / (1 - self.ecc_true))
+
+    def test_ecc(self):
+        np.testing.assert_allclose(self.ecc, self.ecc_true)
+    
+    def test_inc(self):
+        np.testing.assert_allclose(self.inc, self.inc_true)
+
+    def test_raan(self):
+        np.testing.assert_allclose(self.raan, self.raan_true)
+
+    def test_arg_p(self):
+        np.testing.assert_allclose(self.arg_p, self.arg_p_true)
+    
+    def test_nu(self):
+        np.testing.assert_allclose(self.nu, self.nu_true)
+
+    def test_m(self):
+        E_true, M_true = kepler.nu2anom(self.nu, self.ecc)
+        np.testing.assert_allclose(self.m, M_true)
+
+    def test_arglat(self):
+        # argument of latitude isn't used for this case so it goes to zero
+        # np.testing.assert_allclose(self.arglat, self.nu_true + self.arg_p_true)
+        pass
+
+    def test_truelon(self):
+        np.testing.assert_allclose(self.truelon, self.nu_true + self.raan_true + self.arg_p_true)
+
+    def test_lonper(self):
+        np.testing.assert_allclose(self.lonper, self.arg_p_true + self.raan_true)
+
 def test_coe2rv_equatorial_circular_half():
     """Test COE to RV for equatorial circular orbit around Earth"""
 
@@ -82,8 +231,57 @@ def test_coe2rv_equatorial_circular_half():
     np.testing.assert_array_almost_equal(R_ijk_true,R_ijk)
     np.testing.assert_array_almost_equal(V_ijk_true,V_ijk)
 
-# define an Earth GEO stationary orbit
 
+class Testrv2coeEquatorialCircularHalf():
+
+    p_true = 6378.137 # km
+    ecc_true = 0.0
+    inc_true = 0.0
+    raan_true = 0.0
+    arg_p_true = 0.0
+    nu_true = np.pi
+    mu = 398600.5 # km^3 /sec^2
+
+    R_ijk_true = np.array([-p_true, 0,0])
+    V_ijk_true = np.sqrt(mu/p_true) * np.array([0,-1,0])
+    
+    p, a, ecc, inc, raan, arg_p, nu, m, arglat, truelon, lonper = kepler.rv2coe(R_ijk_true, V_ijk_true, mu)
+    
+    def test_p(self):
+        np.testing.assert_allclose(self.p, self.p_true)
+    
+    def test_a(self):
+        np.testing.assert_allclose(self.a, self.p_true / (1 - self.ecc_true))
+
+    def test_ecc(self):
+        np.testing.assert_allclose(self.ecc, self.ecc_true)
+    
+    def test_inc(self):
+        np.testing.assert_allclose(self.inc, self.inc_true)
+
+    def test_raan(self):
+        np.testing.assert_allclose(self.raan, self.raan_true)
+
+    def test_arg_p(self):
+        np.testing.assert_allclose(self.arg_p, self.arg_p_true)
+    
+    def test_nu(self):
+        np.testing.assert_allclose(self.nu, self.nu_true)
+
+    def test_m(self):
+        E_true, M_true = kepler.nu2anom(self.nu, self.ecc)
+        np.testing.assert_allclose(self.m, M_true)
+
+    def test_arglat(self):
+        # argument of latitude isn't used for this case so it goes to zero
+        # np.testing.assert_allclose(self.arglat, self.nu_true + self.arg_p_true)
+        pass
+
+    def test_truelon(self):
+        np.testing.assert_allclose(self.truelon, self.nu_true + self.raan_true + self.arg_p_true)
+
+    def test_lonper(self):
+        np.testing.assert_allclose(self.lonper, self.arg_p_true + self.raan_true)
 def test_kepler_eq_E():
     """
         A series of cases run in Matlab and copied here

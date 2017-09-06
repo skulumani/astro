@@ -126,6 +126,194 @@ def coe2rv(p_in, ecc_in, inc_in, raan_in, arg_p_in, nu_in, mu):
             np.squeeze(v_pqw_out))
 
 
+def rv2coe(r, v, mu):
+    """Position and Velocity vectors to classical orbital elements
+
+    Purpose:
+        - Converts inertial position and velocity vectors to orbital
+        elements
+
+            [p,a,ecc,inc,raan,arg_p,nu,m,arglat,truelon,lonper] = rv2coe (r,v, mu)
+
+    Inputs:
+        - r - position vector in inertial frame (km)
+        - v - velocity vector in inertial frame (km/sec)
+        - mu - gravitational parameter of central body (km^3/sec^2)
+
+    Outputs:
+        - p - semi-major axis (km)
+        - ecc - eccentricity
+        - raan - right acsension of the ascending node (rad) 0 < raan <
+        2*pi
+        - inc - inclination (rad) 0 < inc < pi
+        - arg_p - argument of periapsis (rad) 0 < arg_p < 2*pi
+        - nu - true anomaly (rad) 0 < nu < 2*pi
+        - m - mean anomaly in rad
+        - arglat - argument of latitude(CI) rad 0 <arglat < 2*pi
+        - truelon - true longitude (CE) rad 0 < truelon < 2*pi
+        - lonper - longitude of periapsis rad 0 < lonper < 2*pi
+
+    Dependencies:
+        - None
+
+    Author:
+        - Shankar Kulumani 30 Sept 2012
+            - used old USAFA code and AAE532
+        - Shankar Kulumani 5 September 2017
+            - convert to Python for use in MAE3145
+
+    References
+        - AAE532 Notes
+        - Vallado 3rd Edition
+    """
+
+    tol = 1e-9
+
+    # calculate angular moemntum vector and magnitude
+    mag_r = np.linalg.norm(r)
+    mag_v = np.linalg.norm(v)
+
+    rdotv = np.dot(r, v)
+
+    h = np.cross(r, v)
+    mag_h = np.linalg.norm(h)
+
+    h_hat = h / mag_h
+    # find n,e
+    if mag_h > tol:
+        n = np.zeros(3)
+        n[0] = -h[1]
+        n[1] = h[0]
+        n[2] = 0.0
+        
+        with np.errstate(divide='raise'):
+            try:
+                mag_n = np.linalg.norm(n)
+                n_hat = n / mag_n
+            except FloatingPointError:
+                mag_n = 0
+                n_hat = np.zeros(3)
+
+        # eccentricity vector
+        e = ((mag_v**2 - mu / mag_r) * r - rdotv * v) / mu
+
+        ecc = np.linalg.norm(e)
+        mag_e = ecc
+
+        sme = mag_v**2 / 2 - mu / mag_r
+
+        if np.absolute(sme) > tol:
+            a = -mu / (2 * sme)
+        else:
+            a = np.inf
+
+        p = mag_h**2 / mu
+
+        # inclination
+        inc = np.arccos(h[2] / mag_h)
+
+        # determine orbit type
+        orbit_type = 'ei'
+        if ecc < tol:
+            # circular equatorial
+            if inc < tol or np.absolute(inc - np.pi) < tol:
+                orbit_type = 'ce'
+            else:
+                # circular inclined
+                orbit_type = 'ci'
+
+        else:
+            #  elliptical, parabolic, hyperbolic equatorial -
+            if inc < tol or np.absolute(inc - pi) < tol:
+                orbit_type = 'ee'
+
+        # right ascension of the ascending node
+        if mag_n > tol:
+            temp = n[0] / mag_n
+            if np.absolute(temp) > 1.0:
+                temp = np.sign(temp)
+            raan = np.arccos(temp)
+            if n[1] < 0.0:
+                raan = 2 * np.pi - raan
+        else:
+            raan = 0
+
+        # find argument of periapsis
+        if orbit_type == 'ei':
+            arg_p = np.arccos(np.dot(n, e) / (mag_n * mag_e))
+            if e[2] < 0.0:
+                arg_p = 2 * np.pi - arg_p
+        else:
+            arg_p = 0
+
+        # ------------ find true anomaly at epoch - ------------
+        if orbit_type[0] == 'e':
+            nu = np.arccos(np.dot(e, r) / (mag_e * mag_r))
+            if rdotv < 0.0:
+                nu = 2 * pi - nu
+        else:
+            nu = 0
+
+        # special orbit cases
+        # ---- find argument of latitude - circular inclined - ----
+        if orbit_type == 'ci': 
+            arglat = np.arccos(np.dot(n, r) / (mag_n * mag_r))
+            if r[2] < 0.0:
+                arglat = 2 * pi - arglat
+            m = arglat
+            nu = arglat
+        else:
+            arglat = 0
+
+        # -- find longitude of perigee - elliptical equatorial - ---
+        if ecc > tol and orbit_type == 'ee': 
+            temp = e[0] / ecc
+            if np.absolute(temp) > 1.0:
+                temp = np.sign(temp)
+            lonper = np.arccos(temp)
+            if e[1] < 0.0:
+                lonper = 2 * pi - lonper
+            if inc > pi / 2:
+                lonper = 2 * pi - lonper
+
+            arg_p = lonper
+        else:
+            lonper = 0
+
+        # -------- find true longitude - circular equatorial - -----
+        if mag_r > tol and orbit_type == 'ce':
+            temp = r[0] / mag_r
+            if np.absolute(temp) > 1.0:
+                temp = np.sign(temp)
+            truelon = np.arccos(temp)
+            if r[1] < 0.0:
+                truelon = 2 * np.pi - truelon
+            if inc > np.pi / 2:
+                truelon = 2 * np.pi - truelon
+            m = truelon
+
+            nu = truelon
+        else:
+            truelon = 0
+
+        # find mean anomaly
+        if orbit_type[0] == 'e':
+            E, m = nu2anom(nu, ecc)
+    else:
+        p = 0
+        a = 0
+        ecc = 0
+        inc = 0
+        raan = 0
+        arg_p = 0
+        nu = 0
+        m = 0
+        arglat = 0
+        truelon = 0
+        lonper = 0
+
+    return p, a, ecc, inc, raan, arg_p, nu, m, arglat, truelon, lonper
+
 def kepler_eq_E(M_in, ecc_in):
     """
     (E,nu,count) = kepler_eq_E(M,ecc)
