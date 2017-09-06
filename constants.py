@@ -59,8 +59,8 @@ small = 1.0E-6                  # Small number used for tolerance purposes
 undefined = 999999.1
 
 # General constants
-deg2rad = 180.0 / np.pi
-rad2deg = np.pi / 180.0
+deg2rad = np.pi / 180.0
+rad2deg = 180.0 / np.pi
 
 G = 6.673e-20
 au2km = 149597870.0  # km
