@@ -185,7 +185,7 @@ def rv2coe(r, v, mu):
         n[0] = -h[1]
         n[1] = h[0]
         n[2] = 0.0
-        
+
         with np.errstate(divide='raise'):
             try:
                 mag_n = np.linalg.norm(n)
@@ -256,7 +256,7 @@ def rv2coe(r, v, mu):
 
         # special orbit cases
         # ---- find argument of latitude - circular inclined - ----
-        if orbit_type == 'ci': 
+        if orbit_type == 'ci':
             arglat = np.arccos(np.dot(n, r) / (mag_n * mag_r))
             if r[2] < 0.0:
                 arglat = 2 * pi - arglat
@@ -266,7 +266,7 @@ def rv2coe(r, v, mu):
             arglat = 0
 
         # -- find longitude of perigee - elliptical equatorial - ---
-        if ecc > tol and orbit_type == 'ee': 
+        if ecc > tol and orbit_type == 'ee':
             temp = e[0] / ecc
             if np.absolute(temp) > 1.0:
                 temp = np.sign(temp)
@@ -313,6 +313,7 @@ def rv2coe(r, v, mu):
         lonper = 0
 
     return p, a, ecc, inc, raan, arg_p, nu, m, arglat, truelon, lonper
+
 
 def kepler_eq_E(M_in, ecc_in):
     """
