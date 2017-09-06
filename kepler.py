@@ -838,3 +838,73 @@ def par_orbit_el(p, ecc, inc, raan, arg_p, nu, mu):
 
     return (a, v_inf, sme, h, fpa, r_per, r_ijk, v_ijk,
             r_pqw, v_pqw, r_lvlh, v_lvlh, r, v, v_circ, v_esc, B, M_B, n)
+
+
+def hyp_orbit_el(p, ecc, inc, raan, arg_p, nu, mu):
+    """Hyperbolic Orbit Characteristics/Elements
+
+    Purpose: 
+        - calculates orbital parameters for a hyperbolic orbit
+
+    [a, v_inf, b, sme, flyby, nu_inf, h, fpa, r_per, r_ijk, v_ijk, 
+    r_pqw, v_pqw, r_lvlh, v_lvlh, r, v, v_circ, v_esc, H, M_H, n] = hyp_orbit_el(
+    p, ecc, inc, raan, arg_p, nu, mu)
+
+    Inputs: 
+        - 
+
+    Outputs: 
+        - List/describe outputs of function
+
+    Dependencies: 
+        - coe2rv.m - convert COE to position and velocity vector
+
+    Author: 
+        - Shankar Kulumani 29 Sept 2012
+            - modified outputs
+        - Shankar Kulumani 5 September 2017
+            - convert to Python for MAE3145
+
+    References
+        - AAE532 and any astrodynamics book 
+    """
+    # calculate semi-latus rectum (km)
+    a = p / (ecc**2 - 1)
+    # velocity at infinite radius (km/sec)
+    v_inf = np.sqrt(mu / a)
+    # aiming radius (semi-minor axis b) (km)
+    b = a * np.sqrt(ecc**2 - 1)
+    # mechanical energy (km^2/sec^2)
+    sme = mu / 2 / a
+    # flyby angle (rad)
+    flyby = np.arcsin(1 / ecc) * 2
+    # true anomaly at infinite radius (rad)
+    nu_inf = pi / 2 + flyby / 2
+
+    # angular momentum scalar
+    h = np.sqrt(p * mu)  # km^2/sec
+
+    fpa = fpa_solve(nu, ecc)  # radians
+
+    # radius of periapsis and apoapsis
+    r_per = a * (ecc - 1)  # km
+
+    r_ijk, v_ijk, r_pqw, v_pqw = coe2rv(p, ecc, inc, raan, arg_p, nu, mu)
+
+    # position and velocity within orbit
+    r = np.linalg.norm(r_pqw)  # km
+    v = np.linalg.norm(v_pqw)  # km/sec
+
+    # convert position and velocity to lvlh frame
+    r_lvlh = np.array([r, 0, 0])  # [r_hat theta_hat h_hat] km
+    # [r_hat theta_hat h_hat] km/sec
+    v_lvlh = v * np.array([np.sin(fpa), np.cos(fpa), 0])
+
+    v_circ = np.sqrt(mu / r)
+
+    v_esc = np.sqrt(2) * v_circ
+
+    H, M_H = nu2anom(nu, ecc)  # rad
+
+    n = np.sqrt(mu / a**3)  # mean motion in 1/sec
+
