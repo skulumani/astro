@@ -224,7 +224,7 @@ def rv2coe(r, v, mu):
 
         else:
             #  elliptical, parabolic, hyperbolic equatorial -
-            if inc < tol or np.absolute(inc - pi) < tol:
+            if inc < tol or np.absolute(inc - np.pi) < tol:
                 orbit_type = 'ee'
 
         # right ascension of the ascending node
@@ -250,7 +250,7 @@ def rv2coe(r, v, mu):
         if orbit_type[0] == 'e':
             nu = np.arccos(np.dot(e, r) / (mag_e * mag_r))
             if rdotv < 0.0:
-                nu = 2 * pi - nu
+                nu = 2 * np.pi - nu
         else:
             nu = 0
 
