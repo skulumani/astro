@@ -71,7 +71,7 @@ re2km = 6378.137
 sec2hr = 1 / 3600
 hr2sec = 3600
 day2sec = 86400.0                   # sec/day
-sec2day = 1 / 86400.5
+sec2day = 1 / 86400
 
 # Earth Characteristics from WGS 84
 obliquity = np.radians(23.43928)

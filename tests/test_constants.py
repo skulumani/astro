@@ -14,3 +14,9 @@ def test_deg2rad():
 
 def test_sec2hr():
     np.testing.assert_allclose(3600*constants.sec2hr, 1)
+    np.testing.assert_allclose(1*constants.hr2sec, 3600)
+
+def test_sec2day():
+    np.testing.assert_allclose(1 * constants.sec2day , 1 / (60 * 60 * 24))
+    np.testing.assert_allclose(1 * constants.day2sec, 24 * 60 * 60)
+
