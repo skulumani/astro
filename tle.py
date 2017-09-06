@@ -52,6 +52,7 @@ def get_tle_spacetrack(filename, flag='all'):
         all - Download bulk catalog
         visible - Download the visible satellite list
         testing - Download personal list called Testing
+        rv2coe - list used in RV2COE
 
     Returns
     -------
@@ -92,6 +93,9 @@ def get_tle_spacetrack(filename, flag='all'):
         elif flag == 'visible':
             all_tles = st.tle_latest(
                 favorites='Visible', ordinal=1, format='3le')
+        elif flag == 'rv2coe':
+            all_tles = st.tle_latest(favorites='RV2COE', ordinal=1,
+                                     format='3le')
         else:
             print("Incorrect TLE favorites flag")
             all_tles = "Incorrect flag"

@@ -969,7 +969,6 @@ def orbit_el(p, ecc, inc, raan, arg_p, nu, mu, print_flag=False):
         ( a, h, period, sme, fpa, r_per, r_apo, r_ijk, v_ijk,
          r_pqw, v_pqw, r_lvlh, v_lvlh, r, v, v_circ, v_esc,
          E, M, n ) = elp_orbit_el(p,ecc,inc,raan,arg_p,nu,mu)
-        
         # build string for output
         string = '\n'
         
