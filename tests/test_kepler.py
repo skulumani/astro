@@ -1,6 +1,6 @@
 import numpy as np
 # namedtuple to hold constants for each body
-from .. import kepler
+from .. import kepler, constants
 
 def test_coe2rv_equatorial_circular():
     """Test COE to RV for equatorial circular orbit around Earth"""
@@ -516,3 +516,61 @@ class TestConicOrbitParabolic():
 
     def test_z_axis(self):
         np.testing.assert_allclose(self.zs, 0)
+
+class TestEllipticalOribtProperties():
+    # test case from RV2COE Astro 321, MAE3145
+    r = np.array([8840.0, 646, 5455])
+    v = np.array([-0.695, 5.25, -1.65])
+
+    r_mag_true = 10407.6866
+    v_mag_true = 5.5469
+
+    r_per_true = 6260.5311
+    r_apo_true = 11134.4744
+    energy_true = -22.9147
+    period_true = 2.2423
+    sma_true = 8697.5027
+    ecc_true = 0.2802
+    inc_true = 33.9987
+    raan_true = 250.0287
+    arg_p_true = 255.5372
+    nu_true = 214.8548
+    
+    mu = constants.earth.mu
+
+    p, a, ecc, inc, raan, arg_p, nu, _, _, _, _ = kepler.rv2coe(r, v, mu) 
+    ( a, h, period, sme, fpa, r_per, r_apo, r_ijk, v_ijk,
+     r_pqw, v_pqw, r_lvlh, v_lvlh, r, v, v_circ, v_esc,
+     E, M, n ) = kepler.elp_orbit_el(p,ecc,inc,raan,arg_p,nu,mu)
+    def test_r_mag(self):
+        np.testing.assert_allclose(np.linalg.norm(self.r_ijk), self.r_mag_true, rtol=1e-4)
+
+    def test_v_mag(self):
+        np.testing.assert_allclose(np.linalg.norm(self.v_ijk), self.v_mag_true, rtol=1e-4)
+
+    def test_r_per(self):
+        np.testing.assert_allclose(self.r_per, self.r_per_true, rtol=1e-4)
+
+    def test_r_apo(self):
+        np.testing.assert_allclose(self.r_apo, self.r_apo_true, rtol=1e-4)
+
+    def test_energy(self):
+        np.testing.assert_allclose(self.sme, self.energy_true, rtol=1e-4)
+
+    def test_period(self):
+        np.testing.assert_allclose(self.period*constants.sec2hr, self.period_true, rtol=1e-4)
+
+    def test_sma(self):
+        np.testing.assert_allclose(self.a, self.sma_true, rtol=1e-4)
+
+    def test_ecc(self):
+        np.testing.assert_allclose(self.ecc, self.ecc_true, rtol=1e-4)
+
+    def test_inc(self):
+        np.testing.assert_allclose(self.inc*constants.rad2deg, self.inc_true, rtol=1e-4)
+
+    def test_raan(self):
+        np.testing.assert_allclose(self.raan*constants.rad2deg, self.raan_true, rtol=1e-4)
+
+    def test_arg_p(self):
+        np.testing.assert_allclose(self.arg_p*constants.rad2deg, self.arg_p_true, rtol=1e-4)

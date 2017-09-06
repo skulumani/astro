@@ -792,6 +792,8 @@ def elp_orbit_el(p, ecc, inc, raan, arg_p, nu, mu):
     v_esc = np.sqrt(2) * v_circ
 
     E, M = nu2anom(nu, ecc)  # rad
+    E = float(E)
+    M = float(M)
 
     n = np.sqrt(mu / a**3)  # mean motion in 1/sec
 
@@ -967,7 +969,6 @@ def orbit_el(p, ecc, inc, raan, arg_p, nu, mu, print_flag=False):
         ( a, h, period, sme, fpa, r_per, r_apo, r_ijk, v_ijk,
          r_pqw, v_pqw, r_lvlh, v_lvlh, r, v, v_circ, v_esc,
          E, M, n ) = elp_orbit_el(p,ecc,inc,raan,arg_p,nu,mu)
-        
         # build string for output
         string = '\n'
         
