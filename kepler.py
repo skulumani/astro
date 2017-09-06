@@ -762,7 +762,7 @@ def elp_orbit_el(p, ecc, inc, raan, arg_p, nu, mu):
         - Any astrodynamics book/internet
     """
     # calculate semi-major axis
-    a = p / (1 - np.ecc**2)  # km
+    a = p / (1 - ecc**2)  # km
     # angular momentum scalar
     h = np.sqrt(p * mu)  # km^2/sec
     # period of orbit
