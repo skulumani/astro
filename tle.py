@@ -7,7 +7,7 @@ import numpy as np
 from collections import namedtuple
 from spacetrack import SpaceTrackClient
 
-from astro import time, kepler, geodetic
+from . import time, kepler, geodetic
 from kinematics import attitude
 
 import matplotlib.pyplot as plt

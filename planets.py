@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from collections import namedtuple
 import numpy as np
 from kinematics import attitude
-from astro import kepler, constants
+from . import kepler, constants
 import pdb
 
 twopi = 2 * np.pi
