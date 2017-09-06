@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 from kinematics import attitude
 import pdb
-
+from . import constants
 
 def coe2rv(p_in, ecc_in, inc_in, raan_in, arg_p_in, nu_in, mu):
     """
@@ -907,4 +907,112 @@ def hyp_orbit_el(p, ecc, inc, raan, arg_p, nu, mu):
     H, M_H = nu2anom(nu, ecc)  # rad
 
     n = np.sqrt(mu / a**3)  # mean motion in 1/sec
+    
+    return (a, v_inf, b, sme, flyby, nu_inf, h, fpa, r_per, r_ijk, v_ijk,
+            r_pqw, v_pqw, r_lvlh, r, v, v_circ, v_esc, H, M_H, n)
 
+def orbit_el(p, ecc, inc, raan, arg_p, nu, mu, print_flag=False):
+    """Orbit Characteristics/Elements
+
+    Purpose:
+        - Calculates  orbital parameters using conic equations
+
+        orbit_el(p,ecc,inc,raan,arg_p,nu,mu,print_flag)
+
+    Inputs:
+        - a - semi-major axis in km
+        - ecc - eccentricity of orbit
+        - mu - gravitational parameter in km^3/sec^2
+        - nu - true anomaly in rad 0 < nu < 2*pi
+        - print_flag - 'true' or 'false' to print outputs to screen
+
+    Outputs:
+        - none - prints data to screen
+
+    Dependencies:
+        - elp_orbit_el.m - elliptical orbit elements
+        - hyp_orbit_el.m - hypberbolic orbit elements
+        - par_orbit_el.m - parabolic orbit elements
+
+    Author:
+        - Shankar Kulumani 16 Sept 2012
+            - used code from AAE532 PS4
+        - Shankar Kulumani 19 Sept 2012
+            - added escape speed
+            - added print capability
+            - added constants
+            - added mean motion
+            - added lvlh and pqw vectors
+        - Shankar Kulumani 27 Sept 2012
+            - modifying to add hyperbolic orbit capability
+            - moved elliptical stuff to elp_orbit_el.m
+            - removed outputs
+        - Shankar Kulumani 29 Sept 2012
+            - modified fprintf commands to make it more like STK
+        - Shankar Kulumani 5 September 2017
+            - modify for Python for MAE3145
+
+    References
+        - AAE532 Notes
+
+    """
+    # load constants
+
+    r_earth = constants.earth.radius
+    km2au = constants.km2au
+    rad2deg = constants.rad2deg
+    tol = 1e-9
+
+    if ecc < 1: # elliptical
+        ( a, h, period, sme, fpa, r_per, r_apo, r_ijk, v_ijk,
+         r_pqw, v_pqw, r_lvlh, v_lvlh, r, v, v_circ, v_esc,
+         E, M, n ) = elp_orbit_el(p,ecc,inc,raan,arg_p,nu,mu)
+        
+        # build string for output
+        string = '\n'
+        
+        string += 'Satellite State \n'
+        string += 'Position and Velocity in LVLH frame \n'
+        string += '{:10s} {:20.15g} km {:10s} {:20.15g} km/sec\n{:10s} {:20.15g} km {:10s} {:20.15g} km/sec\n{:10s} {:20.15g} km {:10s} {:20.15g} km/sec\n'.format('r_hat:', r_lvlh[0],'rd_hat:',v_lvlh[ 0 ],'t_hat:',r_lvlh[ 1 ],'td_hat:',v_lvlh[ 1 ],'h_hat:',r_lvlh[ 2 ],'hd_hat:',v_lvlh[ 2 ])
+        
+        string += '\n'
+        string += 'Position and Velocity in EPH/PQW frame \n'
+        string += '{:10s} {:20.15g} km {:10s} {:20.15g} km/sec\n{:10s} {:20.15g} km {:10s} {:20.15g} km/sec\n{:10s} {:20.15g} km {:10s} {:20.15g} km/sec\n'.format('e_hat:',r_pqw[ 0 ],'ed_hat:',v_pqw[ 0 ],'p_hat:',r_pqw[ 1 ],'pd_hat:',v_pqw[ 1 ],'h_hat:',r_pqw[ 2 ],'hd_hat:',v_pqw[ 2 ])
+        
+        string += '\n'
+        string += 'Position and Velocity in IJK frame \n'
+        string += '{:10s} {:20.15g} km {:10s} {:20.15g} km/sec\n{:10s} {:20.15g} km {:10s} {:20.15g} km/sec\n{:10s} {:20.15g} km {:10s} {:20.15g} km/sec\n'.format('i_hat:',r_ijk[ 0 ],'id_hat:',v_ijk[ 0 ],'j_hat:',r_ijk[ 1 ],'jd_hat:',v_ijk[ 1 ],'k_hat:',r_ijk[ 2 ],'kd_hat:',v_ijk[ 2 ])
+        
+        string += '\n'
+        string += '{:10s}: {:20.15g} km = {:20.15g} AU \n'.format('RAD_MAG',r,r*km2au)
+        string += '{:10s}: {:20.15g} km/sec \n'.format('VEL_MAG',v)
+        
+        string += '\n'
+        string += 'Orbital Elements \n'
+        string += '{:10s} {:20.15g} km {:10s} {:20.15g} deg\n{:10s} {:20.15g}    {:10s} {:20.15g} deg\n{:10s} {:20.15g} deg {:9s} {:20.15g} deg\n'.format('sma:',a,'raan:',raan*rad2deg,'ecc:',ecc,'arg_p:',arg_p*rad2deg,'inc:',inc*rad2deg,'nu:',nu*rad2deg)
+        
+        string += '\n'
+        string += 'Elliptic Orbital Parameters\n'
+        string += '{:10s}: {:20.15g} km = {:20.15g} AU \n'.format('P',p, p*km2au)
+        string += '{:10s}: {:20.15g} km^2/sec \n'.format('ANG MOM',h)
+        string += '{:10s}: {:20.15g} sec = {:20.15g} hr\n'.format('PERIOD',period,period/3600)
+        string += '{:10s}: {:20.15g} km^2/sec^2 \n'.format('ENGERGY',sme)
+        string += '{:10s}: {:20.15g} km = {:20.15g} AU \n'.format('RAD_PER',r_per,r_per*km2au)
+        string += '{:10s}: {:20.15g} km = {:20.15g} AU \n'.format('RAD_APO',r_apo,r_apo*km2au)
+        
+        string += '\n'
+        string += '{:10s}: {:20.15g} km/sec \n'.format('VEL_CIRC',v_circ)
+        string += '{:10s}: {:20.15g} km/sec \n'.format('VEL_ESC',v_esc)
+        string += '{:10s}: {:20.15g} deg \n'.format('TRUE_ANOM',nu*rad2deg)
+        string += '{:10s}: {:20.15g} deg \n'.format('FPA',fpa*rad2deg)
+        string += '{:10s}: {:20.15g} deg \n'.format('ECC_ANOM',E*rad2deg)
+        string += '{:10s}: {:20.15g} deg \n'.format('MEAN_ANOM',M*rad2deg)
+        string += '{:10s}: {:20.15g} deg/sec \n'.format('MEAN_MOT',n*rad2deg)
+        
+        string += '\n'
+        string += '{:10s}: {:20.15g} sec = {:20.15g} hr \n'.format('T_PAST_PER',1/n*M,1/n*M/3600)
+    
+    if print_flag:
+        print(string)
+
+    return string
