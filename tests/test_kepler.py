@@ -44,7 +44,7 @@ class Testrv2coeEquatorialCircular():
         np.testing.assert_allclose(self.p, self.p_true)
     
     def test_a(self):
-        np.testing.assert_allclose(self.a, self.p_true / (1 - self.ecc_true))
+        np.testing.assert_allclose(self.a, self.p_true / (1 - self.ecc_true**2))
 
     def test_ecc(self):
         np.testing.assert_allclose(self.ecc, self.ecc_true)
@@ -112,7 +112,7 @@ class Testrv2coePolarCircular():
         np.testing.assert_allclose(self.p, self.p_true)
     
     def test_a(self):
-        np.testing.assert_allclose(self.a, self.p_true / (1 - self.ecc_true))
+        np.testing.assert_allclose(self.a, self.p_true / (1 - self.ecc_true**2))
 
     def test_ecc(self):
         np.testing.assert_allclose(self.ecc, self.ecc_true)
@@ -180,7 +180,7 @@ class Testrv2coeEquatorialCircularQuarer():
         np.testing.assert_allclose(self.p, self.p_true)
     
     def test_a(self):
-        np.testing.assert_allclose(self.a, self.p_true / (1 - self.ecc_true))
+        np.testing.assert_allclose(self.a, self.p_true / (1 - self.ecc_true**2))
 
     def test_ecc(self):
         np.testing.assert_allclose(self.ecc, self.ecc_true)
@@ -231,6 +231,60 @@ def test_coe2rv_equatorial_circular_half():
     np.testing.assert_array_almost_equal(R_ijk_true,R_ijk)
     np.testing.assert_array_almost_equal(V_ijk_true,V_ijk)
 
+class Testrv2coeRV1():
+    a_true = 8697.5027
+    ecc_true = 0.2802
+    p_true = a_true * ( 1 - ecc_true**2)
+    inc_true = np.deg2rad(33.9987)
+    raan_true = np.deg2rad(250.0287)
+    arg_p_true = np.deg2rad(255.5372)
+    nu_true = np.deg2rad(214.8548)
+    mu = 398600.5
+
+    r = np.array([8840, 646, 5455])
+    v = np.array([-0.6950, 5.250, -1.65])
+
+    p, a, ecc, inc, raan, arg_p, nu, m, arglat, truelon, lonper = kepler.rv2coe(r, v, mu)
+
+    def test_p(self):
+        np.testing.assert_allclose(self.p, self.p_true, rtol=1e-1)
+    
+    def test_a(self):
+        np.testing.assert_allclose(self.a, self.p_true / (1 - self.ecc_true**2))
+
+    def test_ecc(self):
+        np.testing.assert_allclose(self.ecc, self.ecc_true, rtol=1e-4)
+    
+    def test_inc(self):
+        np.testing.assert_allclose(self.inc, self.inc_true, rtol=1e-4)
+
+    def test_raan(self):
+        np.testing.assert_allclose(self.raan, self.raan_true)
+
+    def test_arg_p(self):
+        np.testing.assert_allclose(self.arg_p, self.arg_p_true, rtol=1e-4)
+    
+    def test_nu(self):
+        np.testing.assert_allclose(self.nu, self.nu_true, rtol=1e-4)
+
+    def test_m(self):
+        E_true, M_true = kepler.nu2anom(self.nu, self.ecc)
+        np.testing.assert_allclose(self.m, M_true)
+
+    def test_arglat(self):
+        # argument of latitude isn't used for this case so it goes to zero
+        # np.testing.assert_allclose(self.arglat, self.nu_true + self.arg_p_true)
+        pass
+
+    def test_truelon(self):
+        # not used for inclined orbits - only special ones
+        # np.testing.assert_allclose(self.truelon, self.nu_true + self.raan_true + self.arg_p_true)
+        pass
+
+    def test_lonper(self):
+        # not really used for inclined orbits
+        # np.testing.assert_allclose(self.lonper, self.arg_p_true + self.raan_true)
+        pass
 
 class Testrv2coeEquatorialCircularHalf():
 
@@ -251,7 +305,7 @@ class Testrv2coeEquatorialCircularHalf():
         np.testing.assert_allclose(self.p, self.p_true)
     
     def test_a(self):
-        np.testing.assert_allclose(self.a, self.p_true / (1 - self.ecc_true))
+        np.testing.assert_allclose(self.a, self.p_true / (1 - self.ecc_true**2))
 
     def test_ecc(self):
         np.testing.assert_allclose(self.ecc, self.ecc_true)
