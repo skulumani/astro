@@ -1,3 +1,21 @@
+"""Time
+
+Module to perform various astrodynamic time conversions and operations
+
+Notes
+-----
+You can use this module by importing
+
+from astro import time
+
+Attributes
+----------
+No module level attributes
+
+Author
+------
+Shankar Kulumani		GWU		skulumani@gwu.edu
+"""
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
@@ -7,35 +25,35 @@ from kinematics import attitude
 def date2jd(yr, mon, day, hr, minute, sec):
     """Convert date to Julian Date
 
-           Purpose:
-               - Converts UTC date to julian date valid 1 Mar 1900 to 28 Feb 2100
+    Purpose:
+        - Converts UTC date to julian date valid 1 Mar 1900 to 28 Feb 2100
 
-           JD = date2jd(yr, mon, day, hr, min, sec)
+    JD = date2jd(yr, mon, day, hr, min, sec)
 
-           Inputs:
-               - yr - 4 digit year (between 1900 and 2100)
-               - mon - month (between 01 and 12)
-               - day - day (between 1 and 31)
-               - hr - UT hour (between 0 and 23)
-               - min - UT min (between 0 and 59)
-               - sec - UT sec (between 0 and 59.999)
+    Inputs:
+        - yr - 4 digit year (between 1900 and 2100)
+        - mon - month (between 01 and 12)
+        - day - day (between 1 and 31)
+        - hr - UT hour (between 0 and 23)
+        - min - UT min (between 0 and 59)
+        - sec - UT sec (between 0 and 59.999)
 
-           Outputs:
-               - JD - julian date (days from 1 Jan 4713 BC 12 Noon)
-               - MJD - modified julian date
+    Outputs:
+        - JD - julian date (days from 1 Jan 4713 BC 12 Noon)
+        - MJD - modified julian date
 
-           Dependencies:
-               - none
+    Dependencies:
+        - none
 
-           Author:
-               - Shankar Kulumani 21 Oct 2012
-                   - list revisions
-               - Shankar Kulumani 3 Dec 2016
-                   - convert to python
+    Author:
+        - Shankar Kulumani 21 Oct 2012
+            - list revisions
+        - Shankar Kulumani 3 Dec 2016
+            - convert to python
 
-           References
-               - Vallado
-               - USAFA Astro 321
+    References
+        - Vallado
+        - USAFA Astro 321
     """
 
     JD = 367.0 * yr - np.floor((7 * (yr + np.floor((mon + 9) / 12.0))) *
