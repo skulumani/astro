@@ -531,7 +531,8 @@ def conic_orbit(p, ecc, inc, raan, arg_p, nu_i, nu_f):
     # M_rot = [cos(raan) * cos(arg_p) - sin(raan) * cos(inc) * sin(arg_p) -cos(raan) * sin(arg_p) - sin(raan) * cos(inc) * cos(arg_p) sin(raan) * sin(inc);
     #         sin(raan) * cos(arg_p) + cos(raan) * cos(inc) * sin(arg_p) -sin(raan) * sin(arg_p) + cos(raan) * cos(inc) * cos(arg_p) -cos(raan) * sin(inc);
     #         sin(inc) * sin(arg_p) sin(inc) * cos(arg_p) cos(inc);];
-    dcm_pqw2eci = attitude.rot3(-raan).dot(attitude.rot1(-inc)).dot(attitude.rot3(-arg_p))
+    dcm_pqw2eci = attitude.rot3(-raan).dot(attitude.rot1(-inc)
+                                           ).dot(attitude.rot3(-arg_p))
 
     orbit_plane = np.dot(dcm_pqw2eci, np.array([x, y, z]))
 
@@ -796,6 +797,7 @@ def elp_orbit_el(p, ecc, inc, raan, arg_p, nu, mu):
     return (a, h, period, sme, fpa, r_per, r_apo, r_ijk, v_ijk, r_pqw, v_pqw,
             r_lvlh, v_lvlh, r, v, v_circ, v_esc, E, M, n)
 
+
 def par_orbit_el(p, ecc, inc, raan, arg_p, nu, mu):
 
     # calculate semi-latus rectum (km)
@@ -804,33 +806,34 @@ def par_orbit_el(p, ecc, inc, raan, arg_p, nu, mu):
     v_inf = 0
 
     # mechanical energy (km^2/sec^2)
-    sme = mu/2/a
+    sme = mu / 2 / a
 
     # angular momentum scalar
-    h = np.sqrt(p*mu) # km^2/sec
+    h = np.sqrt(p * mu)  # km^2/sec
 
-    fpa = fpa_solve(nu,ecc) # radians
+    fpa = fpa_solve(nu, ecc)  # radians
 
     # radius of periapsis and apoapsis
-    r_per = p/2 # km
+    r_per = p / 2  # km
 
-    r_ijk,v_ijk,r_pqw,v_pqw = coe2rv(p,ecc,inc,raan,arg_p,nu,mu)
+    r_ijk, v_ijk, r_pqw, v_pqw = coe2rv(p, ecc, inc, raan, arg_p, nu, mu)
 
     # position and velocity within orbit
-    r = norm(r_pqw) # km
-    v = norm(v_pqw) # km/sec
+    r = norm(r_pqw)  # km
+    v = norm(v_pqw)  # km/sec
 
     # convert position and velocity to lvlh frame
-    r_lvlh = np.array([r, 0, 0]) # [r_hat theta_hat h_hat] km
-    v_lvlh = v*np.array([np.sin(fpa), np.cos(fpa), 0]) # [r_hat theta_hat h_hat] km/sec
+    r_lvlh = np.array([r, 0, 0])  # [r_hat theta_hat h_hat] km
+    # [r_hat theta_hat h_hat] km/sec
+    v_lvlh = v * np.array([np.sin(fpa), np.cos(fpa), 0])
 
-    v_circ = np.sqrt(mu/r)
+    v_circ = np.sqrt(mu / r)
 
-    v_esc = np.sqrt(2)*v_circ
+    v_esc = np.sqrt(2) * v_circ
 
-    B, M_B = nu2anom(nu,ecc) # rad
+    B, M_B = nu2anom(nu, ecc)  # rad
 
-    n = 2*np.sqrt(mu/p**3) # mean motion in 1/sec
+    n = 2 * np.sqrt(mu / p**3)  # mean motion in 1/sec
 
-    return (a, v_inf, sme, h, fpa, r_per, r_ijk, v_ijk, 
-    r_pqw, v_pqw, r_lvlh, v_lvlh, r, v, v_circ, v_esc, B, M_B, n)
+    return (a, v_inf, sme, h, fpa, r_per, r_ijk, v_ijk,
+            r_pqw, v_pqw, r_lvlh, v_lvlh, r, v, v_circ, v_esc, B, M_B, n)
