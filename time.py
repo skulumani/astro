@@ -8,6 +8,10 @@ You can use this module by importing it into your code
 
 from astro import time
 
+Attributes
+----------
+No module level attributes
+
 Author
 ------
 Shankar Kulumani		GWU		skulumani@gwu.edu
