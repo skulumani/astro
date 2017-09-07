@@ -214,3 +214,37 @@ def rhoazel(sat_eci, site_eci, site_lat, site_lst):
             2*np.pi)[0]
 
     return rho, az, el
+
+def radar_meas(r_sat_eci, v_sat_eci, r_site_eci, site_lat, site_lst):
+    """Simulated radar measurements from the site to satellite
+
+    This function will output deterministic radar measurements given a satellite
+    position and radar site in the ECI inertial frame.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
+    Notes
+    -----
+
+    Dependencies
+    ------------
+
+    Reference
+    ---------
+
+    Author
+    ------
+
+    """
+
+    # determine transformation from IJK to SEZ
+
+    # determine the range and range rate in SEZ frame
+
+    # compute azimuth and elevation
+
+    # transform velocity to angle rate information
