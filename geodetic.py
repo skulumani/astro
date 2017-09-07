@@ -85,9 +85,15 @@ def lla2ecef(lat, lon, alt, r=6378.137, ee=8.1819190842622e-2):
 
     return np.array([x, y, z])
 
+def eci2ecef(jd):
+    """Rotation matrix to convert from ECI to ECEF
 
-def site2eci(lat, alt, lst, r=6378.137, ee=8.1819190842622e-2):
-    """Calculate the site vector in the IJK coordinate system.
+    Will gradually improve this function to include all of the Earth 
+    motion terms. For now, just use sidereal time to get the rotation matrix
+    """
+
+def site2ecef(lat, alt, lst, r=6378.137, ee=8.1819190842622e-2):
+    """Calculate the site vector in the ECEF coordinate system.
 
     Author:   C2C Shankar Kulumani   USAFA/CS-19   719-333-4741
 
@@ -97,7 +103,7 @@ def site2eci(lat, alt, lst, r=6378.137, ee=8.1819190842622e-2):
         sitalt - site altitude (meters)
 
     Outputs:
-        R_site - site vector in IJK system
+        R_site - site vector in ECEF frame
 
     Globals:
         RE, EEsqrd
@@ -108,13 +114,14 @@ def site2eci(lat, alt, lst, r=6378.137, ee=8.1819190842622e-2):
 
     References:
         Astro 321 COMFIX
+        Vallado Alg 47
     """
     N = r / np.sqrt(1 - ee**2 * np.sin(lat)**2)
     x = (N + alt) * np.cos(lat)
     z = ((1 - ee**2) * N + alt) * np.sin(lat)
-    eci = np.array([x * np.cos(lst), x * np.sin(lst), z])
+    ecef = np.array([x * np.cos(lst), x * np.sin(lst), z])
 
-    return eci
+    return ecef
 
 
 def ecef2lla(ecef, r=6378.137, ee=8.1819190842622e-2):
