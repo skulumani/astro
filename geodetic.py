@@ -1,5 +1,5 @@
 """Geodetic transformations. This module holds many functions to peform common
-transformations used in astrodynamics. 
+transformations used in astrodynamics.
 
 Copyright (C) {2017}  {Shankar Kulumani}
 
@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 import numpy as np
 from kinematics import attitude
+from . import time, constants
 
 
 def lla2ecef(lat, lon, alt, r=6378.137, ee=8.1819190842622e-2):
@@ -85,12 +86,20 @@ def lla2ecef(lat, lon, alt, r=6378.137, ee=8.1819190842622e-2):
 
     return np.array([x, y, z])
 
+
 def eci2ecef(jd):
     """Rotation matrix to convert from ECI to ECEF
 
-    Will gradually improve this function to include all of the Earth 
+    Will gradually improve this function to include all of the Earth
     motion terms. For now, just use sidereal time to get the rotation matrix
     """
+
+    gst, _ = time.gstlst(jd, 0)
+
+    dcm = attitude.rot3(gst, 'c')
+
+    return dcm
+
 
 def site2ecef(lat, alt, lst, r=6378.137, ee=8.1819190842622e-2):
     """Calculate the site vector in the ECEF coordinate system.
@@ -129,7 +138,7 @@ def ecef2lla(ecef, r=6378.137, ee=8.1819190842622e-2):
     above the reference ellipsoid
 
     """
-    twopi = 2*np.pi
+    twopi = 2 * np.pi
     tol = 1e-6
 
     norm_vec = np.linalg.norm(ecef)
@@ -141,9 +150,9 @@ def ecef2lla(ecef, r=6378.137, ee=8.1819190842622e-2):
         rtasc = np.arctan2(ecef[1], ecef[0])
 
     lon = rtasc
-    lon = attitude.normalize(lon, 0, 2*np.pi)
+    lon = attitude.normalize(lon, 0, 2 * np.pi)
 
-    decl = np.arcsin(ecef[2]/ norm_vec)
+    decl = np.arcsin(ecef[2] / norm_vec)
     latgd = decl
 
     # iterate to find geodetic latitude
@@ -154,11 +163,11 @@ def ecef2lla(ecef, r=6378.137, ee=8.1819190842622e-2):
         sintemp = np.sin(latgd)
         c = r / np.sqrt(1.0 - ee**2 * sintemp**2)
         latgd = np.arctan2(ecef[2] + c * ee**2 * sintemp, temp)
-        i = i +1
+        i = i + 1
 
     # calculate the height
-    if (np.pi / 2 - np.absolute(latgd)) > np.pi/180:
-        hellp = temp/np.cos(latgd) - c
+    if (np.pi / 2 - np.absolute(latgd)) > np.pi / 180:
+        hellp = temp / np.cos(latgd) - c
     else:
         s = c * (1 - ee**2)
         hellp = ecef[2] / np.sin(latgd) - s
@@ -166,13 +175,15 @@ def ecef2lla(ecef, r=6378.137, ee=8.1819190842622e-2):
     latgc = gd2gc(latgd, ee**2)
     return latgc, latgd, lon, hellp
 
+
 def gd2gc(latgd, eesqrd=0.081819221456**2):
     """Only valid for locations on the Earth's surface
 
     Vallado Example 3-1
     """
-    latgc = np.arctan( (1 - eesqrd)*np.tan(latgd))
+    latgc = np.arctan((1 - eesqrd) * np.tan(latgd))
     return latgc
+
 
 def gc2gd(latgc, eesqrd=0.081819221456**2):
     """Only valid for locations on the Earth's surface
