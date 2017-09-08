@@ -1,6 +1,6 @@
 
 import numpy as np
-
+import pdb
 from .. import geodetic
 
 deg2rad = np.pi/180
@@ -81,3 +81,36 @@ def test_ecef2lla2_washington_dc():
     expected_lla =  (38.8895 * deg2rad, 282.9647 * deg2rad, 0.3)
     latgc, latgd, longd, hellp  = geodetic.ecef2lla(ecef)
     np.testing.assert_allclose((latgd, longd, hellp), expected_lla, rtol=1e-3)
+
+def test_rv2rhoazel_vallado():
+    # find some test cases from the book
+    pass
+
+def test_eci2ecef_valldo():
+    pass
+
+def test_rhoazel_equator_zenith():
+    sat_eci = np.array([6378.137 + 100, 0, 0])
+    site_eci = np.array([6378.137, 0, 0])
+    site_lat = 0
+    site_lst = 0
+    
+    true_rho = 100
+    true_az = np.pi
+    true_el = np.pi /2
+
+    rho, az, el = geodetic.rhoazel(sat_eci, site_eci, site_lat, site_lst)
+    np.testing.assert_allclose((rho, az, el), (true_rho, true_az, true_el))
+
+def test_rhoazel_pole_zenith():
+    sat_eci = np.array([0, 0, 6378.137 + 200])
+    site_eci = np.array([0, 0, 6378.137])
+    site_lat = np.pi / 2
+    site_lst = 0
+    
+    true_rho = 200
+    true_az = np.pi
+    true_el = np.pi / 2
+
+    rho, az, el = geodetic.rhoazel(sat_eci, site_eci, site_lat, site_lst)
+    np.testing.assert_allclose((rho, az, el), (true_rho, true_az, true_el))
