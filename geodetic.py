@@ -193,6 +193,89 @@ def gc2gd(latgc, eesqrd=0.081819221456**2):
     latgd = np.arctan(np.tan(latgc) / (1 - eesqrd))
     return latgd
 
+
+def rv2rhoazel(r_sat_eci, v_sat_eci, lat, lon, alt, jd):
+    """
+    This function calculates the topcentric range,azimuth and elevation from
+    the site vector and satellite position vector.
+
+    Author:   C2C Shankar Kulumani   USAFA/CS-19   719-333-4741
+
+    Inputs:
+        sat_eci - satellite ECI position vector (km)
+        site_eci - site ECI position vector (km)
+        site_lat - site geodetic latitude (radians)
+        site_lst - site local sidereal time (radians)
+
+    Outputs:
+        rho - range (km)
+        az - asimuth (radians)
+        el - elevation (radians)
+
+    Globals: None
+
+    Constants: None
+
+    Coupling:
+
+    References:
+        Astro 321 Predict LSN 22
+    """
+    small = constants.small
+    halfpi = constants.halfpi
+
+    # get site in ECEF
+    r_site_ecef = lla2ecef(lat, lon, alt)
+
+    # convert sat and site to ecef
+    dcm_eci2ecef = eci2ecef(jd)
+    omega_earth = np.array([0, 0, constants.earth.omega])
+
+    r_sat_ecef = dcm_eci2ecef.dot(r_sat_eci)
+    v_sat_ecef = dcm_eci2ecef.dot(
+        v_sat_eci) - np.cross(omega_earth, r_sat_ecef)
+
+    # find relative vector in ecef frame
+    rho_ecef = r_sat_ecef - r_site_ecef
+    drho_ecef = v_sat_ecef - np.zeros_like(v_sat_ecef)  # site isn't moving
+    rho = np.linalg.norm(rho_ecef)
+
+    # convert to SEZ coordinate frame
+    dcm_ecef2sez = attitude.rot2(np.pi / 2 - lat).dot(attitude.rot3(lon))
+    rho_sez = dcm_ecef2sez.dot(rho_ecef)
+    drho_sez = dcm_ecef2sez.dot(drho_ecef)
+
+    # find azimuth and eleveation
+    temp = np.sqrt(rho_sez[0]**2 + rho_sez[1]**2)
+
+    if temp < small:  # directly over the north pole
+        el = np.sign(rho_sez[2]) * halfpi  # \pm 90 deg
+    else:
+        mag_rho_sez = np.linalg.norm(rho_sez)
+        el = np.arcsin(rho_sez[2] / mag_rho_sez)
+
+    if temp < small:
+        az = np.arctan2(drho_sez[1], - drho_sez[0])
+    else:
+        az = np.arctan2(rho_sez[1] / temp, -rho_sez[0] / temp)
+
+    # range, azimuth and elevation rates
+    drho = np.dot(rho_sez, drho_sez) / rho
+
+    if np.absolute(temp**2) > small:
+        daz = (drho_sez[0] * rho_sez[1] - drho_sez[1] * rho_sez[0]) / temp**2
+    else:
+        daz = 0
+
+    if np.absolute(temp) > small:
+        dele = (drho_sez[2] - drho * np.sin(el)) / temp
+    else:
+        dele = 0
+
+    return rho, az, el, drho, daz, dele
+
+
+
 def rhoazel(sat_eci, site_eci, site_lat, site_lst):
     """
     This function calculates the topcentric range,azimuth and elevation from
@@ -210,11 +293,11 @@ def rhoazel(sat_eci, site_eci, site_lat, site_lst):
         rho - range (km)
         az - asimuth (radians)
         el - elevation (radians)
-    
+
     Globals: None
-    
+
     Constants: None
-    
+
     Coupling: 
 
     References:
@@ -224,168 +307,11 @@ def rhoazel(sat_eci, site_eci, site_lat, site_lst):
     site2sat_eci = sat_eci - site_eci
 
     site2sat_sez = attitude.rot3(-site_lst).dot(site2sat_eci)
-    site2sat_sez = attitude.rot2(-(np.pi/2 - site_lat)).dot(site2sat_sez)
-    
+    site2sat_sez = attitude.rot2(-(np.pi / 2 - site_lat)).dot(site2sat_sez)
+
     rho = np.linalg.norm(site2sat_sez)
     el = np.arcsin(site2sat_sez[2] / rho)
-    az = attitude.normalize(np.arctan2(site2sat_sez[1], -site2sat_sez[0]), 0, 
-            2*np.pi)[0]
-# % ------------------------------------------------------------------------------
-# %
-# %                           function rv2razel
-# %
-# %  this function converts geocentric equatorial (eci) position and velocity
-# %    vectors into range, azimuth, elevation, and rates.  notice the value
-# %    of small as it can affect the rate term calculations. the solution uses
-# %    the velocity vector to find the singular cases. also, the elevation and
-# %    azimuth rate terms are not observable unless the acceleration vector is
-# %    available.
-# %
-# %  author        : david vallado                  719-573-2600   22 jun 2002
-# %
-# %  revisions
-# %    vallado     - add terms for ast calculation                 30 sep 2002
-# %    vallado     - update for site fixes                          2 feb 2004 
-# %
-# %  inputs          description                    range / units
-# %    reci        - eci position vector            km
-# %    veci        - eci velocity vector            km/s
-# %    rs          - eci site position vector       km
-# %    latgd       - geodetic latitude              -pi/2 to pi/2 rad
-# %    lon         - longitude of site              -2pi to 2pi rad
-# %    alt         - altitude                       km
-# %    ttt         - julian centuries of tt         centuries
-# %    jdut1       - julian date of ut1             days from 4713 bc
-# %    lod         - excess length of day           sec
-# %    xp          - polar motion coefficient       arc sec
-# %    yp          - polar motion coefficient       arc sec
-# %    terms       - number of terms for ast calculation 0,2
-# %
-# %  outputs       :
-# %    rho         - satellite range from site      km
-# %    az          - azimuth                        0.0 to 2pi rad
-# %    el          - elevation                      -pi/2 to pi/2 rad
-# %    drho        - range rate                     km/s
-# %    daz         - azimuth rate                   rad / s
-# %    del         - elevation rate                 rad / s
-# %
-# %  locals        :
-# %    rhoveci     - eci range vector from site     km
-# %    drhoveci    - eci velocity vector from site  km / s
-# %    rhosez      - sez range vector from site     km
-# %    drhosez     - sez velocity vector from site  km
-# %    wcrossr     - cross product result           km / s
-# %    earthrate   - eci earth's rotation rate vec  rad / s
-# %    tempvec     - temporary vector
-# %    temp        - temporary real*8 value
-# %    temp1       - temporary real*8 value
-# %    i           - index
-# %
-# %  coupling      :
-# %    mag         - magnitude of a vector
-# %    rot3        - rotation about the 3rd axis
-# %    rot2        - rotation about the 2nd axis
-# %
-# %  references    :
-# %    vallado       2007, 268-269, alg 27
-# %
-# % [rho,az,el,drho,daz,del] = rv2razel ( reci,veci, latgd,lon,alt,ttt,jdut1,lod,xp,yp,terms,ddpsi,ddeps );
-# % ------------------------------------------------------------------------------
-
-# function [rho,az,el,drho,daz,del] = rv2razel ( reci,veci, latgd,lon,alt,ttt,jdut1,lod,xp,yp,terms,ddpsi,ddeps );
-
-#     halfpi = pi*0.5;
-#     small  = 0.00000001;
-
-#     % --------------------- implementation ------------------------
-#     % ----------------- get site vector in ecef -------------------
-#     [rs,vs] = site ( latgd,lon,alt );
-
-#     % -------------------- convert eci to ecef --------------------
-#     a = [0;0;0];
-#     [recef,vecef,aecef] = eci2ecef(reci,veci,a,ttt,jdut1,lod,xp,yp,terms,ddpsi,ddeps);
-#     % simplified - just use sidereal time rotation
-#     % thetasa= 7.29211514670698e-05 * (1.0  - 0.0/86400.0 );
-#     % omegaearth = [0; 0; thetasa;];
-#     % [deltapsi,trueeps,meaneps,omega,nut] = nutation(ttt,ddpsi,ddeps);
-#     % [st,stdot] = sidereal(jdut1,deltapsi,meaneps,omega,0,0 );
-#     %  recef  = st'*reci;
-#     %  vecef  = st'*veci - cross( omegaearth,recef );
-
-
-#     % ------- find ecef range vector from site to satellite -------
-#     rhoecef  = recef - rs;
-#     drhoecef = vecef;
-#     rho      = mag(rhoecef);
-
-#     % ------------- convert to sez for calculations ---------------
-#     [tempvec]= rot3( rhoecef, lon          );
-#     [rhosez ]= rot2( tempvec, halfpi-latgd );
-
-#     [tempvec]= rot3( drhoecef, lon         );
-#     [drhosez]= rot2( tempvec,  halfpi-latgd);
-
-#     % ------------- calculate azimuth and elevation ---------------
-#     temp= sqrt( rhosez(1)*rhosez(1) + rhosez(2)*rhosez(2) );
-#     if ( ( temp < small ) )           % directly over the north pole
-#         el= sign(rhosez(3))*halfpi;   % +- 90 deg
-#     else
-#         magrhosez = mag(rhosez);
-#         el= asin( rhosez(3) / magrhosez );
-#     end
-
-#     if ( temp < small )
-#         az = atan2( drhosez(2), -drhosez(1) );
-#     else
-#         az= atan2( rhosez(2)/temp, -rhosez(1)/temp );
-#     end
-
-#     % ------ calculate range, azimuth and elevation rates ---------
-#     drho= dot(rhosez,drhosez)/rho;
-#     if ( abs( temp*temp ) > small )
-#         daz= ( drhosez(1)*rhosez(2) - drhosez(2)*rhosez(1) ) / ( temp*temp );
-#     else
-#         daz= 0.0;
-#     end
-
-#     if ( abs( temp ) > small )
-#         del= ( drhosez(3) - drho*sin( el ) ) / temp;
-#     else
-#         del= 0.0;
-#     end
+    az = attitude.normalize(np.arctan2(site2sat_sez[1], -site2sat_sez[0]), 0,
+                            2 * np.pi)[0]
 
     return rho, az, el
-
-def radar_meas(r_sat_eci, v_sat_eci, r_site_eci, site_lat, site_lst):
-    """Simulated radar measurements from the site to satellite
-
-    This function will output deterministic radar measurements given a satellite
-    position and radar site in the ECI inertial frame.
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    Notes
-    -----
-
-    Dependencies
-    ------------
-
-    Reference
-    ---------
-
-    Author
-    ------
-
-    """
-
-    # determine transformation from IJK to SEZ
-
-    # determine the range and range rate in SEZ frame
-
-    # compute azimuth and elevation
-
-    # transform velocity to angle rate information
