@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import numpy as np
 from kinematics import attitude
 from . import time, constants
-
+import pdb
 
 def lla2ecef(lat, lon, alt, r=6378.137, ee=8.1819190842622e-2):
     """Convert latitude, longitude, and altitude to the Earth centered
@@ -96,7 +96,7 @@ def eci2ecef(jd):
 
     gst, _ = time.gstlst(jd, 0)
 
-    dcm = attitude.rot3(gst, 'c')
+    dcm = attitude.rot3(gst, 'r')
 
     return dcm
 
@@ -241,7 +241,7 @@ def rv2rhoazel(r_sat_eci, v_sat_eci, lat, lon, alt, jd):
     rho = np.linalg.norm(rho_ecef)
 
     # convert to SEZ coordinate frame
-    dcm_ecef2sez = attitude.rot2(np.pi / 2 - lat).dot(attitude.rot3(lon))
+    dcm_ecef2sez = attitude.rot2(np.pi / 2 - lat, 'r').dot(attitude.rot3(lon, 'r'))
     rho_sez = dcm_ecef2sez.dot(rho_ecef)
     drho_sez = dcm_ecef2sez.dot(drho_ecef)
 
@@ -271,9 +271,9 @@ def rv2rhoazel(r_sat_eci, v_sat_eci, lat, lon, alt, jd):
         dele = (drho_sez[2] - drho * np.sin(el)) / temp
     else:
         dele = 0
-
+    
+    az = attitude.normalize(az, 0, constants.twopi)
     return rho, az, el, drho, daz, dele
-
 
 
 def rhoazel(sat_eci, site_eci, site_lat, site_lst):

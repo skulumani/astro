@@ -83,10 +83,21 @@ def test_ecef2lla2_washington_dc():
     np.testing.assert_allclose((latgd, longd, hellp), expected_lla, rtol=1e-3)
 
 def test_rv2rhoazel_vallado():
-    # find some test cases from the book
-    pass
+    # test example 7-1 pg.409 Vallado
+    latgd = np.deg2rad(39.007)
+    lon = np.deg2rad(-104.883)
+    alt = 2.187
+    jd = 2449857.636829
+
+    r = np.array([-5503.79562, 62.28191, 3824.24480])
+    v = np.array([-2.199987, 1.139111, 1.484966])
+
+    expected_output = (604.68, np.deg2rad(205.6), np.deg2rad(30.7), 2.08, np.deg2rad(0.15), np.deg2rad(0.17))  
+    actual_output = geodetic.rv2rhoazel(r, v, latgd, lon, alt, jd)
+    np.testing.assert_allclose(actual_output, expected_output, rtol=1e-4)
 
 def test_eci2ecef_valldo():
+
     pass
 
 def test_rhoazel_equator_zenith():
