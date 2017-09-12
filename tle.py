@@ -34,6 +34,9 @@ COE = namedtuple('COE', ['n', 'ecc', 'raan', 'argp', 'mean', 'E', 'nu', 'a',
 PASS = namedtuple('PASS', ['jd', 'az', 'el', 'site_eci', 'sat_eci', 'gst', 'lst',
                            'sun_alt', 'alpha', 'beta', 'sun_eci', 'rho'])
 
+RADAR_PASS = namedtuple('RADAR_PASS', ['jd', 'site_eci', 'sat_r_eci', 'sat_v_eci', 
+                                       'gst', 'lst', 'sun_eci', 'sun_alt', 'alpha', 
+                                       'beta', 'rho', 'az', 'el', 'drho', 'daz', 'dele'])
 
 def get_tle_spacetrack(filename, flag='all'):
     r"""Download TLEs from spacetrack.org
@@ -53,6 +56,7 @@ def get_tle_spacetrack(filename, flag='all'):
         visible - Download the visible satellite list
         testing - Download personal list called Testing
         rv2coe - list used in RV2COE
+        comfix - list used in COMFIX
 
     Returns
     -------
@@ -95,6 +99,9 @@ def get_tle_spacetrack(filename, flag='all'):
                 favorites='Visible', ordinal=1, format='3le')
         elif flag == 'rv2coe':
             all_tles = st.tle_latest(favorites='RV2COE', ordinal=1,
+                                     format='3le')
+        elif flag == 'comfix':
+            all_tles = st.tle_latest(favorites='COMFIX', ordinal=1,
                                      format='3le')
         else:
             print("Incorrect TLE favorites flag")
@@ -624,6 +631,95 @@ class Satellite(object):
         self.rho_vis = rho_vis
         self.az_vis = az_vis
         self.el_vis = el_vis
+        self.pass_vis = all_passes
+
+    def visible_radar(self, site):
+        """Check if current sat is visible from the site given an example radar sensor
+        """
+        sat_r_eci = self.r_eci
+        sat_v_eci = self.v_eci
+        site_eci = site['eci']
+        sun_eci = site['sun_eci']
+
+        alpha = np.arccos(np.einsum('ij,ij->i', site_eci, sun_eci) /
+                          np.linalg.norm(site_eci, axis=1) / np.linalg.norm(sun_eci,
+                                                                            axis=1))
+        beta = np.arccos(np.einsum('ij,ij->i', sat_r_eci, sun_eci) /
+                         np.linalg.norm(sat_r_eci, axis=1) / np.linalg.norm(sun_eci,
+                                                                          axis=1))
+        sun_alt = np.linalg.norm(sun_eci, axis=1) * np.sin(beta)
+
+        jd_vis = []
+        rho_vis = []
+        az_vis = []
+        el_vis = []
+        drho_vis = []
+        daz_vis = []
+        dele_vis = []
+
+        # create array to store all the passes
+        all_passes = []
+        current_pass = RADAR_PASS(jd=[], site_eci=[], sat_r_eci=[],
+                                  sat_v_eci=[], gst=[], lst=[], sun_alt=[],
+                                  alpha=[], beta=[], sun_eci=[], 
+                                  rho=[], az=[], el=[], drho=[], daz=[], dele=[])
+
+        jd_last = self.jd_span[0]
+        for (jd, a, b, sar, sav, si, su, su_alt, lst, gst) in zip(self.jd_span, alpha,
+                                                            beta, sat_r_eci, sat_v_eci,
+                                                            site_eci, sun_eci,
+                                                            sun_alt, site['lst'],
+                                                            site['gst']):
+
+            rho, az, el, drho, daz, dele = geodetic.rv2rhoazel(sar, sav, site['lat'],
+                                                               site['lon'], site['alt'], jd)
+            if el > 10 * deg2rad:
+                jd_vis.append(jd)
+                rho_vis.append(rho)
+                az_vis.append(az)
+                el_vis.append(el)
+                drho_vis.append(drho)
+                daz_vis.append(daz)
+                dele_vis.append(dele)
+
+                # we have a visible state - save to current pass if
+                # time since last visible is small enough if not then
+                # we have to create another pass namedtuple
+                if np.absolute(jd_last - jd) > (10 / 24 / 60):
+                    if current_pass.jd:  # new pass
+                        all_passes.append(current_pass)
+                        current_pass = RADAR_PASS(jd=[], site_eci=[], sat_r_eci=[],
+                                  sat_v_eci=[], gst=[], lst=[], sun_alt=[],
+                                  alpha=[], beta=[], sun_eci=[], 
+                                  rho=[], az=[], el=[], drho=[], daz=[], dele=[])
+
+                current_pass.jd.append(jd)
+                current_pass.site_eci.append(si)
+                current_pass.sat_r_eci.append(sar)
+                current_pass.sat_v_eci.append(sav)
+                current_pass.gst.append(gst)
+                current_pass.lst.append(lst)
+                current_pass.sun_alt.append(su_alt)
+                current_pass.alpha.append(a)
+                current_pass.beta.append(b)
+                current_pass.sun_eci.append(su)
+                current_pass.rho.append(rho)
+                current_pass.az.append(az)
+                current_pass.el.append(el)
+                current_pass.drho.append(drho)
+                current_pass.daz.append(daz)
+                current_pass.dele.append(dele)
+                jd_last = jd
+
+        all_passes.append(current_pass)
+
+        self.jd_vis = jd_vis
+        self.rho_vis = rho_vis
+        self.az_vis = az_vis
+        self.el_vis = el_vis
+        self.drho_vis = drho_vis
+        self.daz_vis = daz_vis
+        self.dele_vis = dele_vis
         self.pass_vis = all_passes
 
     def output(self, filename):
