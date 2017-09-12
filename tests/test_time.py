@@ -24,6 +24,16 @@ def test_finddays_newyears():
     ddays = time.finddays(2017, 1, 1, 0, 0, 0)
     np.testing.assert_equal(ddays, 0)
 
+def test_date2jd_vallado_p409():
+    # example from 7-1 Vallado pg. 409
+    jd, mjd = time.date2jd(1995, 5, 20, 3, 17, 2)
+    np.testing.assert_allclose(jd, 2449857.636829, rtol=1e-5)
+
+def test_jd2date_vallado_p409():
+    expected_date = (1995, 5, 20, 3, 17, 2.0255)
+    actual_date = time.jd2date(2449857.636829)
+    np.testing.assert_allclose(actual_date, expected_date, rtol=1e-3)
+
 def test_dayofyr2mdhms_january():
     yr = 2017
     days = 1.5
