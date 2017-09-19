@@ -5,7 +5,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 # import ephem
 from collections import namedtuple
-from spacetrack import SpaceTrackClient
 
 from . import time, kepler, geodetic
 from kinematics import attitude
@@ -86,6 +85,8 @@ def get_tle_spacetrack(filename, flag='all'):
     --------
 
     """
+    from spacetrack import SpaceTrackClient
+
     password = input('Enter SpaceTrack.org password: ')
     st = SpaceTrackClient('shanks.k', password)
     with open(filename, 'w') as f:
