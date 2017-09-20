@@ -918,7 +918,7 @@ def hyp_orbit_el(p, ecc, inc, raan, arg_p, nu, mu):
     n = np.sqrt(mu / a**3)  # mean motion in 1/sec
 
     return (a, v_inf, b, sme, flyby, nu_inf, h, fpa, r_per, r_ijk, v_ijk,
-            r_pqw, v_pqw, r_lvlh, r, v, v_circ, v_esc, H, M_H, n)
+            r_pqw, v_pqw, r_lvlh, v_lvlh, r, v, v_circ, v_esc, H, M_H, n)
 
 
 def orbit_el(p, ecc, inc, raan, arg_p, nu, mu, print_flag=False):
