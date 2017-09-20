@@ -528,6 +528,9 @@ def conic_orbit(p, ecc, inc, raan, arg_p, nu_i, nu_f):
     xs = rs * np.cos(nu_i)
     ys = rs * np.sin(nu_i)
     zs = 0
+
+    pos_pqw = np.stack(( x, y, z ), axis=1)
+    sat_pqw = np.array([ xs, ys, zs ])
     # rotate orbit plane to correct orientation
 
     # M_rot = [cos(raan) * cos(arg_p) - sin(raan) * cos(inc) * sin(arg_p) -cos(raan) * sin(arg_p) - sin(raan) * cos(inc) * cos(arg_p) sin(raan) * sin(inc);
@@ -547,8 +550,11 @@ def conic_orbit(p, ecc, inc, raan, arg_p, nu_i, nu_f):
     xs = sat_pos[0]
     ys = sat_pos[1]
     zs = sat_pos[2]
+    
+    pos_eci = np.stack(( x, y, z ), axis=1)
+    sat_eci = np.array([ xs, ys, zs ])
 
-    return (x, y, z, xs, ys, zs)
+    return (pos_eci, sat_eci, pos_pqw, sat_pqw)
 
 
 def nu2anom(nu, ecc):
