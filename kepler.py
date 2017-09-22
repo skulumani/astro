@@ -539,23 +539,11 @@ def conic_orbit(p, ecc, inc, raan, arg_p, nu_i, nu_f):
     # M_rot = [cos(raan) * cos(arg_p) - sin(raan) * cos(inc) * sin(arg_p) -cos(raan) * sin(arg_p) - sin(raan) * cos(inc) * cos(arg_p) sin(raan) * sin(inc);
     #         sin(raan) * cos(arg_p) + cos(raan) * cos(inc) * sin(arg_p) -sin(raan) * sin(arg_p) + cos(raan) * cos(inc) * cos(arg_p) -cos(raan) * sin(inc);
     #         sin(inc) * sin(arg_p) sin(inc) * cos(arg_p) cos(inc);];
-    dcm_pqw2eci = attitude.rot3(-raan).dot(attitude.rot1(-inc)
-                                           ).dot(attitude.rot3(-arg_p))
+    dcm_pqw2eci = attitude.rot3(-raan, 'r').dot(attitude.rot1(-inc, 'r')
+                                           ).dot(attitude.rot3(-arg_p, 'r'))
 
-    orbit_plane = np.dot(dcm_pqw2eci, np.array([x, y, z]))
-
-    x = orbit_plane[0, :]
-    y = orbit_plane[1, :]
-    z = orbit_plane[2, :]
-
-    sat_pos = np.dot(dcm_pqw2eci, np.array([xs, ys, zs]))
-
-    xs = sat_pos[0]
-    ys = sat_pos[1]
-    zs = sat_pos[2]
-    
-    pos_eci = np.stack(( x, y, z ), axis=1)
-    sat_eci = np.array([ xs, ys, zs ])
+    pos_eci = np.dot(dcm_pqw2eci, pos_pqw.T).T
+    sat_eci = np.dot(dcm_pqw2eci, sat_pqw)
 
     return (pos_eci, sat_eci, pos_pqw, sat_pqw)
 
