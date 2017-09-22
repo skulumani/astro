@@ -475,7 +475,10 @@ def conic_orbit(p, ecc, inc, raan, arg_p, nu_i, nu_f):
            - nu_f - final true anomaly (rad) 0 < nu < 2*pi
 
         Outputs:
-           - none
+            pos_eci : (1000, 3) numpy array of satellite orbit in inertial frame
+            sat_eci : (3,) numpy array of satellite position in inertial frame
+            pos_pqw : (1000, 3) numpy array of orbit in perifocal frame
+            sat_pqw : (3,) numpy array of satellite position in perifocal frame
 
         Dependencies:
            - ROT1,ROT2,ROT3 - principle axis rotation matrices
