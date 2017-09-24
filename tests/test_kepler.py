@@ -1,7 +1,7 @@
 import numpy as np
 # namedtuple to hold constants for each body
 from .. import kepler, constants
-
+import pdb
 def test_coe2rv_equatorial_circular():
     """Test COE to RV for equatorial circular orbit around Earth"""
 
@@ -573,3 +573,18 @@ class TestEllipticalOribtProperties():
 
     def test_arg_p(self):
         np.testing.assert_allclose(self.arg_p*constants.rad2deg, self.arg_p_true, rtol=1e-4)
+
+class TestHNEVector_elliptical_equatorial():
+    r, v, _, _ = kepler.coe2rv(10000, 0.2, 0, 0, 0, 0, constants.earth.mu)
+    h, n, e = kepler.hne_vec(r, v, constants.earth.mu)
+
+    def test_h_vec(self):
+        np.testing.assert_allclose(self.h, np.array([0, 0, 1]))
+
+    def test_n_vec(self):
+        np.testing.assert_allclose(self.n, np.zeros(3))
+
+    def test_e_vec(self):
+        np.testing.assert_allclose(self.e, np.array([1, 0, 0]))
+        
+

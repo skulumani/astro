@@ -126,6 +126,98 @@ def coe2rv(p_in, ecc_in, inc_in, raan_in, arg_p_in, nu_in, mu):
     return (np.squeeze(r_ijk_out), np.squeeze(v_ijk_out), np.squeeze(r_pqw_out),
             np.squeeze(v_pqw_out))
 
+def hne_vec(r, v, mu):
+    r"""Compute fundamental vectors associated with orbit
+
+    This will compute the angular momentum, h, nodal, n, and eccentricity
+    vector, e, for a Keplerian two-body orbit.
+
+    Parameters
+    ----------
+    r : array_like and type
+        <`4:Description of the variable`>
+
+    Returns
+    -------
+    describe : type
+        Explanation of return value named describe
+
+    Other Parameters
+    ----------------
+    only_seldom_used_keywords : type
+        Explanation of this parameter
+
+    Raises
+    ------
+    BadException
+        Because you shouldn't have done that.
+
+    See Also
+    --------
+    other_func: Other function that this one might call
+
+    Notes
+    -----
+    You may include some math:
+
+    .. math:: X(e^{j\omega } ) = x(n)e^{ - j\omega n}
+
+    Author
+    ------
+    Shankar Kulumani		GWU		skulumani@gwu.edu
+
+    References
+    ----------
+    Cite the relevant literature, e.g. [1]_.  You may also cite these
+    references in the notes section above.
+
+    .. [1] Shannon, Claude E. "Communication theory of secrecy systems."
+    Bell Labs Technical Journal 28.4 (1949): 656-715
+
+    Examples
+    --------
+    An example of how to use the function
+
+    >>> a = [1, 2, 3]
+    >>> print [x + 3 for x in a]
+    [4, 5, 6]
+    >>> print "a\n\nb"
+    a
+    b
+
+    """ 
+    
+    # compute angular momentum vector
+    mag_r = np.linalg.norm(r)
+    mag_v = np.linalg.norm(v)
+    rdotv = r.dot(v)
+
+    h = np.cross(r, v)
+    mag_h = np.linalg.norm(h)
+
+    h_hat = h / mag_h
+
+    # compute line of nodes vector
+    n = np.zeros(3)
+    n[0] = -h[1]
+    n[1] = h[0]
+    n[2] = 0.0
+    
+    if np.linalg.norm(n) < constants.small:
+        mag_n = 0
+        n_hat = np.zeros(3)
+    else:
+        mag_n = np.linalg.norm(n)
+        n_hat = n / mag_n
+
+    # compute eccentricity vector
+    e = ((mag_v**2 - mu / mag_r) * r - rdotv * v) / mu
+    if np.linalg.norm(e) < constants.small:
+        e_hat = np.zeros(3)
+    else:
+        e_hat = e / np.linalg.norm(e)
+    
+    return h_hat, n_hat, e_hat
 
 def rv2coe(r, v, mu):
     """Position and Velocity vectors to classical orbital elements
