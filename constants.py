@@ -202,16 +202,16 @@ saturn = Body(
     p=1.42673000e9 * (1 - .05415060**2))
 
 
-callisto = Body(
-    rot_per=0,
-    radius=2575,
-    mu=8825,
-    orbit_sma=20 * saturn.radius,
-    orbit_per=0,
-    orbit_ecc=0.2,
-    orbit_inc=0,
-    mass=0,
-    p=20 * saturn.radius * (1 - 0.2**2))
+titan = Body(
+    rot_per=0.627393,
+    radius=2575.5,
+    mu=8978.19,
+    orbit_sma=1221830.0,
+    orbit_per=15.94542*day2sec,
+    orbit_ecc=0.0292,
+    orbit_inc=0.33,
+    mass=8978.19 / G,
+    p=1221830.0 * (1 - 0.2**2))
 
 # uranus
 uranus = Body(
