@@ -2,6 +2,7 @@
 
 Hold many useful functions for numerical integration of astrodynamics
 """
+from astro import constants
 import numpy as np
 
 def accel_third(mu_j, r_i2j, r_q2j):
@@ -39,3 +40,11 @@ def accel_third(mu_j, r_i2j, r_q2j):
 
     perturbing = direct + indirect
     return direct, indirect, perturbing
+
+def accel_twobody(mass_int, mass_body, r_body2int, G=constants.G):
+    """Two body dominant acceleration
+
+    """
+
+    accel = -G * ( mass_body + mass_int) / np.linalg.norm(r_body2int)**3 * r_body2int
+    return accel
