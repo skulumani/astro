@@ -1,5 +1,5 @@
 import numpy as np
-from .. import time
+from astro import time
 
 deg2rad = np.pi / 180
 rad2deg = 180 / np.pi
