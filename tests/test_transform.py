@@ -1,7 +1,7 @@
 """Test the transform module
 """
 
-from .. import transform
+from astro import transform
 import numpy as np
 
 class TestPQWtoECI():

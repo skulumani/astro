@@ -2,7 +2,7 @@
 """
 import numpy as np
 
-from .. import planets
+from astro import planets
 import pdb
 
 

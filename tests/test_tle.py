@@ -1,7 +1,7 @@
 """Test the TLE parsing and transformations
 """
 import numpy as np
-from .. import tle
+from astro import tle
 import pdb
 import os
 

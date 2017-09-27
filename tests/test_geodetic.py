@@ -1,7 +1,7 @@
 
 import numpy as np
 import pdb
-from .. import geodetic
+from astro import geodetic
 
 deg2rad = np.pi/180
 
