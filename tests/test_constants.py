@@ -1,5 +1,5 @@
 import numpy as np
-from .. import constants
+from astro import constants
 
 
 def test_newton_gravity_constant():
