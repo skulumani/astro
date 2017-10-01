@@ -38,7 +38,7 @@ class NearKernels(object):
     https://pdssbn.astro.umd.edu/data_sb/missions/near/index.shtml
     """
 
-    def __init__(self):
+    def __init__(self, path=cwd):
         """Construct all the member variables for NEAR
         """
         self.near_id = '-93'
@@ -121,7 +121,7 @@ class NearKernels(object):
 
         self.nameList = [getKernelNameFromUrl(url) for url in self.urlList]
         self.kernelDescription = 'Metal Kernel for 2001 NEAR orbit and landing'
-        getKernels(self)
+        getKernels(self, os.path.realpath(path))
         self.metakernel = writeMetaKernel(self, 'near2001.tm')
 
         self.info()
@@ -184,7 +184,7 @@ class CassiniKernels(object):
     https://naif.jpl.nasa.gov/pub/naif/CASSINI/
     """
 
-    def __init__(self):
+    def __init__(self, path=cwd):
         """Initialize the Cassini kernel class
         """
         self.Lsk_url = 'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/a_old_versions/naif0011.tls'
@@ -215,7 +215,7 @@ class CassiniKernels(object):
         self.nameList = [getKernelNameFromUrl(url) for url in self.urlList]
 
         self.kernelDescription = 'Metal Kernel for Cassini Orbiter'
-        getKernels(self)
+        getKernels(self, os.path.realpath(path))
         self.metakernel = writeMetaKernel(self, 'cassini.tm')
 
 def cleanupKernels(kernelObj=CassiniKernels):
@@ -247,13 +247,13 @@ def attemptDownload(url, kernelName, targetFileName, num_attempts=5):
         print("Error downloading kernel: {}. Check if it exists at url: {}".format(kernelName, url))
 
 
-def getKernels(kernelObj=CassiniKernels):
+def getKernels(kernelObj=CassiniKernels, path=cwd):
     """Download all the Kernels
     """
         
     for url in kernelObj.urlList:
         kernelName = getKernelNameFromUrl(url)
-        kernelFile = os.path.join(cwd, directory, kernelName)
+        kernelFile = os.path.join(path, directory, kernelName)
 
         if not os.path.isfile(kernelFile):
             attemptDownload(url, kernelName, kernelFile, 5)
