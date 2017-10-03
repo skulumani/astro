@@ -587,4 +587,18 @@ class TestHNEVector_elliptical_equatorial():
     def test_e_vec(self):
         np.testing.assert_allclose(self.e, np.array([1, 0, 0]))
         
+def test_perapo2aecc_circular():
+    r_per = 8000
+    r_apo = r_per
+    a_actual = r_per
+    p_actual = r_per
+    ecc_actual = 0
+    a, p, ecc = kepler.perapo2aecc(r_per, r_apo)
+    np.testing.assert_allclose((a, p, ecc), (a_actual, p_actual, ecc_actual))
 
+def test_perapo2aecc_semi_major_axis_mean():
+    r_per = 10000
+    r_apo = 20000
+    a_actual = (r_per + r_apo) / 2
+    a, _, _ = kepler.perapo2aecc(r_per, r_apo)
+    np.testing.assert_allclose(a, a_actual)

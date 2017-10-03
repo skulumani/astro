@@ -126,6 +126,45 @@ def coe2rv(p_in, ecc_in, inc_in, raan_in, arg_p_in, nu_in, mu):
     return (np.squeeze(r_ijk_out), np.squeeze(v_ijk_out), np.squeeze(r_pqw_out),
             np.squeeze(v_pqw_out))
 
+def perapo2aecc(r_per, r_apo):
+    """Apoapsis/Periapsis to Semi-major axis and Eccentricity
+
+    Purpose: 
+    - Convert known apoapsis and periapsis distances to semi-major axis
+    adn eccentricity
+
+     a, p, ecc = perapo2aecc(r_per,r_apo)
+
+    Inputs: 
+    - r_per - periapsis distance in km
+    - r_apo - apoapsis distance in km
+
+    Outputs: 
+    - a - semi-major axis in km
+    - ecc - eccentricity
+
+    Dependencies: 
+    - none
+
+    Author: 
+    - Shankar Kulumani 19 Sept 2012
+    - list revisions
+    - Shankar Kulumani 31 Oct 2012
+    - added semi-latus rectum
+    - Shankar Kulumani 2 Oct 2017
+        - convert to Python
+
+    References
+    - AAE532 Notes/PS5
+    """
+
+    ecc = (r_apo-r_per)/(r_per+r_apo)
+    a = r_per/(1-ecc)
+
+    p = a*(1-ecc**2)
+    
+    return a, p, ecc
+
 def hne_vec(r, v, mu):
     r"""Compute fundamental vectors associated with orbit
 
