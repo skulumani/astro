@@ -212,6 +212,130 @@ class Testrv2coeEquatorialCircularQuarer():
     def test_lonper(self):
         np.testing.assert_allclose(self.lonper, self.arg_p_true + self.raan_true)
 
+class Testrv2coeVallado():
+
+    p_true = 1.73527 * constants.earth.radius # km
+    ecc_true = 0.83285
+    inc_true = np.deg2rad(87.87)
+    raan_true = np.deg2rad(227.89)
+    arg_p_true = np.deg2rad(53.38)
+    nu_true = np.deg2rad(92.335)
+    mu = 398600.5 # km^3 /sec^2
+
+    R_ijk_true = np.array([6524.834, 6862.875, 6448.296])
+    V_ijk_true = np.array([4.901320, 5.533756, -1.976341]) 
+    
+    p, a, ecc, inc, raan, arg_p, nu, m, _, _, _= kepler.rv2coe(R_ijk_true, V_ijk_true, mu)
+    
+    rtol = 1e-3
+
+    def test_p(self):
+        np.testing.assert_allclose(self.p, self.p_true, rtol=self.rtol)
+    
+    def test_a(self):
+        np.testing.assert_allclose(self.a, self.p_true / (1 - self.ecc_true**2), rtol=self.rtol)
+
+    def test_ecc(self):
+        np.testing.assert_allclose(self.ecc, self.ecc_true, rtol=self.rtol)
+    
+    def test_inc(self):
+        np.testing.assert_allclose(self.inc, self.inc_true, rtol=self.rtol)
+
+    def test_raan(self):
+        np.testing.assert_allclose(self.raan, self.raan_true, rtol=self.rtol)
+
+    def test_arg_p(self):
+        np.testing.assert_allclose(self.arg_p, self.arg_p_true, rtol=self.rtol)
+    
+    def test_nu(self):
+        np.testing.assert_allclose(self.nu, self.nu_true, rtol=self.rtol)
+
+    def test_m(self):
+        E_true, M_true = kepler.nu2anom(self.nu, self.ecc)
+        np.testing.assert_allclose(self.m, M_true, rtol=self.rtol)
+
+
+class Testrv2coeCurtis():
+    """Using example 4.7 from Curtis
+    """
+    p_true = 80000**2/398600
+    ecc_true = 1.4
+    inc_true = np.deg2rad(30)
+    raan_true = np.deg2rad(40)
+    arg_p_true = np.deg2rad(60)
+    nu_true = np.deg2rad(30)
+    mu = 398600 # km^3 /sec^2
+
+    R_ijk_true = np.array([-4040, 4815, 3629])
+    V_ijk_true = np.array([-10.39, -4.772, 1.744]) 
+    
+    p, a, ecc, inc, raan, arg_p, nu, m, _, _, _= kepler.rv2coe(R_ijk_true, V_ijk_true, mu)
+    
+    rtol = 1e-3
+
+    def test_p(self):
+        np.testing.assert_allclose(self.p, self.p_true, rtol=self.rtol)
+    
+    def test_a(self):
+        np.testing.assert_allclose(np.absolute(self.a), self.p_true / (self.ecc_true**2 - 1), rtol=1e2)
+
+    def test_ecc(self):
+        np.testing.assert_allclose(self.ecc, self.ecc_true, rtol=1e-1)
+    
+    def test_inc(self):
+        np.testing.assert_allclose(self.inc, self.inc_true, rtol=self.rtol)
+
+    def test_raan(self):
+        np.testing.assert_allclose(self.raan, self.raan_true, rtol=self.rtol)
+
+    def test_arg_p(self):
+        np.testing.assert_allclose(self.arg_p, self.arg_p_true, rtol=self.rtol)
+    
+    def test_nu(self):
+        np.testing.assert_allclose(self.nu, self.nu_true, rtol=self.rtol)
+
+    def test_m(self):
+        E_true, M_true = kepler.nu2anom(self.nu, self.ecc)
+        np.testing.assert_allclose(self.m, M_true, rtol=self.rtol)
+
+def test_coe2rv_curtis():
+    """Test COE to RV for Curtis example 4.3"""
+
+    p_true = 80000**2/398600
+    ecc_true = 1.4
+    inc_true = np.deg2rad(30)
+    raan_true = np.deg2rad(40)
+    arg_p_true = np.deg2rad(60)
+    nu_true = np.deg2rad(30)
+    mu = 398600 # km^3 /sec^2
+
+    R_ijk_true = np.array([-4040, 4815, 3629])
+    V_ijk_true = np.array([-10.39, -4.772, 1.744]) 
+    
+    R_ijk, V_ijk, R_pqw, V_pqw = kepler.coe2rv(p_true,ecc_true,inc_true,raan_true,arg_p_true,nu_true, mu)
+
+    np.testing.assert_allclose(R_ijk,R_ijk_true, rtol=1e0)
+    np.testing.assert_allclose(V_ijk,V_ijk_true, rtol=1e0)
+
+def test_coe2rv_vallado():
+    """Test COE to RV for Vallado example 2-6"""
+
+    p_true = 1.735272 * constants.earth.radius # km
+    ecc_true = 0.832853
+    inc_true = np.deg2rad(87.87)
+    raan_true = np.deg2rad(227.89)
+    arg_p_true = np.deg2rad(53.38)
+    nu_true = np.deg2rad(92.336)
+    mu = 398600.5 # km^3 /sec^2
+
+    R_ijk_true = np.array([6525.5454,6861.7313, 6449.0585])
+    V_ijk_true = np.array([4.902227, 5.533085, -1.975757]) 
+    
+    R_ijk, V_ijk, R_pqw, V_pqw = kepler.coe2rv(p_true,ecc_true,inc_true,raan_true,arg_p_true,nu_true, mu)
+
+    np.testing.assert_allclose(R_ijk,R_ijk_true, rtol=1e-4)
+    np.testing.assert_allclose(V_ijk,V_ijk_true, rtol=1e-4)
+
 def test_coe2rv_equatorial_circular_half():
     """Test COE to RV for equatorial circular orbit around Earth"""
 
