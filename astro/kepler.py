@@ -126,6 +126,7 @@ def coe2rv(p_in, ecc_in, inc_in, raan_in, arg_p_in, nu_in, mu):
     return (np.squeeze(r_ijk_out), np.squeeze(v_ijk_out), np.squeeze(r_pqw_out),
             np.squeeze(v_pqw_out))
 
+
 def perapo2aecc(r_per, r_apo):
     """Apoapsis/Periapsis to Semi-major axis and Eccentricity
 
@@ -158,12 +159,13 @@ def perapo2aecc(r_per, r_apo):
     - AAE532 Notes/PS5
     """
 
-    ecc = (r_apo-r_per)/(r_per+r_apo)
-    a = r_per/(1-ecc)
+    ecc = (r_apo - r_per) / (r_per + r_apo)
+    a = r_per / (1 - ecc)
 
-    p = a*(1-ecc**2)
-    
+    p = a * (1 - ecc**2)
+
     return a, p, ecc
+
 
 def hne_vec(r, v, mu):
     r"""Compute fundamental vectors associated with orbit
@@ -224,8 +226,8 @@ def hne_vec(r, v, mu):
     a
     b
 
-    """ 
-    
+    """
+
     # compute angular momentum vector
     mag_r = np.linalg.norm(r)
     mag_v = np.linalg.norm(v)
@@ -241,7 +243,7 @@ def hne_vec(r, v, mu):
     n[0] = -h[1]
     n[1] = h[0]
     n[2] = 0.0
-    
+
     if np.linalg.norm(n) < constants.small:
         mag_n = 0
         n_hat = np.zeros(3)
@@ -255,8 +257,9 @@ def hne_vec(r, v, mu):
         e_hat = np.zeros(3)
     else:
         e_hat = e / np.linalg.norm(e)
-    
+
     return h_hat, n_hat, e_hat
+
 
 def rv2coe(r, v, mu):
     """Position and Velocity vectors to classical orbital elements
@@ -587,41 +590,53 @@ def kepler_eq_E(M_in, ecc_in):
     return (np.squeeze(E_out), np.squeeze(nu_out), np.squeeze(count_out))
 
 
-def conic_orbit(p, ecc, inc, raan, arg_p, nu_i, nu_f):
+def conic_orbit(p, ecc, inc, raan, arg_p, nu_i, nu_f, mu=constants.earth.mu):
     """Plot conic orbit
 
-        Purpose:
-           - Uses the polar conic equation to plot a conic orbit
+    Purpose:
+        - Uses the polar conic equation to plot a conic orbit
 
-        [x y z xs ys zs ] = conic_orbit(p,ecc,inc,raan,arg_p,nu_i,nu_f)
+    state_eci, state_pqw, state_lvlh, state_sat_eci, state_sat_pqw,
+    state_sat_lvlh = conic_orbit(p,ecc,inc,raan,arg_p,nu_i,nu_f)
 
-        Inputs:
-           - p - semi-major axis (km)
-           - ecc - eccentricity
-           - raan - right acsension of the ascending node (rad) 0 < raan <
-           2*pi
-           - inc - inclination (rad) 0 < inc < pi
-           - arg_p - argument of periapsis (rad) 0 < arg_p < 2*pi
-           - nu_i - initial true anomaly (rad) 0 < nu < 2*pi
-           - nu_f - final true anomaly (rad) 0 < nu < 2*pi
+    Inputs:
+        - p - semi-major axis (km)
+        - ecc - eccentricity
+        - raan - right acsension of the ascending node (rad) 0 < raan <
+        2*pi
+        - inc - inclination (rad) 0 < inc < pi
+        - arg_p - argument of periapsis (rad) 0 < arg_p < 2*pi
+        - nu_i - initial true anomaly (rad) 0 < nu < 2*pi
+        - nu_f - final true anomaly (rad) 0 < nu < 2*pi
+        - mu - gravitational paramter of central body (km^3/sec^2)
 
-        Outputs:
-            pos_eci : (1000, 3) numpy array of satellite orbit in inertial frame
-            sat_eci : (3,) numpy array of satellite position in inertial frame
-            pos_pqw : (1000, 3) numpy array of orbit in perifocal frame
-            sat_pqw : (3,) numpy array of satellite position in perifocal frame
+    Outputs:
+        state_eci : (1000, 6) numpy array of satellite orbit in inertial frame
+        state_pqw : (1000, 6) numpy array of satellite orbi in perifocal frame
+        state_lvlh : (1000, 6) numpy array of satellite orbit in local
+        veritical local horizontal frame
+        state_sat_eci : (6,) numpy array of satellite state in inertial frame
+        state_sat_pqw : (6,) numpy array of satellite state in perifocal frame
+        state_sat_lvlh : (6,) numpy array of satellite state in local veritical and local horizontal fram
 
-        Dependencies:
-           - ROT1,ROT2,ROT3 - principle axis rotation matrices
+        the state is defined as 6 elements
+        state[0:3] - position in reference frame in kilometer
+        state[3:6] - velocity in reference frame in kilometer/second
 
-        Author:
-           - Shankar Kulumani 1 Dec 2012
-               - list revisions
-           - Shankar Kulumani 5 Dec 2014
-               - added outputs for orbit gui functions
+    Dependencies:
+        - ROT1,ROT2,ROT3 - principle axis rotation matrices
 
-        References
-           - AAE532
+    Author:
+        - Shankar Kulumani 1 Dec 2012
+            - list revisions
+        - Shankar Kulumani 5 Dec 2014
+            - added outputs for orbit gui functions
+        - Shankar Kulumani 5 Oct 2017
+            - modify to include velocity and all three reference frames
+
+    References
+        - AAE532
+        - MAE3145
     """
 
     tol = 1e-9
@@ -655,28 +670,53 @@ def conic_orbit(p, ecc, inc, raan, arg_p, nu_i, nu_f):
         r = p / (1 + ecc * np.cos(v))
         rs = p / (1 + ecc * np.cos(nu_i))
 
-    x = r * np.cos(v)
-    y = r * np.sin(v)
-    z = np.zeros_like(x)
+    # position and velocity in local vertical and local horizontal frame
+    pos_lvlh = np.stack((r, np.zeros_like(r), np.zeros_like(r)), axis=1)
+    sat_lvlh = np.array([rs, 0, 0])
 
-    xs = rs * np.cos(nu_i)
-    ys = rs * np.sin(nu_i)
-    zs = 0
+    vr = np.sqrt(mu / p) * ecc * np.sin(v)
+    vt = np.sqrt(mu / p) * (1 + ecc * np.cos(v))
 
-    pos_pqw = np.stack(( x, y, z ), axis=1)
-    sat_pqw = np.array([ xs, ys, zs ])
-    # rotate orbit plane to correct orientation
+    vr_sat = np.sqrt(mu / p) * ecc * np.sin(nu_i)
+    vt_sat = np.sqrt(mu / p) * (1 + ecc * np.cos(nu_i))
 
-    # M_rot = [cos(raan) * cos(arg_p) - sin(raan) * cos(inc) * sin(arg_p) -cos(raan) * sin(arg_p) - sin(raan) * cos(inc) * cos(arg_p) sin(raan) * sin(inc);
-    #         sin(raan) * cos(arg_p) + cos(raan) * cos(inc) * sin(arg_p) -sin(raan) * sin(arg_p) + cos(raan) * cos(inc) * cos(arg_p) -cos(raan) * sin(inc);
-    #         sin(inc) * sin(arg_p) sin(inc) * cos(arg_p) cos(inc);];
+    v_lvlh = np.stack((vr, vt, np.zeros_like(vt)), axis=1)
+    vs_lvlh = np.array([vr_sat, vt_sat, 0])
+
+    # convert to perifocal reference frame
+    pos_pqw = np.stack((r * np.cos(v),
+                        r * np.sin(v),
+                        np.zeros_like(r)), axis=1)
+    sat_pqw = np.array([rs * np.cos(nu_i),
+                        rs * np.sin(nu_i),
+                        np.zeros_like(rs)])
+
+    v_pqw = np.stack((np.cos(v) * vr - np.sin(v) * vt,
+                      np.sin(v) * vr + np.cos(v) * vt,
+                      np.zeros_like(vr)), axis=1)
+    vs_pqw = np.array([np.cos(nu_i) * vr_sat - np.sin(nu_i) * vt_sat,
+                       np.sin(nu_i) * vr_sat + np.cos(nu_i) * vt_sat,
+                       0])
+    # rotate orbit plane to inertial frame
     dcm_pqw2eci = attitude.rot3(-raan, 'r').dot(attitude.rot1(-inc, 'r')
-                                           ).dot(attitude.rot3(-arg_p, 'r'))
+                                                ).dot(attitude.rot3(-arg_p, 'r'))
 
     pos_eci = np.dot(dcm_pqw2eci, pos_pqw.T).T
     sat_eci = np.dot(dcm_pqw2eci, sat_pqw)
 
-    return (pos_eci, sat_eci, pos_pqw, sat_pqw)
+    v_eci = np.dot(dcm_pqw2eci, v_pqw.T).T
+    vs_eci = np.dot(dcm_pqw2eci, vs_pqw)
+
+    state_eci = np.concatenate((pos_eci, v_eci), axis=1)
+    state_pqw = np.concatenate((pos_pqw, v_pqw), axis=1)
+    state_lvlh = np.concatenate((pos_lvlh, v_lvlh), axis=1)
+
+    state_sat_eci = np.concatenate((sat_eci, vs_eci))
+    state_sat_pqw = np.concatenate((sat_pqw, vs_pqw))
+    state_sat_lvlh = np.concatenate((sat_lvlh, vs_lvlh))
+
+    return (state_eci, state_pqw, state_lvlh, state_sat_eci, state_sat_pqw,
+            state_sat_lvlh)
 
 
 def nu2anom(nu, ecc):

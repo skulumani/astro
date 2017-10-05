@@ -583,20 +583,29 @@ class TestConicOrbitEquatorial():
     arg_p = 0.0
     nu_i = 0.0
     nu_f = 0.0 
-
-    pos_eci, sat_eci, pos_pqw, sat_pqw = kepler.conic_orbit(p, ecc, inc, raan, arg_p, nu_i, nu_f)
+    mu = constants.earth.mu
+    (state_eci, state_pqw, state_lvlh, state_sat_eci, state_sat_pqw,
+     state_sat_lvlh) = kepler.conic_orbit(p, ecc, inc, raan, arg_p, nu_i, nu_f,
+                                          mu)
 
     def test_x_axis(self):
-        np.testing.assert_allclose(self.sat_eci[0], self.p)
+        np.testing.assert_allclose(self.state_sat_eci[0], self.p)
 
     def test_y_axis(self):
-        np.testing.assert_allclose(self.sat_eci[1], 0)
+        np.testing.assert_allclose(self.state_sat_eci[1], 0)
 
     def test_z_axis(self):
-        np.testing.assert_allclose(self.sat_eci[2], 0)
+        np.testing.assert_allclose(self.state_sat_eci[2], 0)
 
     def test_circular_orbit(self):
-        np.testing.assert_allclose(np.linalg.norm(self.pos_eci, axis=1), self.p)
+        np.testing.assert_allclose(np.linalg.norm(self.state_eci[:, 0:3],
+                                                  axis=1), self.p)
+    
+    def test_lvlh_radial_velocity(self):
+        np.testing.assert_allclose(self.state_lvlh[:, 3], 0)
+
+    def test_lvlh_tangential_velocity(self):
+        np.testing.assert_allclose(self.state_lvlh[:, 4], np.sqrt(self.mu/self.p))
 
 class TestConicOrbitHyperbolic():
 
@@ -608,16 +617,17 @@ class TestConicOrbitHyperbolic():
     nu_i = 0.0
     nu_f = 0.0 
 
-    pos_eci, sat_eci, pos_pqw, sat_pqw = kepler.conic_orbit(p, ecc, inc, raan, arg_p, nu_i, nu_f)
+    (state_eci, state_pqw, state_lvlh, state_sat_eci, state_sat_pqw,
+     state_sat_lvlh) = kepler.conic_orbit(p, ecc, inc, raan, arg_p, nu_i, nu_f)
     
     def test_x_axis(self):
-        np.testing.assert_allclose(self.sat_eci[0], self.p/(1-self.ecc**2)*(1-self.ecc))
+        np.testing.assert_allclose(self.state_sat_eci[0], self.p/(1-self.ecc**2)*(1-self.ecc))
 
     def test_y_axis(self):
-        np.testing.assert_allclose(self.sat_eci[1], 0)
+        np.testing.assert_allclose(self.state_sat_eci[1], 0)
 
     def test_z_axis(self):
-        np.testing.assert_allclose(self.sat_eci[2], 0)
+        np.testing.assert_allclose(self.state_sat_eci[2], 0)
 
 class TestConicOrbitParabolic():
 
@@ -629,16 +639,17 @@ class TestConicOrbitParabolic():
     nu_i = 0.0
     nu_f = 0.0 
 
-    pos_eci, sat_eci, pos_pwq, sat_pqw = kepler.conic_orbit(p, ecc, inc, raan, arg_p, nu_i, nu_f)
+    (state_eci, state_pqw, state_lvlh, state_sat_eci, state_sat_pqw,
+     state_sat_lvlh) = kepler.conic_orbit(p, ecc, inc, raan, arg_p, nu_i, nu_f)
     
     def test_x_axis(self):
-        np.testing.assert_allclose(self.sat_eci[0], self.p/2)
+        np.testing.assert_allclose(self.state_sat_eci[0], self.p/2)
 
     def test_y_axis(self):
-        np.testing.assert_allclose(self.sat_eci[1], 0)
+        np.testing.assert_allclose(self.state_sat_eci[1], 0)
 
     def test_z_axis(self):
-        np.testing.assert_allclose(self.sat_eci[2], 0)
+        np.testing.assert_allclose(self.state_sat_eci[2], 0)
 
 class TestEllipticalOribtProperties():
     # test case from RV2COE Astro 321, MAE3145
