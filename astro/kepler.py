@@ -593,39 +593,50 @@ def kepler_eq_E(M_in, ecc_in):
 def conic_orbit(p, ecc, inc, raan, arg_p, nu_i, nu_f, mu=constants.earth.mu):
     """Plot conic orbit
 
-        Purpose:
-           - Uses the polar conic equation to plot a conic orbit
+    Purpose:
+        - Uses the polar conic equation to plot a conic orbit
 
-        pos_eci, sat_eci, pos_pqw, sat_pqw = conic_orbit(p,ecc,inc,raan,arg_p,nu_i,nu_f)
+    state_eci, state_pqw, state_lvlh, state_sat_eci, state_sat_pqw,
+    state_sat_lvlh = conic_orbit(p,ecc,inc,raan,arg_p,nu_i,nu_f)
 
-        Inputs:
-           - p - semi-major axis (km)
-           - ecc - eccentricity
-           - raan - right acsension of the ascending node (rad) 0 < raan <
-           2*pi
-           - inc - inclination (rad) 0 < inc < pi
-           - arg_p - argument of periapsis (rad) 0 < arg_p < 2*pi
-           - nu_i - initial true anomaly (rad) 0 < nu < 2*pi
-           - nu_f - final true anomaly (rad) 0 < nu < 2*pi
-           - mu - gravitational paramter of central body (km^3/sec^2)
+    Inputs:
+        - p - semi-major axis (km)
+        - ecc - eccentricity
+        - raan - right acsension of the ascending node (rad) 0 < raan <
+        2*pi
+        - inc - inclination (rad) 0 < inc < pi
+        - arg_p - argument of periapsis (rad) 0 < arg_p < 2*pi
+        - nu_i - initial true anomaly (rad) 0 < nu < 2*pi
+        - nu_f - final true anomaly (rad) 0 < nu < 2*pi
+        - mu - gravitational paramter of central body (km^3/sec^2)
 
-        Outputs:
-            pos_eci : (1000, 3) numpy array of satellite orbit in inertial frame
-            sat_eci : (3,) numpy array of satellite position in inertial frame
-            pos_pqw : (1000, 3) numpy array of orbit in perifocal frame
-            sat_pqw : (3,) numpy array of satellite position in perifocal frame
+    Outputs:
+        state_eci : (1000, 6) numpy array of satellite orbit in inertial frame
+        state_pqw : (1000, 6) numpy array of satellite orbi in perifocal frame
+        state_lvlh : (1000, 6) numpy array of satellite orbit in local
+        veritical local horizontal frame
+        state_sat_eci : (6,) numpy array of satellite state in inertial frame
+        state_sat_pqw : (6,) numpy array of satellite state in perifocal frame
+        state_sat_lvlh : (6,) numpy array of satellite state in local veritical and local horizontal fram
 
-        Dependencies:
-           - ROT1,ROT2,ROT3 - principle axis rotation matrices
+        the state is defined as 6 elements
+        state[0:3] - position in reference frame in kilometer
+        state[3:6] - velocity in reference frame in kilometer/second
 
-        Author:
-           - Shankar Kulumani 1 Dec 2012
-               - list revisions
-           - Shankar Kulumani 5 Dec 2014
-               - added outputs for orbit gui functions
+    Dependencies:
+        - ROT1,ROT2,ROT3 - principle axis rotation matrices
 
-        References
-           - AAE532
+    Author:
+        - Shankar Kulumani 1 Dec 2012
+            - list revisions
+        - Shankar Kulumani 5 Dec 2014
+            - added outputs for orbit gui functions
+        - Shankar Kulumani 5 Oct 2017
+            - modify to include velocity and all three reference frames
+
+    References
+        - AAE532
+        - MAE3145
     """
 
     tol = 1e-9
