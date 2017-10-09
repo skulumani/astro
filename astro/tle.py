@@ -104,6 +104,9 @@ def get_tle_spacetrack(filename, flag='all'):
         elif flag == 'comfix':
             all_tles = st.tle_latest(favorites='COMFIX', ordinal=1,
                                      format='3le')
+        elif flag == 'propagate':
+            all_tles = st.tle_latest(favorites='PROPAGATE', ordinal=1,
+                                     format='3le')
         else:
             print("Incorrect TLE favorites flag")
             all_tles = "Incorrect flag"
