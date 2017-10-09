@@ -547,10 +547,15 @@ def test_tof_delta_t():
     """Test propogation using Kepler's Eq"""
 
     # define circular orbit around the Earth
-
-    # find period of orbit and propogate over 1 period
-
+    p = 8000
+    ecc = 0
+    mu = constants.earth.mu
+    nu_0 = np.pi/2
+    delta_t = 2 * np.pi * np.sqrt(p**3/ mu)
+    
     # make sure you get back to the same spot
+    E_f, M_f, nu_f = kepler.tof_delta_t( p, ecc, mu, nu_0, delta_t)
+    np.testing.assert_allclose(nu_f, nu_0)
 
     
 
