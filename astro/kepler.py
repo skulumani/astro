@@ -793,8 +793,40 @@ def nu2anom(nu, ecc):
 
 
 def tof_delta_t(p, ecc, mu, nu_0, delta_t):
-    """
-        Propogate a COE into the future
+    """Use time of fligt to compute future true anomaly for eccentric orbits
+
+       Calculate change in orbital position (true anomaly) given a delta_t
+       change in time
+
+    Inputs: 
+        - p - semi-latus rectum in km
+        - ecc - eccentricity of orbit 0 < ecc < 1
+        - mu - gravitational parameter
+        - nu_0 - initial true anomaly in rad 0 < nu_0 < 2*pi
+        - delta_t - change in time in seconds
+        
+    Outputs: 
+        - nu_f - true anomaly after delta_t in rad 0 < nu_f < 2*pi
+
+    Dependencies: 
+        - ecc_anomaly.m - calculates eccentric and mean anomaly from true
+        anomaly
+        - kepler_eq_E.m - solves for eccentric anomaly and true anomaly
+        given a mean anomaly
+
+    Author: 
+        - Shankar Kulumani 15 Sept 2012
+            - written using USAFA code and AAE532 PS4 homework
+        - Shankar Kulumani 19 Sept 2012
+            - added E and M outputs
+        - Shankar Kulumani 1 Oct 2012
+            - added semi-latus rectum input
+        - Shankar Kulumani 9 Oct 2017
+            - now in Python
+
+    References
+        - Vallado 3rd Edition
+        - AAE532 Notes
     """
 
     tol = 1e-9
