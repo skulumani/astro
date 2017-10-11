@@ -2,6 +2,9 @@ import numpy as np
 # namedtuple to hold constants for each body
 from astro import kepler, constants
 import pdb
+
+#TODO:Add test for tof_nu
+
 def test_coe2rv_equatorial_circular():
     """Test COE to RV for equatorial circular orbit around Earth"""
 

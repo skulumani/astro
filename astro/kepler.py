@@ -820,6 +820,68 @@ def tof_delta_t(p, ecc, mu, nu_0, delta_t):
 
     return (E_f, M_f, nu_f)
 
+def tof_nu(p, ecc, nu_1, nu_2, mu=constants.earth.mu):
+    """Calculate TOF between two known true anomaly positions
+
+    Inputs: 
+        - p - semi-major axis (or semi-parameter for parabolic) in km
+        - ecc - eccentricity 0 < ecc < 1
+        - mu - gravitational parameter of central body in km^3/sec^2
+        - nu_0 - initial true anomaly in rad 0 < nu_0 < 2*pi
+        - nu_f - final true anomaly in rad 0 < nu_f < 2*pi
+
+    Outputs: 
+        - tof - time of flight in seconds
+
+    Dependencies: 
+        - ecc_anomaly - calculates eccentric anomaly from true anomlay
+
+    Author: 
+        - Shankar Kulumani 16 Sept 2012
+            - uses code from AAE532 PS4 in function form
+        - Shankar Kulumani 29 Sept 2012
+            - added eccentricity logic for different orbit types
+        - Shankar Kulumani 1 Oct 2012
+            - added semi-latus rectum instead of semi-major axis
+        - Shankar Kulumani  11 Oct 2017
+            - convert to Python
+
+    Note:
+        Currently only supports elliptical orbits. Need to modify
+
+    References
+        - AAE532 Notes
+        - Vallado 3rd Edition
+        - Bate,Mueller,White
+    """
+
+    tol = constants.small
+
+    # calculate eccentric anomaly from true anomaly
+    #TODO: need to modify to handle other orbit types
+    E_0, M_0 = nu2anom(nu_1,ecc)
+
+    E_f, M_f = nu2anom(nu_2,ecc)
+
+
+    # check eccentricity
+    if np.absolute(ecc-1) < tol: # parabolic
+        
+        n = 2*np.sqrt(mu/p**3)
+    elif ecc > 1+tol:
+        a = p/(ecc**2-1)
+        # calculate mean motion
+        n = np.sqrt(mu/a**3)
+    else:
+        a = p/(1-ecc**2)
+        # calculate mean motion
+        n = np.sqrt(mu/a**3)
+
+    # calculate time of flight
+
+    tof = (M_f-M_0)/n
+    
+    return tof
 
 def fpa_solve(nu, ecc):
     """Calculate flight path angle
