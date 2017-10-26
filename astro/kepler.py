@@ -451,8 +451,10 @@ def rv2coe(r, v, mu):
 
 
 def kepler_eq_E(M_in, ecc_in):
-    """
-    (E,nu,count) = kepler_eq_E(M,ecc)
+    """Solve Kepler's Equation for all orbit types
+
+    (E, nu, count) = kepler_eq_E(M, ecc)
+
     Purpose:
        - This function solves Kepler's equation for eccentric anomaly
        given a mean anomaly using a newton-rapson method.
@@ -465,6 +467,7 @@ def kepler_eq_E(M_in, ecc_in):
     Outputs:
        - E - eccentric anomaly in rad 0 < E < 2*pi
        - nu - true anomaly in rad 0 < nu < 2*pi
+       - count - number of iterations to converge
 
     Dependencies:
        - none
