@@ -1409,3 +1409,42 @@ def orbit_el(p, ecc, inc, raan, arg_p, nu, mu, print_flag=False):
         print(string)
 
     return string
+
+def semilatus_rectum(a, ecc):
+    r"""Compute the semilatus rectum
+
+    Given the semimajor axis and eccentricty, this will compute the semilatus rectum.
+
+    Parameters
+    ----------
+    a : float
+        Semimajor axis (distance unit)
+    ecc : float
+        Eccentricity of orbit (unitless)
+
+    Returns
+    -------
+    p : float
+        Semilatus rectum in the same units as a
+
+    Notes
+    -----
+
+    .. math:: p = a ( 1 - e^2)
+
+    Author
+    ------
+    Shankar Kulumani		GWU		skulumani@gwu.edu
+
+    References
+    ----------
+
+    .. [1] Fundamentals of Astrodynamics
+
+    """
+    p = a * (1 - ecc**2)
+    if ecc == 1:
+        print('Parabolic orbits a = infty, just setting p = 0')
+        p = 0
+
+    return p

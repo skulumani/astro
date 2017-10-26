@@ -745,3 +745,31 @@ def test_perapo2aecc_semi_major_axis_mean():
     a_actual = (r_per + r_apo) / 2
     a, _, _ = kepler.perapo2aecc(r_per, r_apo)
     np.testing.assert_allclose(a, a_actual)
+
+class TestSemiLatusRectum():
+
+    def test_circular(self):
+        a = 8000
+        ecc = 0
+        p = kepler.semilatus_rectum(a, ecc)
+        np.testing.assert_allclose(p, a)
+    
+    def test_elliptical(self):
+        a = 8000
+        ecc = 0.5
+        p = kepler.semilatus_rectum(a, ecc)
+        np.testing.assert_allclose(p, a * (1 - ecc**2))
+
+    def test_parabolic(self):
+        """Shouldn't work since parabolas have infinite a
+        """
+        a = np.infty
+        ecc = 1
+        p = kepler.semilatus_rectum(a, ecc)
+        np.testing.assert_allclose(p, 0)
+    
+    def test_hyperbolic(self):
+        a = -8000
+        ecc = 1.5
+        p = kepler.semilatus_rectum(a, ecc)
+        np.testing.assert_allclose(p, a * (1 - ecc**2))
