@@ -1147,7 +1147,7 @@ def hyp_orbit_el(p, ecc, inc, raan, arg_p, nu, mu):
     # flyby angle (rad)
     flyby = np.arcsin(1 / ecc) * 2
     # true anomaly at infinite radius (rad)
-    nu_inf = pi / 2 + flyby / 2
+    nu_inf = np.pi / 2 + flyby / 2
 
     # angular momentum scalar
     h = np.sqrt(p * mu)  # km^2/sec
@@ -1489,7 +1489,7 @@ def hyp_per2sma(rp, ecc):
         print("Eccentricty should be greater than 1")
         return 1
 
-    a = -rp / (ecc - 1)
+    a = - rp / (ecc - 1)
     p = semilatus_rectum(a, ecc)
     return a, p
 
