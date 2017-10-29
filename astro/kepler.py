@@ -6,7 +6,7 @@ import numpy as np
 from kinematics import attitude
 import pdb
 from . import constants
-
+import sys
 
 def coe2rv(p_in, ecc_in, inc_in, raan_in, arg_p_in, nu_in, mu):
     """
@@ -176,7 +176,7 @@ def hne_vec(r, v, mu):
     Parameters
     ----------
     r : array_like and type
-        <`4:Description of the variable`>
+        Description of the variable
 
     Returns
     -------
@@ -1451,3 +1451,45 @@ def semilatus_rectum(a, ecc):
         p = 0
 
     return p
+
+def hyp_per2sma(rp, ecc):
+    r"""Convert periapsis to semimajor axis for hyperbolic orbits
+
+    Determine semi-major axis and semi-latus rectum for hyperbolic orbits
+
+    Parameters
+    ----------
+    rp : float
+        Periapsis distance in kilometers or other distance unit
+    ecc : float
+        Eccentricty of orbit - should be greater than 1
+
+    Returns
+    -------
+    a : float
+        Semimajor axis in kilometers
+    p : float
+        Semilatus rectum in same units as input distance
+
+    Author
+    ------
+    Shankar Kulumani		GWU		skulumani@gwu.edu
+
+    References
+    ----------
+    Cite the relevant literature, e.g. [1]_.  You may also cite these
+    references in the notes section above.
+
+    .. [1] Shannon, Claude E. "Communication theory of secrecy systems."
+    Bell Labs Technical Journal 28.4 (1949): 656-715
+
+    """
+    
+    if ecc <= 1:
+        print("Eccentricty should be greater than 1")
+        return 1
+
+    a = rp / (ecc - 1)
+    p = semilatus_rectum(a, ecc)
+    return a, p
+
