@@ -1489,7 +1489,7 @@ def hyp_per2sma(rp, ecc):
         print("Eccentricty should be greater than 1")
         return 1
 
-    a = rp / (ecc - 1)
+    a = -rp / (ecc - 1)
     p = semilatus_rectum(a, ecc)
     return a, p
 

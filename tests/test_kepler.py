@@ -773,3 +773,11 @@ class TestSemiLatusRectum():
         ecc = 1.5
         p = kepler.semilatus_rectum(a, ecc)
         np.testing.assert_allclose(p, a * (1 - ecc**2))
+
+def test_hyperbolic_semi_major_axis():
+    a_actual = -147562.739
+    p_actual = 15125.180
+
+    a, p = kepler.hyp_per2sma(1000 + 6378.137, 1.05)
+    np.testing.assert_allclose(a, a_actual)
+    np.testing.assert_allclose(p, p_actual)
