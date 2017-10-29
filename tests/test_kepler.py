@@ -717,6 +717,35 @@ class TestEllipticalOribtProperties():
     def test_arg_p(self):
         np.testing.assert_allclose(self.arg_p*constants.rad2deg, self.arg_p_true, rtol=1e-4)
 
+class TestHyperbolicOrbitProperties():
+    """From MAE3145 HW4 Problem 2
+    """
+    mu = constants.earth.mu
+    rp = 1000 + constants.earth.radius
+    ecc = 1.05
+
+    a_true = 147562.7399
+    p_true = 15125.19
+    energy_true = 1.350613644
+    vinf_true = 1.64354108
+    nu_inf_true = np.deg2rad(162.2472)
+    
+    a, p = kepler.hyp_per2sma(rp, ecc) 
+    (a, v_inf, b, sme, flyby, nu_inf, h, fpa, r_per, r_ijk, v_ijk, r_pqw,
+     v_pqw, r_lvlh, v_lvlh, r, v, v_circ, v_esc, H, M_H, n) = kepler.hyp_orbit_el(p, ecc, 0, 0, 0, np.pi/2, mu)
+   
+    def test_semi_major_axis(self):
+        np.testing.assert_allclose(self.a, self.a_true)
+    
+    def test_specific_mechanical_energy(self):
+        np.testing.assert_allclose(self.sme, self.energy_true)
+    
+    def test_velocity_infinity(self):
+        np.testing.assert_allclose(self.v_inf, self.vinf_true)
+    
+    def test_true_anomaly_infinity(self):
+        np.testing.assert_allclose(self.nu_inf, self.nu_inf_true)
+
 class TestHNEVector_elliptical_equatorial():
     r, v, _, _ = kepler.coe2rv(10000, 0.2, 0, 0, 0, 0, constants.earth.mu)
     h, n, e = kepler.hne_vec(r, v, constants.earth.mu)
