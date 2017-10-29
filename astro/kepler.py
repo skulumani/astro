@@ -1292,7 +1292,7 @@ def orbit_el(p, ecc, inc, raan, arg_p, nu, mu, print_flag=False):
             'T_PAST_PER', 1 / n * M, 1 / n * M / 3600)
     elif (ecc - 1) > tol:  # hyperbolic
         (a, v_inf, b, sme, flyby, nu_inf, h, fpa, r_per, r_ijk, v_ijk, r_pqw,
-         v_pqw, r_lvlh, r, v, v_circ, v_esc, H, M_H, n) = hyp_orbit_el(p, ecc, inc, raan, arg_p, nu, mu)
+         v_pqw, r_lvlh, v_lvlh, r, v, v_circ, v_esc, H, M_H, n) = hyp_orbit_el(p, ecc, inc, raan, arg_p, nu, mu)
         # build string for output
         string = '\n'
 
@@ -1348,7 +1348,7 @@ def orbit_el(p, ecc, inc, raan, arg_p, nu, mu, print_flag=False):
 
         string += '\n'
         string += '{:10s}: {:20.15g} sec = {:20.15g} hr \n'.format(
-            'T_PAST_PER', 1 / n * M, 1 / n * M / 3600)
+            'T_PAST_PER', 1 / n * M_H, 1 / n * M_H / 3600)
     elif np.absolute(ecc - 1) < tol:  # parabolic
         (a, v_inf, sme, h, fpa, r_per, r_ijk, v_ijk, r_pqw, v_pqw, r_lvlh,
          v_lvlh, r, v, v_circ, v_esc, B, M_B, n) = par_orbit_el(p, ecc, inc,

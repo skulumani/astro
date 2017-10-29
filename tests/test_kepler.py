@@ -729,7 +729,8 @@ class TestHyperbolicOrbitProperties():
     energy_true = 1.350613644
     vinf_true = 1.64354108
     nu_inf_true = np.deg2rad(162.2472)
-    
+    flyby_true = np.deg2rad(144.4944196)
+
     a, p = kepler.hyp_per2sma(rp, ecc) 
     (a, v_inf, b, sme, flyby, nu_inf, h, fpa, r_per, r_ijk, v_ijk, r_pqw,
      v_pqw, r_lvlh, v_lvlh, r, v, v_circ, v_esc, H, M_H, n) = kepler.hyp_orbit_el(p, ecc, 0, 0, 0, np.pi/2, mu)
@@ -745,6 +746,9 @@ class TestHyperbolicOrbitProperties():
     
     def test_true_anomaly_infinity(self):
         np.testing.assert_allclose(self.nu_inf, self.nu_inf_true)
+    
+    def test_flyby_angle(self):
+        np.testing.assert_allclose(self.flyby, self.flyby_true)
 
 class TestHNEVector_elliptical_equatorial():
     r, v, _, _ = kepler.coe2rv(10000, 0.2, 0, 0, 0, 0, constants.earth.mu)
