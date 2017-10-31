@@ -132,7 +132,7 @@ def site2ecef(lat, alt, lst, r=6378.137, ee=8.1819190842622e-2):
 
     return ecef
 
-
+# TODO:Add documentation
 def ecef2lla(ecef, r=6378.137, ee=8.1819190842622e-2):
     """Converts a ECEF vector to the equivalent Lat, longitude and Altitude
     above the reference ellipsoid
