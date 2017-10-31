@@ -97,7 +97,7 @@ def eci2ecef(jd):
 
     gst, _ = time.gstlst(jd, 0)
 
-    dcm = attitude.rot3(gst, 'c')
+    dcm = attitude.rot3(gst, 'r')
 
     return dcm
 
@@ -229,7 +229,7 @@ def rv2rhoazel(r_sat_eci, v_sat_eci, lat, lon, alt, jd):
     r_site_ecef = lla2ecef(lat, lon, alt)
 
     # convert sat and site to ecef
-    dcm_eci2ecef = eci2ecef(jd).T
+    dcm_eci2ecef = eci2ecef(jd)
     omega_earth = np.array([0, 0, constants.earth.omega])
 
     r_sat_ecef = dcm_eci2ecef.dot(r_sat_eci)

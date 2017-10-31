@@ -146,7 +146,8 @@ class TestECI2ECEF():
     _, lst = time.gstlst(jd_exp, lonexp)
     eci = geodetic.site2eci(latgdexp, altexp, lst)
     ecef = geodetic.lla2ecef(latgdexp, lonexp, altexp)
-    eci_from_ecef = geodetic.eci2ecef(jd_exp).dot(ecef)
+    Reci2ecef = geodetic.eci2ecef(jd_exp)
+    eci_from_ecef = Reci2ecef.T.dot(ecef)
 
     def test_eci_vallado(self):
         np.testing.assert_allclose(self.eci, self.eci_exp, rtol=1e-2)
