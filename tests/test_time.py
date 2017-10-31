@@ -87,7 +87,7 @@ class TestTimeGSTValladoEx3_3():
     gstexp = np.deg2rad(333.893486)
     jd, mjd = time.date2jd(dateexp[0], dateexp[1], dateexp[2], dateexp[3], dateexp[4], dateexp[5])
     date = time.jd2date(jdexp)
-    gst, lst = time.gstlst(jd, lonexp)
+    gst, _ = time.gstlst(jd, 0)
 
     def test_jd(self):
         np.testing.assert_allclose(self.jd, self.jdexp)
