@@ -80,3 +80,20 @@ def test_lst_vallado():
     expected_lst = 48.578787886
     _, actual_lst = time.gstlst(2448855.009722, -104 * deg2rad)
     np.testing.assert_allclose(actual_lst * rad2deg, expected_lst, rtol=1e-3)
+
+class TestTimeGSTValladoEx3_3():
+    dateexp = (1995, 2, 24, 12, 0, 0)
+    jdexp = 2449773.0
+    gstexp = np.deg2rad(333.893486)
+    jd, mjd = time.date2jd(dateexp[0], dateexp[1], dateexp[2], dateexp[3], dateexp[4], dateexp[5])
+    date = time.jd2date(jdexp)
+    gst, lst = time.gstlst(jd, lonexp)
+
+    def test_jd(self):
+        np.testing.assert_allclose(self.jd, self.jdexp)
+
+    def test_date(self):
+        np.testing.assert_allclose(self.date, self.dateexp)
+
+    def test_gst(self):
+        np.testing.assert_allclose(self.gst, self.gstexp)

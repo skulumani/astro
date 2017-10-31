@@ -1,7 +1,7 @@
 
 import numpy as np
 import pdb
-from astro import geodetic
+from astro import geodetic, time
 
 deg2rad = np.pi/180
 
@@ -68,6 +68,16 @@ def test_lla2ecef_usafa():
     actual_ecef = geodetic.lla2ecef(lat, lon, alt)
     np.testing.assert_allclose(actual_ecef, expected_ecef, rtol=1e-3)
 
+def test_lla2ecef_ascension_island():
+    """Example 3-2 Vallado
+    """
+    latgd = np.deg2rad(-7.9066357)
+    lon = np.deg2rad(345.5975)
+    alt = 56 / 1e3
+    ecef_expected = np.array([6119.40026932, -1571.47955545, -871.56118090])
+    ecef = geodetic.lla2ecef(latgd, lon, alt)
+    np.testing.assert_allclose(ecef, ecef_expected)
+
 def test_lla2ecef_washington_dc():
     lat = 38.8895 * deg2rad
     lon = -77.0353 * deg2rad
@@ -96,10 +106,6 @@ def test_rv2rhoazel_vallado():
     actual_output = geodetic.rv2rhoazel(r, v, latgd, lon, alt, jd)
     np.testing.assert_allclose(actual_output, expected_output, rtol=1e-4)
 
-def test_eci2ecef_valldo():
-
-    pass
-
 def test_rhoazel_equator_zenith():
     sat_eci = np.array([6378.137 + 100, 0, 0])
     site_eci = np.array([6378.137, 0, 0])
@@ -125,3 +131,26 @@ def test_rhoazel_pole_zenith():
 
     rho, az, el = geodetic.rhoazel(sat_eci, site_eci, site_lat, site_lst)
     np.testing.assert_allclose((rho, az, el), (true_rho, true_az, true_el))
+
+class TestECI2ECEF():
+    """Test to make sure we can convert a location on the earth to the correct ECEF vector
+    """
+
+    lonexp = np.deg2rad(72.5529)
+    latgdexp= np.deg2rad(34.352496)
+    latgcexp = np.deg2rad(34.173429)
+    altexp = 5085.22 # kilometer
+
+    eci_exp = np.array([6524.834, 6862.875, 6448.296])
+    jd_exp = 2449773.0
+    _, lst = time.gstlst(jd_exp, lonexp)
+    eci = geodetic.site2eci(latgdexp, altexp, lst)
+    ecef = geodetic.lla2ecef(latgdexp, lonexp, altexp)
+    eci_from_ecef = geodetic.eci2ecef(jd_exp).dot(ecef)
+
+    def test_eci_vallado(self):
+        np.testing.assert_allclose(self.eci, self.eci_exp, rtol=1e-2)
+
+    def test_eci_from_ecef(self):
+        np.testing.assert_allclose(self.eci_from_ecef, self.eci_exp, rtol=1e-2)
+    

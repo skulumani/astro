@@ -87,6 +87,7 @@ def lla2ecef(lat, lon, alt, r=6378.137, ee=8.1819190842622e-2):
     return np.array([x, y, z])
 
 
+# TODO: Add EOP and a full transformation here - compare to SPICE
 def eci2ecef(jd):
     """Rotation matrix to convert from ECI to ECEF
 
@@ -96,13 +97,13 @@ def eci2ecef(jd):
 
     gst, _ = time.gstlst(jd, 0)
 
-    dcm = attitude.rot3(gst, 'r')
+    dcm = attitude.rot3(gst, 'c')
 
     return dcm
 
-
-def site2ecef(lat, alt, lst, r=6378.137, ee=8.1819190842622e-2):
-    """Calculate the site vector in the ECEF coordinate system.
+# TODO: Change documentation to ECI (inertial frame) and verify
+def site2eci(lat, alt, lst, r=6378.137, ee=8.1819190842622e-2):
+    """Calculate the site vector in the ECI coordinate system.
 
     Author:   C2C Shankar Kulumani   USAFA/CS-19   719-333-4741
 
@@ -112,7 +113,7 @@ def site2ecef(lat, alt, lst, r=6378.137, ee=8.1819190842622e-2):
         sitalt - site altitude (meters)
 
     Outputs:
-        R_site - site vector in ECEF frame
+        R_site - site vector in ECI frame - inertial frame
 
     Globals:
         RE, EEsqrd
@@ -128,9 +129,9 @@ def site2ecef(lat, alt, lst, r=6378.137, ee=8.1819190842622e-2):
     N = r / np.sqrt(1 - ee**2 * np.sin(lat)**2)
     x = (N + alt) * np.cos(lat)
     z = ((1 - ee**2) * N + alt) * np.sin(lat)
-    ecef = np.array([x * np.cos(lst), x * np.sin(lst), z])
+    eci = np.array([x * np.cos(lst), x * np.sin(lst), z])
 
-    return ecef
+    return eci
 
 # TODO:Add documentation
 def ecef2lla(ecef, r=6378.137, ee=8.1819190842622e-2):
@@ -228,7 +229,7 @@ def rv2rhoazel(r_sat_eci, v_sat_eci, lat, lon, alt, jd):
     r_site_ecef = lla2ecef(lat, lon, alt)
 
     # convert sat and site to ecef
-    dcm_eci2ecef = eci2ecef(jd)
+    dcm_eci2ecef = eci2ecef(jd).T
     omega_earth = np.array([0, 0, constants.earth.omega])
 
     r_sat_ecef = dcm_eci2ecef.dot(r_sat_eci)
@@ -315,3 +316,7 @@ def rhoazel(sat_eci, site_eci, site_lat, site_lst):
                             2 * np.pi)[0]
 
     return rho, az, el
+
+def eci2lla(pos_eci, jd):
+    """Find LLA for a ECI vector about the Earth
+    """
