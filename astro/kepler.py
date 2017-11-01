@@ -1179,7 +1179,7 @@ def hyp_orbit_el(p, ecc, inc, raan, arg_p, nu, mu):
     return (a, v_inf, b, sme, flyby, nu_inf, h, fpa, r_per, r_ijk, v_ijk,
             r_pqw, v_pqw, r_lvlh, v_lvlh, r, v, v_circ, v_esc, H, M_H, n)
 
-
+# TODO: Output eccentricity, ang mom, and nodal vectors
 def orbit_el(p, ecc, inc, raan, arg_p, nu, mu, print_flag=False):
     """Orbit Characteristics/Elements
 
