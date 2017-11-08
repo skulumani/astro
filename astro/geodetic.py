@@ -101,6 +101,12 @@ def eci2ecef(jd):
 
     return dcm
 
+def ecef2eci(jd):
+    """Rotation matrix to transform from ECEF to ECI
+    """
+    dcm = eci2ecef(jd).T
+    return dcm
+
 # TODO: Change documentation to ECI (inertial frame) and verify
 def site2eci(lat, alt, lst, r=6378.137, ee=8.1819190842622e-2):
     """Calculate the site vector in the ECI coordinate system.
