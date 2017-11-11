@@ -637,6 +637,7 @@ class Satellite(object):
         self.el_vis = el_vis
         self.pass_vis = all_passes
 
+    # TODO: Update documentation
     def visible_radar(self, site):
         """Check if current sat is visible from the site given an example radar sensor
         """
@@ -725,7 +726,11 @@ class Satellite(object):
         self.daz_vis = daz_vis
         self.dele_vis = dele_vis
         self.pass_vis = all_passes
-
+    
+    def radar_measurement(self, site):
+        """Compute deterministic radar measurments from a ground site
+        """
+        pass
     def output(self, filename):
         """Write to output file
         """
