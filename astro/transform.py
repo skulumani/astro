@@ -76,7 +76,7 @@ def enu2ecefv(enu, latgd, lon, alt=0):
     site_ecef = geodetic.lla2ecef(lat, lon, alt)
 
     # transform
-    ecef = dcm_ecef2enu.dot(enu) + site_ecef
+    ecef = dcm_enu2ecef.dot(enu) + site_ecef
 
     return ecef
 
@@ -91,3 +91,57 @@ def ecef2enuv(ecef, latgd, lon, alt=0):
     # transform
     enu = dcm_ecef2enu.dot(ecef - site_ecef)
     return enu
+
+# TODO: Add documentation and testing
+# TODO: Make this vectorized to allow for vector inputs
+def ned2ecefv(ned, latgd, lon, alt=0):
+
+    # find rotation matrix for this location enu2ecef
+    dcm_ned2ecef = dcm_ned2ecef(latgd, lon)
+
+    # vector to site (latgd, lon)
+    site_ecef = geodetic.lla2ecef(lat, lon, alt)
+
+    # transform
+    ecef = dcm_ned2ecef.dot(ned) + site_ecef
+
+    return ecef
+
+# TODO: Add documentation and testing
+# TODO: Make this vectorized to allow for vector inputs
+def ecef2nedv(ecef, latgd, lon, alt=0):
+    dcm_ecef2ned = dcm_ecef2ned(latgd, lon)
+
+    # site vector
+    site_ecef = geodetic.lla2ecef(lat, lon, alt)
+
+    # transform
+    ned = dcm_ecef2ned.dot(ecef - site_ecef)
+    return ned
+
+# TODO: Add documentation and testing
+# TODO: Make this vectorized to allow for vector inputs
+def sez2ecefv(sez, latgd, lon, alt=0):
+
+    # find rotation matrix for this location enu2ecef
+    dcm_sez2ecef = dcm_sez2ecef(latgd, lon)
+
+    # vector to site (latgd, lon)
+    site_ecef = geodetic.lla2ecef(lat, lon, alt)
+
+    # transform
+    ecef = dcm_sez2ecef.dot(ned) + site_ecef
+
+    return ecef
+
+# TODO: Add documentation and testing
+# TODO: Make this vectorized to allow for vector inputs
+def ecef2sezv(ecef, latgd, lon, alt=0):
+    dcm_ecef2sez = dcm_ecef2sez(latgd, lon)
+
+    # site vector
+    site_ecef = geodetic.lla2ecef(lat, lon, alt)
+
+    # transform
+    ned = dcm_ecef2sez.dot(ecef - site_ecef)
+    return ned
