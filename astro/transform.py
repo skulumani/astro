@@ -43,8 +43,12 @@ def dcm_ecef2ned(latgd, lon, alt):
     pass
 
 def dcm_ecef2enu(latgd, lon, alt):
-    pass
+    dcm = np.array([[-np.sin(lon), np.cos(lon), 0],
+                    [-np.sin(latgd)*np.cos(lon), -np.sin(latgd)*np.sin(lon), np.cos(latgd)],
+                    [np.cos(latgd)*np.cos(lon), np.cos(latgd)*np.sin(lon), np.sin(latgd)]])
 
-def dcm_ecef2enu(latgd, lon, alt):
-    pass
+    return dcm
 
+def dcm_enu2ecef(latgd, lon, alt):
+    dcm = dcm_ecef2enu(latgd, lon, alt)
+    return dcm.T
