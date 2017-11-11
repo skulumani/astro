@@ -6,6 +6,7 @@ import numpy as np
 from astro import kepler, constants
 from kinematics import attitude
 
+# TODO: Documentation and unit testing
 def dcm_pqw2eci_vector(r, v, mu=constants.earth.mu):
     """Define rotation matrix transforming PQW to ECI given eci vectors
 
@@ -19,6 +20,7 @@ def dcm_pqw2eci_vector(r, v, mu=constants.earth.mu):
 
     return dcm
 
+#TODO: Documentation and testing
 def dcm_pqw2eci_coe(raan, inc, arg_p):
     """Define rotation matrix transforming PQW to ECI given orbital elements
 
@@ -27,3 +29,22 @@ def dcm_pqw2eci_coe(raan, inc, arg_p):
             attitude.rot1(inc)).dot(attitude.rot3(arg_p))
 
     return dcm
+
+def dcm_sez2ecef(latgd, lon, alt):
+    pass
+
+def dcm_ecef2sez(latgd, lon, alt):
+    pass
+
+def dcm_ned2ecef(latgd, lon, alt):
+    pass
+
+def dcm_ecef2ned(latgd, lon, alt):
+    pass
+
+def dcm_ecef2enu(latgd, lon, alt):
+    pass
+
+def dcm_ecef2enu(latgd, lon, alt):
+    pass
+
