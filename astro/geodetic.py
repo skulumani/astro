@@ -200,7 +200,7 @@ def gc2gd(latgc, eesqrd=0.081819221456**2):
     latgd = np.arctan(np.tan(latgc) / (1 - eesqrd))
     return latgd
 
-
+# TODO: Incorporate all the other observation angles (RADEC, etc. Vallado Ch 4)
 def rv2rhoazel(r_sat_eci, v_sat_eci, lat, lon, alt, jd):
     """
     This function calculates the topcentric range,azimuth and elevation from
@@ -227,6 +227,7 @@ def rv2rhoazel(r_sat_eci, v_sat_eci, lat, lon, alt, jd):
 
     References:
         Astro 321 Predict LSN 22
+        Vallado Algorithm 27
     """
     small = constants.small
     halfpi = constants.halfpi

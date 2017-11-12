@@ -107,6 +107,22 @@ def test_rv2rhoazel_vallado():
     actual_output = geodetic.rv2rhoazel(r, v, latgd, lon, alt, jd)
     np.testing.assert_allclose(actual_output, expected_output, rtol=1e-4)
 
+def test_rv2rhoazel_vallado():
+    # Example 4-1 pg. 275 Vallado
+    latgd = np.deg2rad(39.007)
+    lon = np.deg2rad(-104.883)
+    alt = 2.19456 # kilometer
+    jd, _ = time.date2jd(1994, 5, 14, 13, 11, 20.59856)
+
+    # ECI values for position and velocity
+    r_eci = np.array([1752246215, -3759563433, -1577568105])
+    v_eci = np.array([-18.323, 18.332, 7.777])
+    
+    expected_output = (4437722626.456, 3.67834, 0.4171786,
+                       -25.360829, 6.748139e-5,-2.89766e-5)
+    actual_output = geodetic.rv2rhoazel(r_eci, v_eci, latgd, lon, alt, jd)
+    np.testing.assert_allclose(actual_output, expected_output, rtol=1e-3)
+
 def test_rhoazel_equator_zenith():
     sat_eci = np.array([6378.137 + 100, 0, 0])
     site_eci = np.array([6378.137, 0, 0])
