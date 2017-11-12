@@ -209,3 +209,77 @@ class TestECEF2ECI():
 
     def test_eci_from_ecef(self):
         np.testing.assert_allclose(self.eci_from_ecef, self.eci_exp, rtol=1e-2)
+
+class TestRhoAzEl2SEZ():
+
+    def test_zenith_stationary(self):
+        rho = np.random.uniform(0, 1000)
+        az = 0
+        el = np.pi/2
+        drho = 0
+        daz = 0
+        dele = 0
+        rho_sez_expected = np.array([0, 0, rho])
+        rho_sez, drho_sez = geodetic.rhoazel2sez(rho, az, el, drho, daz, dele)
+        np.testing.assert_array_almost_equal(rho_sez, rho_sez_expected)
+
+    def test_horizon_north(self):
+        rho = np.random.uniform(0, 1000)
+        az = 0
+        el = 0
+        drho = 0
+        daz = 0
+        dele = 0
+        rho_sez_expected = np.array([-rho, 0, 0])
+        rho_sez, drho_sez = geodetic.rhoazel2sez(rho, az, el, drho, daz, dele)
+        np.testing.assert_array_almost_equal(rho_sez, rho_sez_expected)
+
+    def test_horizon_east(self):
+        rho = np.random.uniform(0, 1000)
+        az = np.pi/2
+        el = 0
+        drho = 0
+        daz = 0
+        dele = 0
+        rho_sez_expected = np.array([0, rho, 0])
+        rho_sez, drho_sez = geodetic.rhoazel2sez(rho, az, el, drho, daz, dele)
+        np.testing.assert_array_almost_equal(rho_sez, rho_sez_expected)
+
+    def test_zenith_approaching(self):
+        rho = np.random.uniform(0, 1000)
+        az = 0
+        el = np.pi/2
+        drho = -np.random.uniform(0, 100)
+        daz = 0
+        dele = 0
+        rho_sez_expected = np.array([0, 0, rho])
+        drho_sez_expected = np.array([0, 0, drho])
+        rho_sez, drho_sez = geodetic.rhoazel2sez(rho, az, el, drho, daz, dele)
+        np.testing.assert_array_almost_equal(rho_sez, rho_sez_expected)
+        np.testing.assert_array_almost_equal(drho_sez, drho_sez_expected)
+
+    def test_horizon_north_receeding(self):
+        rho = np.random.uniform(0, 1000)
+        az = 0
+        el = 0
+        drho = np.random.uniform(0, 10)
+        daz = 0
+        dele = 0
+        rho_sez_expected = np.array([-rho, 0, 0])
+        drho_sez_expected = np.array([-drho, 0, 0])
+        rho_sez, drho_sez = geodetic.rhoazel2sez(rho, az, el, drho, daz, dele)
+        np.testing.assert_array_almost_equal(rho_sez, rho_sez_expected)
+        np.testing.assert_array_almost_equal(drho_sez, drho_sez_expected)
+
+    def test_horizon_east_approaching(self):
+        rho = np.random.uniform(0, 1000)
+        az = np.pi/2
+        el = 0
+        drho = -np.random.uniform(0, 100)
+        daz = 0
+        dele = 0
+        rho_sez_expected = np.array([0, rho, 0])
+        drho_sez_expected = np.array([0, drho, 0])
+        rho_sez, drho_sez = geodetic.rhoazel2sez(rho, az, el, drho, daz, dele)
+        np.testing.assert_array_almost_equal(rho_sez, rho_sez_expected)
+        np.testing.assert_array_almost_equal(drho_sez, drho_sez_expected)

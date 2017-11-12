@@ -324,6 +324,54 @@ def rhoazel(sat_eci, site_eci, site_lat, site_lst):
 
     return rho, az, el
 
+def rhoazel2sez(rho, az, el, drho, daz, dele):
+    """This program calculates the range vector in the SEZ system.
+    
+    Author:   C2C Shankar Kulumani   USAFA/CS-19   719-333-4741
+    
+    Inputs:
+        rho - range (km)
+        az - azimuth (radians)
+        el - elevation (radians)
+        drho - range rate (km/sec)
+        daz - azimuth rate (radians/sec)
+        del - elevation rate (radians/sec)
+    
+    Outputs:
+        Rho_sez - range vector SEZ (km)
+        Drho_sez - range velocity vecotr SEZ (km/sec)
+    
+    Globals: None
+    
+    Constants: None
+    
+    Coupling: None
+    
+    References:
+        Astro 321 COMFIX
+    """
+
+    # Calculate range vector
+    rho_s=-rho*np.cos(az)*np.cos(el)
+    rho_e = rho*np.sin(az)*np.cos(el)
+    rho_z=rho*np.sin(el)
+
+    rho_sez= np.array([rho_s, rho_e, rho_z])
+
+    # Calculate range rate vector
+    transform = np.array([[-np.cos(el)*np.cos(az), rho * np.sin(el)*np.cos(az), rho * np.cos(el) * np.sin(az)],
+                          [np.cos(el) * np.sin(az), -rho*np.sin(el)*np.sin(az), rho*np.cos(el)*np.cos(az)],
+                          [np.sin(el), rho * np.cos(el), 0]])
+    drho_sez = transform.dot(np.array([drho, dele, daz]))
+    # drho_s=-drho*np.cos(az)*np.cos(el)+rho*daz*np.sin(az)*np.cos(el)+rho*dele*np.cos(az)*np.sin(el)
+    # drho_e=drho*np.sin(az)*np.cos(el)+rho*daz*np.cos(az)*np.cos(el)-rho*dele*np.sin(az)*np.sin(el)
+    # drho_z=drho*np.sin(el)+rho*dele*np.cos(el)
+
+    # drho_sez=np.array([drho_s,drho_e,drho_z])
+
+    return rho_sez,  drho_sez
+
 def eci2lla(pos_eci, jd):
     """Find LLA for a ECI vector about the Earth
     """
+    pass
