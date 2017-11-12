@@ -675,7 +675,7 @@ class Satellite(object):
                                                             site_eci, sun_eci,
                                                             sun_alt, site['lst'],
                                                             site['gst']):
-
+            # deterministic radar measurement
             rho, az, el, drho, daz, dele = geodetic.rv2rhoazel(sar, sav, site['lat'],
                                                                site['lon'], site['alt'], jd)
             if el > 10 * deg2rad:
@@ -727,10 +727,7 @@ class Satellite(object):
         self.dele_vis = dele_vis
         self.pass_vis = all_passes
     
-    def radar_measurement(self, site):
-        """Compute deterministic radar measurments from a ground site
-        """
-        pass
+
     def output(self, filename):
         """Write to output file
         """
