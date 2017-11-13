@@ -22,6 +22,8 @@ from kinematics import attitude
 from . import time, constants
 import pdb
 # TODO: Make these funcitons vectorized to handle vector inputs
+
+
 def lla2ecef(lat, lon, alt, r=6378.137, ee=8.1819190842622e-2):
     """Convert latitude, longitude, and altitude to the Earth centered
     Earth fixed frame (ECEF)
@@ -101,6 +103,7 @@ def eci2ecef(jd):
 
     return dcm
 
+
 def ecef2eci(jd):
     """Rotation matrix to transform from ECEF to ECI
     """
@@ -108,6 +111,8 @@ def ecef2eci(jd):
     return dcm
 
 # TODO: Change documentation to ECI (inertial frame) and verify
+
+
 def site2eci(lat, alt, lst, r=6378.137, ee=8.1819190842622e-2):
     """Calculate the site vector in the ECI coordinate system.
 
@@ -140,6 +145,8 @@ def site2eci(lat, alt, lst, r=6378.137, ee=8.1819190842622e-2):
     return eci
 
 # TODO:Add documentation
+
+
 def ecef2lla(ecef, r=6378.137, ee=8.1819190842622e-2):
     """Converts a ECEF vector to the equivalent Lat, longitude and Altitude
     above the reference ellipsoid
@@ -200,6 +207,8 @@ def gc2gd(latgc, eesqrd=0.081819221456**2):
     latgd = np.arctan(np.tan(latgc) / (1 - eesqrd))
     return latgd
 
+# TODO: Incorporate all the other observation angles (RADEC, etc. Vallado Ch 4)
+
 
 def rv2rhoazel(r_sat_eci, v_sat_eci, lat, lon, alt, jd):
     """
@@ -227,6 +236,7 @@ def rv2rhoazel(r_sat_eci, v_sat_eci, lat, lon, alt, jd):
 
     References:
         Astro 321 Predict LSN 22
+        Vallado Algorithm 27
     """
     small = constants.small
     halfpi = constants.halfpi
@@ -248,7 +258,8 @@ def rv2rhoazel(r_sat_eci, v_sat_eci, lat, lon, alt, jd):
     rho = np.linalg.norm(rho_ecef)
 
     # convert to SEZ coordinate frame
-    dcm_ecef2sez = attitude.rot2(np.pi / 2 - lat, 'r').dot(attitude.rot3(lon, 'r'))
+    dcm_ecef2sez = attitude.rot2(
+        np.pi / 2 - lat, 'r').dot(attitude.rot3(lon, 'r'))
     rho_sez = dcm_ecef2sez.dot(rho_ecef)
     drho_sez = dcm_ecef2sez.dot(drho_ecef)
 
@@ -278,7 +289,7 @@ def rv2rhoazel(r_sat_eci, v_sat_eci, lat, lon, alt, jd):
         dele = (drho_sez[2] - drho * np.sin(el)) / temp
     else:
         dele = 0
-    
+
     az = attitude.normalize(az, 0, constants.twopi)
     return rho, az, el, drho, daz, dele
 
@@ -323,6 +334,57 @@ def rhoazel(sat_eci, site_eci, site_lat, site_lst):
 
     return rho, az, el
 
+
+def rhoazel2sez(rho, az, el, drho, daz, dele):
+    """This program calculates the range vector in the SEZ system.
+
+    Author:   C2C Shankar Kulumani   USAFA/CS-19   719-333-4741
+
+    Inputs:
+        rho - range (km)
+        az - azimuth (radians)
+        el - elevation (radians)
+        drho - range rate (km/sec)
+        daz - azimuth rate (radians/sec)
+        del - elevation rate (radians/sec)
+
+    Outputs:
+        Rho_sez - range vector SEZ (km)
+        Drho_sez - range velocity vecotr SEZ (km/sec)
+
+    Globals: None
+
+    Constants: None
+
+    Coupling: None
+
+    References:
+        Astro 321 COMFIX
+    """
+
+    # Calculate range vector
+    rho_s = -rho * np.cos(az) * np.cos(el)
+    rho_e = rho * np.sin(az) * np.cos(el)
+    rho_z = rho * np.sin(el)
+
+    rho_sez = np.array([rho_s, rho_e, rho_z])
+
+    # Calculate range rate vector
+    transform = np.array([[-np.cos(el) * np.cos(az), rho * np.sin(el) * np.cos(az), rho * np.cos(el) * np.sin(az)],
+                          [np.cos(el) * np.sin(az), -rho * np.sin(el)
+                           * np.sin(az), rho * np.cos(el) * np.cos(az)],
+                          [np.sin(el), rho * np.cos(el), 0]])
+    drho_sez = transform.dot(np.array([drho, dele, daz]))
+    # drho_s=-drho*np.cos(az)*np.cos(el)+rho*daz*np.sin(az)*np.cos(el)+rho*dele*np.cos(az)*np.sin(el)
+    # drho_e=drho*np.sin(az)*np.cos(el)+rho*daz*np.cos(az)*np.cos(el)-rho*dele*np.sin(az)*np.sin(el)
+    # drho_z=drho*np.sin(el)+rho*dele*np.cos(el)
+
+    # drho_sez=np.array([drho_s,drho_e,drho_z])
+
+    return rho_sez,  drho_sez
+
+
 def eci2lla(pos_eci, jd):
     """Find LLA for a ECI vector about the Earth
     """
+    pass

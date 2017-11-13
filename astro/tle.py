@@ -637,6 +637,7 @@ class Satellite(object):
         self.el_vis = el_vis
         self.pass_vis = all_passes
 
+    # TODO: Update documentation
     def visible_radar(self, site):
         """Check if current sat is visible from the site given an example radar sensor
         """
@@ -674,7 +675,7 @@ class Satellite(object):
                                                             site_eci, sun_eci,
                                                             sun_alt, site['lst'],
                                                             site['gst']):
-
+            # deterministic radar measurement
             rho, az, el, drho, daz, dele = geodetic.rv2rhoazel(sar, sav, site['lat'],
                                                                site['lon'], site['alt'], jd)
             if el > 10 * deg2rad:
@@ -725,6 +726,7 @@ class Satellite(object):
         self.daz_vis = daz_vis
         self.dele_vis = dele_vis
         self.pass_vis = all_passes
+    
 
     def output(self, filename):
         """Write to output file
