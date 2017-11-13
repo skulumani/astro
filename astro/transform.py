@@ -37,7 +37,8 @@ def dcm_sez2ecef(latgd, lon, alt=0):
 
 #TODO: Documentation and testing
 def dcm_ecef2sez(latgd, lon, alt=0):
-    dcm = attitude.rot2(np.pi/2 - latgd, 'r').dot(attitude.rot3(lon, 'r'))
+    # dcm = attitude.rot2(np.pi/2 - latgd, 'r').dot(attitude.rot3(lon, 'r'))
+    dcm = attitude.rot2(- np.pi/2 + latgd).dot(attitude.rot3(lon))
     return dcm
 
 #TODO: Documentation and testing
