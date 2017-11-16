@@ -27,6 +27,24 @@ class TestRVFPA2OrbitEl():
     def test_true_anomaly(self):
         np.testing.assert_allclose(self.nu, self.nu_true)
 
+class TestSingleImpulse():
+    # 2017 HW5 Problem 1
+    rm = 59029.6
+    vm = 1.69
+    fpam = np.deg2rad(27.45)
+    delta_v = 1.2
+    alpha = np.deg2rad(30)
+    rf, vf, fpaf = manuever.single_impulse(rm, vm, fpam, delta_v, alpha)
 
+    rf_true = rm
+    vf_true = 2.7944049
+    fpaf_true = np.deg2rad(39.84879352)
 
+    def test_position(self):
+        np.testing.assert_allclose(self.rf, self.rf_true) 
+    
+    def test_velocity(self):
+        np.testing.assert_allclose(self.vf, self.vf_true)
 
+    def test_flight_path_angle(self):
+        np.testing.assert_allclose(self.fpaf, self.fpaf_true)
