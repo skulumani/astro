@@ -2,6 +2,7 @@
 """
 
 from astro import transform
+from kinematics.attitude import rot2, rot3
 import numpy as np
 
 # TODO: Add more test functions - from book
@@ -94,6 +95,14 @@ class TestECEF2SEZ():
         dcm = transform.dcm_ecef2sez(latgd, lon, alt)
         dcm_opp = transform.dcm_sez2ecef(latgd, lon, alt)
         np.testing.assert_allclose(dcm.T, dcm_opp)
+    
+    def test_dcm_loop(self):
+        latitude = np.linspace(-np.pi/2, np.pi/2, 10)
+        longitude = np.linspace(-np.pi, np.pi, 10)
+        for lat, lon in zip(latitude, longitude):
+            dcm_expected = rot2(np.pi/2 - lat, 'r').dot(rot3(lon, 'r'))
+            dcm = transform.dcm_ecef2sez(lat, lon)
+            np.testing.assert_allclose(dcm, dcm_expected)
 
 class TestECEF2NED():
 
