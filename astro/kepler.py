@@ -1524,4 +1524,3 @@ def nu_solve(p, e, r):
     nu = np.arccos( p / r / e - 1 / e)
     return nu, -nu
 
-
