@@ -1047,7 +1047,8 @@ def elp_orbit_el(p, ecc, inc, raan, arg_p, nu, mu):
 
     r = np.linalg.norm(r_pqw)
     v = np.linalg.norm(v_pqw)
-
+    
+    # TODO: Add a function that compute pos/vel in LVLH frame alone
     # convert position and velocity to lvlh frame
     r_lvlh = np.array([r, 0, 0])  # [r_hat theta_hat h_hat] km
     # [r_hat theta_hat h_hat] km/sec
@@ -1492,4 +1493,14 @@ def hyp_per2sma(rp, ecc):
     a = - rp / (ecc - 1)
     p = semilatus_rectum(a, ecc)
     return a, p
+
+# TODO: add documentation
+def nu_solve(p, e, r):
+    """Solve conic equation for true anomaly
+
+    """
+
+    nu = np.arccos( p / r / e - 1 / e)
+    return nu, -nu
+
 
