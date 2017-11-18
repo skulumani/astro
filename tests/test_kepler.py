@@ -814,3 +814,11 @@ def test_hyperbolic_semi_major_axis():
     a, p = kepler.hyp_per2sma(1000 + 6378.137, 1.05)
     np.testing.assert_allclose(a, a_actual)
     np.testing.assert_allclose(p, p_actual)
+
+def test_true_anomaly_solve():
+    a_1 =6*6378.137
+    ecc_1 = .5
+    nu_0 = 0
+    p_1 = a_1*(1-ecc_1**2)
+    nu = kepler.nu_solve(p_1, ecc_1, 7.6 * 6378.137)
+    np.testing.assert_allclose(nu[0], np.deg2rad(144.6654977))

@@ -1497,7 +1497,28 @@ def hyp_per2sma(rp, ecc):
 # TODO: add documentation
 def nu_solve(p, e, r):
     """Solve conic equation for true anomaly
+    
+    nu, nu_neg = nu_solv(p, ecc, r)
 
+    Parameters
+    ----------
+    p : float
+        Semi parameter
+    e : float
+        eccentricity
+    r : float
+        radius of orbit
+
+    Returns
+    -------
+    nu : float
+        True anomaly in radians
+    nu_neg : float
+        Negative true anomaly in radians
+
+    Author
+    ------
+    Shankar Kulumani		GWU		skulumani@gwu.edu
     """
 
     nu = np.arccos( p / r / e - 1 / e)
