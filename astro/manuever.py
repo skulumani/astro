@@ -23,6 +23,7 @@ Shankar Kulumani		GWU		skulumani@gwu.edu
 import numpy as np
 from kinematics import attitude
 import pdb
+from scipy.optimize import fsolve
 # TODO: Add documentation
 
 
@@ -177,3 +178,76 @@ def delta_v_solve_planar(v1, v2, fpa1, fpa2):
     beta = np.arctan2(sin_beta, cos_beta)
     alpha = np.pi-beta
     return delta_v, alpha, beta
+
+# TODO: Add documentation
+def planar_conic_orbit_intersection(p1, p2, ecc1, ecc2, dargp, nu1_old=np.deg2rad(90)):
+    """HW6 Problem 3"""
+    # Find nu1 for the original orbit
+    
+    def f(nu1):
+        f = p2/(1+ecc2*np.cos(nu1-dargp)) - (p1/(1+ecc1*np.cos(nu1)))
+        return f
+
+    def fdot(nu1):
+        fdot = ((p2*ecc2*np.sin(nu1-dargp))/(1+ecc2*np.cos(nu1-dargp))**2)-((p1*ecc1*np.sin(nu1))/(1+ecc1*np.cos(nu1))**2)
+        return fdot
+    nu1_new = fsolve(f, nu1_old)    
+    # count = 0
+    # delta = 1
+    # while delta > 1e-9 and count < 50:
+    #     count = count+1
+        
+    #     nu1_new = nu1_old - f(nu1_old)/fdot(nu1_old)
+        
+    #     delta = np.absolute(nu1_new - nu1_old)
+
+    return nu1_new[0]
+
+def delta_v_vnc(dv_mag, alpha, beta, fpa):
+    """VNC LVLH Delta V vector
+
+    [dv_vnc dv_lvlh] = delta_v_vnc(dv_mag,alpha, beta, fpa)
+
+    Purpose: 
+        - Converts the alpha/beta angle of the Delta_V to the VNC frame
+            - V - tangent to current velocity vector
+            - N - normal to orbit plane (same direction as ang_mom vector)
+            - C - orthongonal to velocity vector in orbit plane
+        - Converts Delta_v into the LVLH frame
+            - r_hat - in direction of orbit position vector
+            - theta_hat - normal to r_hat in orbit plane
+            - h_hat - orthogonal to orbit plane
+
+    Inputs: 
+        - dv_mag - magnitude of delta_v in km/sec
+        - alpha - angle between projection of delta_v vector into the orbit
+        plane and the orginal velocity vector (V) in rad
+        - beta - angle of delta_v vector out of orbit plane (V-C plane) in
+        rad
+        - fpa - current flight path angle in rad - angle of the velocity
+        vector wrt to theta_hat
+
+    Outputs: 
+        - dv_vnc - delta_v vector in VNC frame [V_hat;C_hat;N_hat];
+        - dv_lvlh - delta_v vector in LVLH frame [r_hat;theta_hat;h_hat]
+
+    Dependencies: 
+        - none
+
+    Author: 
+        - Shankar Kulumani 15 Oct 2012
+        - Shankar Kulumani 18 Nov 2017
+            - In python
+
+    References
+        - AAE532 notes LSN 20
+        - Vallado - referred to as NTW frame or Frenet System
+    """
+
+    dv_vnc = dv_mag*np.array([np.cos(beta)*np.cos(alpha), np.cos(beta)*np.sin(alpha), np.sin(beta)])
+
+    phi = fpa+alpha
+
+    dv_lvlh = dv_mag* np.array([np.cos(beta)*np.sin(phi),np.cos(beta)*np.cos(phi),np.sin(beta)])
+
+    return dv_vnc, dv_lvlh

@@ -1,5 +1,5 @@
 import numpy as np
-from astro import manuever, constants
+from astro import manuever, constants, kepler
 import pdb
 class TestRVFPA2OrbitEl():
     r = 4 * constants.earth.radius
@@ -62,3 +62,11 @@ def test_delta_v_solve_planar():
     np.testing.assert_allclose(alpha, alpha_true)
     np.testing.assert_allclose(beta, beta_true)
 
+def test_planar_orbit_intersection():
+    ecc1 = 0.75
+    p1 = kepler.semilatus_rectum(4.5*constants.earth.radius, ecc1)
+    a2, p2, ecc2 = kepler.perapo2aecc(2 * constants.earth.radius, 6 * constants.earth.radius)
+    dargp = np.deg2rad(35)
+
+    nu = manuever.planar_conic_orbit_intersection(p1, p2, ecc1, ecc2, dargp)
+    np.testing.assert_allclose(nu, np.deg2rad(110.342156))
