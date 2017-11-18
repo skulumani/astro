@@ -48,3 +48,17 @@ class TestSingleImpulse():
 
     def test_flight_path_angle(self):
         np.testing.assert_allclose(self.fpaf, self.fpaf_true)
+
+def test_delta_v_solve_planar():
+    v1 = 2.455
+    v2 = 2.867
+    fpa1 = np.deg2rad(26.03)
+    fpa2 = 0
+    deltav, alpha, beta = manuever.delta_v_solve_planar(v1, v2, fpa1, fpa2)
+    deltav_true = 1.2639818
+    alpha_true = 1.47477394
+    beta_true = np.pi - alpha
+    np.testing.assert_allclose(deltav, deltav_true)
+    np.testing.assert_allclose(alpha, alpha_true)
+    np.testing.assert_allclose(beta, beta_true)
+
