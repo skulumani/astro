@@ -25,7 +25,7 @@ from kinematics import attitude
 import pdb
 from scipy.optimize import fsolve
 # TODO: Add documentation
-
+from . import kepler
 
 def rvfpa2orbit_el(mag_r, mag_v, fpa, mu):
     """Converts R,V, and FPA to orbital elements
@@ -203,6 +203,7 @@ def planar_conic_orbit_intersection(p1, p2, ecc1, ecc2, dargp, nu1_old=np.deg2ra
 
     return nu1_new[0]
 
+# TODO: Add unit tests
 def delta_v_vnc(dv_mag, alpha, beta, fpa):
     """VNC LVLH Delta V vector
 
@@ -251,3 +252,69 @@ def delta_v_vnc(dv_mag, alpha, beta, fpa):
     dv_lvlh = dv_mag* np.array([np.cos(beta)*np.sin(phi),np.cos(beta)*np.cos(phi),np.sin(beta)])
 
     return dv_vnc, dv_lvlh
+
+# TODO: Add unit test
+def hohmann(r_i,r_f,ecc_i,ecc_f,nu_i,nu_f,mu):
+    """Hohmann Transfer for circle to circle or elliptical
+
+    [dv_a,dv_b,tof ] = hohmann (r_i,r_f,ecc_i,ecc_f,nu_i,nu_f,mu)
+
+    Inputs:
+        - r_i - magnitude of initial position in km
+        - r_f - magnitude of final position in km
+        - ecc_i - eccentricity of initial orbit
+        - ecc_f - eccentricity of final orbit
+        - nu_i - true anomaly of initial orbit in rad (0 or pi)
+        - nu_f - true anomaly of final orbit in rad (0 or pi)
+        - mu - gravitational parameter of central body in km^3/sec^2
+
+    Outputs:
+        - dv_a - first delta_v in km/sec
+        - dv_b - second delta_v in km/sec
+        - tof - time of flight of transfer in seconds
+        - phase_angle - angle in rad between departure point and arriving
+        
+    Dependencies:
+        - tof_delta_t - calculates change in true anomaly given a TOF
+
+    Author:
+        - Shankar Kulumani 15 Oct 2012
+        - Shankar Kulumani 17 Oct 2012
+            - added phase angle
+
+    References
+        - AAE532 Notes
+        - Vallado
+    """
+    # calculate semi-major axis of initial,transfer, and final orbits
+    a_i = (r_i * (1 + ecc_i * np.cos(nu_i))) / (1.0 - ecc_i**2 )
+    a_f = (r_f * (1.0 + ecc_f * np.cos(nu_f))) / (1 - ecc_f**2 )
+
+    a_t, p_t, ecc_t = kepler.perapo2aecc(r_i, r_f)
+    p_i = kepler.semilatus_rectum(a_i, ecc_i)
+    p_f = kepler.semilatus_rectum(a_f, ecc_f)
+    if ( ecc_i < 1.0 ) and ( ecc_f < 1.0 ):
+        # find first delta_v
+        v_i = np.sqrt( (2 * mu)/r_i - (mu/a_i) )
+        vt_a = np.sqrt( (2 * mu)/r_i- (mu/a_t) )
+        dv_a= np.absolute( vt_a - v_i )
+        
+        # find second delta_v
+        v_f = np.sqrt( (2.0 * mu)/r_f - (mu/a_f) )
+        vt_b = np.sqrt( (2.0 * mu)/r_f - (mu/a_t) )
+        dv_b= np.absolute( v_f - vt_b )
+        
+        # ----------------  find transfer time of flight  ---------- }
+        tof = np.pi * np.sqrt( a_t**3 / mu ) # always 1/2 period
+        
+        # find phase angle
+        ( _,_ , phase_angle ) = kepler.tof_delta_t(p_f,ecc_f,mu,nu_f,-tof)
+    
+    return ( dv_a,dv_b,tof , phase_angle )    
+
+# TODO: Add documentation and  unit test
+def synodic_period(a1, a2, mu):
+    n1 = np.sqrt(mu/a1**3)
+    n2 = np.sqrt(mu/ a2**3)
+    S = 2 * np.pi / np.absolute(n2 - n1)
+    return S

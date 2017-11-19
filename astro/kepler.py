@@ -703,7 +703,7 @@ def conic_orbit(p, ecc, inc, raan, arg_p, nu_i, nu_f, mu=constants.earth.mu):
     # rotate orbit plane to inertial frame
     dcm_pqw2eci = attitude.rot3(-raan, 'r').dot(attitude.rot1(-inc, 'r')
                                                 ).dot(attitude.rot3(-arg_p, 'r'))
-
+    
     pos_eci = np.dot(dcm_pqw2eci, pos_pqw.T).T
     sat_eci = np.dot(dcm_pqw2eci, sat_pqw)
 

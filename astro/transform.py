@@ -28,6 +28,23 @@ def dcm_pqw2eci_coe(raan, inc, arg_p):
     dcm = attitude.rot3(raan).dot(
             attitude.rot1(inc)).dot(attitude.rot3(arg_p))
 
+    dcm_pqw2eci = attitude.rot3(-raan, 'r').dot(attitude.rot1(-inc, 'r')
+                                                ).dot(attitude.rot3(-arg_p, 'r'))
+    return dcm
+
+def dcm_eci2pqw_coe(raan, inc, arg_p):
+    """Define rotation matrix transforming PQW to ECI given orbital elements
+
+    """
+    dcm = dcm_pqw2eci_coe(raan, inc, arg_p).T
+    return dcm
+
+def dcm_pqw2lvlh(nu):
+    dcm = attitude.rot3(-nu)
+    return dcm
+
+def dcm_lvlh2pqw(nu):
+    dcm = dcm_pqw2lvlh(nu).T
     return dcm
 
 #TODO: Documentation and testing
