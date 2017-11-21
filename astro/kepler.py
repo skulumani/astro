@@ -264,11 +264,7 @@ def hne_vec(r, v, mu):
 def rv2coe(r, v, mu):
     """Position and Velocity vectors to classical orbital elements
 
-    Purpose:
-        - Converts inertial position and velocity vectors to orbital
-        elements
-
-            [p,a,ecc,inc,raan,arg_p,nu,m,arglat,truelon,lonper] = rv2coe (r,v, mu)
+    [p,a,ecc,inc,raan,arg_p,nu,m,arglat,truelon,lonper] = rv2coe(r,v, mu)
 
     Inputs:
         - r - position vector in inertial frame (km)
@@ -289,7 +285,8 @@ def rv2coe(r, v, mu):
         - lonper - longitude of periapsis rad 0 < lonper < 2*pi
 
     Dependencies:
-        - None
+        - numpy - everything is dependent on numpy
+        - nu2anom - convert true anomaly to eccentric and mean anomaly
 
     Author:
         - Shankar Kulumani 30 Sept 2012
