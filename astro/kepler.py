@@ -467,7 +467,8 @@ def kepler_eq_E(M_in, ecc_in):
        - count - number of iterations to converge
 
     Dependencies:
-       - none
+       - numpy - everything needs numpy
+       - kinematics.attitude.normalize - normalize an angle
 
     Author:
        - Shankar Kulumani 15 Sept 2012
@@ -720,39 +721,43 @@ def conic_orbit(p, ecc, inc, raan, arg_p, nu_i, nu_f, mu=constants.earth.mu):
 
 
 def nu2anom(nu, ecc):
+    """Calculates the eccentric and mean anomaly given eccentricity and true
+    anomaly
+
+    ( E, M ) = ecc_anomaly(nu,ecc)
+
+    Inputs:
+        - nu - true anomaly in rad -2*pi < nu < 2*pi
+        - ecc - eccentricity of orbit 0 < ecc < inf
+
+    Outputs:
+        - E - (elliptical/parabolic/hyperbolic) eccentric anomaly in rad
+            0 < E < 2*pi
+        - M - mean anomaly in rad 0 < M < 2*pi
+
+    Dependencies:
+        - numpy - we are lost without numpy
+        - kinematics.attitude.normalize - normalize angles
+    
+    Notes
+    -----
+    This function is valid for all orbit types. 
+
+    Author:
+        - Shankar Kulumani 20 Nov 2017
+            - only now realized I already implemented other orbit types
+        - Shankar Kulumani 5 Dec 2016
+            - Convert to python
+        - Shankar Kulumani 15 Sept 2012
+            - modified from USAFA code and notes from AAE532
+            - only elliptical case will add other later
+        - Shankar Kulumani 17 Sept 2012
+            - added rev check to reduce angle btwn 0 and 2*pi
+
+    References
+        - AAE532 notes
+        - Vallado 3rd Ed
     """
-    [E M] = ecc_anomaly(nu,ecc)
-
-       Purpose:
-           - Calculates the eccentric and mean anomaly given eccentricity and
-           true anomaly
-
-       Inputs:
-           - nu - true anomaly in rad -2*pi < nu < 2*pi
-           - ecc - eccentricity of orbit 0 < ecc < inf
-
-       Outputs:
-           - E - (elliptical/parabolic/hyperbolic) eccentric anomaly in rad
-               0 < E < 2*pi
-           - M - mean anomaly in rad 0 < M < 2*pi
-
-       Dependencies:
-           - none
-
-       Author:
-           - Shankar Kulumani 5 Dec 2016
-                - Convert to python
-           - Shankar Kulumani 15 Sept 2012
-               - modified from USAFA code and notes from AAE532
-               - only elliptical case will add other later
-           - Shankar Kulumani 17 Sept 2012
-               - added rev check to reduce angle btwn 0 and 2*pi
-
-       References
-           - AAE532 notes
-           - Vallado 3rd Ed
-    """
-
     small = 1e-9
 
     if ecc <= small:  # circular
@@ -774,7 +779,7 @@ def nu2anom(nu, ecc):
 
         E = B
         M = B + 1.0 / 3 * B**3
-
+        # TODO: Need to check if I need to do quadrant checks for parabolic or hyperbolic cases
         # E = revcheck(E);
         # M = revcheck(M);
     elif ecc > 1 + small:  # hyperbolic
