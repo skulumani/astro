@@ -95,8 +95,9 @@ def single_impulse(mag_r1, mag_v1, fpa1, delta_v, alpha):
     mag_vf = np.sqrt(mag_v1**2 + delta_v**2 - 2 *
                      mag_v1 * delta_v * np.cos(beta))
 
-    delta_fpa = np.arccos(
-        (delta_v**2 - mag_vf**2 - mag_v1**2) / (-2 * mag_vf * mag_v1))
+    dfpa_cos = (delta_v**2 - mag_vf**2 - mag_v1**2) / (-2 * mag_vf * mag_v1)
+    dfpa_sin = delta_v * np.sin(beta) / mag_vf
+    delta_fpa = np.arctan2(dfpa_sin, dfpa_cos)
 
     mag_rf = mag_r1
 
