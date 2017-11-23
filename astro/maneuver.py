@@ -180,7 +180,7 @@ def delta_v_solve_planar(v1, v2, fpa1, fpa2):
     alpha = np.pi-beta
     return delta_v, alpha, beta
 
-# TODO: Add documentation
+# TODO: Add documentation and unit test
 def planar_conic_orbit_intersection(p1, p2, ecc1, ecc2, dargp, nu1_old=np.deg2rad(90)):
     """HW6 Problem 3"""
     # Find nu1 for the original orbit
@@ -254,7 +254,7 @@ def delta_v_vnc(dv_mag, alpha, beta, fpa):
 
     return dv_vnc, dv_lvlh
 
-# TODO: Add unit test
+# TODO: Add unit test and improve this ot be more general
 def hohmann(r_i,r_f,ecc_i,ecc_f,nu_i,nu_f,mu):
     """Hohmann Transfer for circle to circle or elliptical
 
@@ -294,22 +294,22 @@ def hohmann(r_i,r_f,ecc_i,ecc_f,nu_i,nu_f,mu):
     a_t, p_t, ecc_t = kepler.perapo2aecc(r_i, r_f)
     p_i = kepler.semilatus_rectum(a_i, ecc_i)
     p_f = kepler.semilatus_rectum(a_f, ecc_f)
-    if ( ecc_i < 1.0 ) and ( ecc_f < 1.0 ):
-        # find first delta_v
-        v_i = np.sqrt( (2 * mu)/r_i - (mu/a_i) )
-        vt_a = np.sqrt( (2 * mu)/r_i- (mu/a_t) )
-        dv_a= np.absolute( vt_a - v_i )
-        
-        # find second delta_v
-        v_f = np.sqrt( (2.0 * mu)/r_f - (mu/a_f) )
-        vt_b = np.sqrt( (2.0 * mu)/r_f - (mu/a_t) )
-        dv_b= np.absolute( v_f - vt_b )
-        
-        # ----------------  find transfer time of flight  ---------- }
-        tof = np.pi * np.sqrt( a_t**3 / mu ) # always 1/2 period
-        
-        # find phase angle
-        ( _,_ , phase_angle ) = kepler.tof_delta_t(p_f,ecc_f,mu,nu_f,-tof)
+    # if ( ecc_i < 1.0 ) and ( ecc_f < 1.0 ):
+    # find first delta_v
+    v_i = np.sqrt( (2 * mu)/r_i - (mu/a_i) )
+    vt_a = np.sqrt( (2 * mu)/r_i- (mu/a_t) )
+    dv_a= np.absolute( vt_a - v_i )
+    
+    # find second delta_v
+    v_f = np.sqrt( (2.0 * mu)/r_f - (mu/a_f) )
+    vt_b = np.sqrt( (2.0 * mu)/r_f - (mu/a_t) )
+    dv_b= np.absolute( v_f - vt_b )
+    
+    # ----------------  find transfer time of flight  ---------- }
+    tof = np.pi * np.sqrt( a_t**3 / mu ) # always 1/2 period
+    
+    # find phase angle
+    ( _,_ , phase_angle ) = kepler.tof_delta_t(p_f,ecc_f,mu,nu_f,-tof)
     
     return ( dv_a,dv_b,tof , phase_angle )    
 
@@ -319,3 +319,13 @@ def synodic_period(a1, a2, mu):
     n2 = np.sqrt(mu/ a2**3)
     S = 2 * np.pi / np.absolute(n2 - n1)
     return S
+
+# TODO: Add unit tests
+def vel_mag(r, a, mu):
+    """Energy equation to find magnitude of velocity in orbit
+    """
+
+    v = np.sqrt((2 * mu / r) - mu / a)
+    return v
+
+# TODO: Add a phasing orbit function

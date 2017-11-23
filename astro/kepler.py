@@ -1589,6 +1589,9 @@ def nu_solve(p, e, r):
     nu = np.arccos( p / r / e - 1 / e)
     return nu, -nu
 
-def nu_anomaly(E, ecc):
-    """Convert eccentric anomaly to true anomaly
+# TODO Add unit tests
+def period2sma(period, mu):
+    """Convert period to semi major axis
     """
+    a = ((period / 2 / np.pi)**2 * mu )**(1/3)
+    return a
