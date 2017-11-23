@@ -143,3 +143,36 @@ class TestECEF2NED():
         dcm = transform.dcm_ecef2ned(latgd, lon, alt)
         dcm_opp = transform.dcm_ned2ecef(latgd, lon, alt)
         np.testing.assert_allclose(dcm.T, dcm_opp)
+
+class TestPQW2LVLH():
+    nu = np.random.uniform(0, 2*np.pi)
+    dcm = transform.dcm_pqw2lvlh(nu)
+    dcm_opp = transform.dcm_lvlh2pqw(nu)
+
+    def test_true_anomaly_90(self):
+        nu = np.deg2rad(90)
+        phat = np.array([1, 0, 0])
+        R_pqw2lvlh = transform.dcm_pqw2lvlh(nu)
+        R_lvlh2pqw = transform.dcm_lvlh2pqw(nu)
+        rhat = np.array([0, -1, 0])
+        np.testing.assert_array_almost_equal(R_pqw2lvlh.dot(phat), rhat)
+        np.testing.assert_array_almost_equal(R_lvlh2pqw.dot(rhat), phat)
+
+    def test_true_anomaly_180(self):
+        nu = np.deg2rad(180)
+        phat = np.array([1, 0, 0])
+        R_pqw2lvlh = transform.dcm_pqw2lvlh(nu)
+        R_lvlh2pqw = transform.dcm_lvlh2pqw(nu)
+        rhat = np.array([-1, 0, 0])
+        np.testing.assert_array_almost_equal(R_pqw2lvlh.dot(phat), rhat)
+        np.testing.assert_array_almost_equal(R_lvlh2pqw.dot(rhat), phat)
+
+    def test_so3(self):
+        dcm = self.dcm
+        np.testing.assert_allclose(np.linalg.det(dcm), 1)
+        np.testing.assert_array_almost_equal(dcm.T.dot(dcm), np.eye(3,3))
+    
+    def test_inverse_identity(self):
+        dcm = self.dcm
+        dcm_opp = self.dcm_opp
+        np.testing.assert_allclose(dcm.T, dcm_opp)
