@@ -719,7 +719,68 @@ def conic_orbit(p, ecc, inc, raan, arg_p, nu_i, nu_f, mu=constants.earth.mu):
     return (state_eci, state_pqw, state_lvlh, state_sat_eci, state_sat_pqw,
             state_sat_lvlh)
 
+# TODO: Add unit tests
+def anom2nu(E, ecc):
+    """Calculate true anomaly given eccentric anomaly for all orbits
 
+    (nu) = anom2nu(E,ecc) 
+
+    Inputs:
+        - ecc - eccentricity of orbit 0 < ecc < inf
+        - E - (elliptical/parabolic/hyperbolic) eccentric anomaly in rad
+            0 < E < 2*pi
+
+    Outputs:
+        - nu - true anomaly in rad -2*pi < nu < 2*pi
+
+    Dependencies:
+        - numpy - we are lost without numpy
+        - kinematics.attitude.normalize - normalize angles
+    
+    Notes
+    -----
+    This function is valid for all orbit types. 
+
+    Author:
+        - Shankar Kulumani 23 Nov 2017
+            - Add function in python
+
+    References
+        - AAE532 notes
+        - Vallado 3rd Ed
+    """
+    small = 1e-9
+
+    if ecc <= small:  # circular
+        nu = E
+    elif small < ecc and ecc <= 1 - small:  # elliptical
+        sinv = np.sin(E) * np.sqrt(1- ecc**2) / (1 - ecc * np.cos(E))
+        cosv = (np.cos(E) - ecc) / (1 - ecc * np.cos(E))
+        nu = np.arctan2(sinv, cosv)
+
+        nu = attitude.normalize(nu, 0, 2 * np.pi)
+    elif np.absolute(ecc - 1) <= small:  # parabolic
+        B = E
+        sinv = p * B / r
+        cosv = (p - r) / r
+
+        nu = np.arctan2(B)
+        
+        nu = attitude.normalize(nu, 0, 2 * np.pi)
+    elif ecc > 1 + small:  # hyperbolic
+        H = E
+        sinv = -np.sinh(H) * np.sqrt(ecc**2 - 1) / (1 - ecc * np.cosh(H))
+        cosv = (np.cosh(H) - ecc) / (1 - ecc * np.cosh(H))
+
+        nu = np.arctan2(sinv, cosv)
+    else:
+        print("Eccentricity is out of bounds 0 < ecc < inf")
+
+    return nu[0]
+
+
+# TODO: Add unit tests
+# TODO: Use arctan2 formulation of conversion
 def nu2anom(nu, ecc):
     """Calculates the eccentric and mean anomaly given eccentricity and true
     anomaly
@@ -785,7 +846,9 @@ def nu2anom(nu, ecc):
     elif ecc > 1 + small:  # hyperbolic
         sine = (np.sqrt(ecc**2 - 1) * np.sin(nu)) / \
             (1.0 + ecc * np.cos(nu))
-        H = np.arcsinh(sine)
+        cose = (ecc + np.cos(nu)) / (1 + ecc * np.cos(nu))
+        H = np.arctan2(sine, cose)
+
         E = H
         M = ecc * np.sinh(H) - H
 
@@ -1526,3 +1589,6 @@ def nu_solve(p, e, r):
     nu = np.arccos( p / r / e - 1 / e)
     return nu, -nu
 
+def nu_anomaly(E, ecc):
+    """Convert eccentric anomaly to true anomaly
+    """
