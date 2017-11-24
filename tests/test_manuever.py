@@ -86,3 +86,25 @@ def test_synodic_period():
     S_true = 67377144.56697
     S = maneuver.synodic_period(a1, a2, mu)
     np.testing.assert_allclose(S, S_true, rtol=1e-4)
+
+class TestHohmannCircular():
+    r1 = constants.earth.orbit_sma
+    r2 = constants.neptune.orbit_sma
+    ecc1, ecc2 = 0, 0
+    nu1, nu2 = 0, np.pi
+    mu = constants.sun.mu
+    dv1_true, dv2_true, tof_true, phase_angle_true = 11.65413, 4.05359, 9.66154e8, np.deg2rad(113.153)
+    dv1, dv2, tof, phase = maneuver.hohmann(r1, r2, ecc1, ecc2, nu1, nu2, mu)
+
+    def test_dv1(self):
+        np.testing.assert_allclose(self.dv1, self.dv1_true, rtol=1e-4)
+
+    def test_dv2(self):
+        np.testing.assert_allclose(self.dv2, self.dv2_true, rtol=1e-4)
+
+    def test_tof(self):
+        np.testing.assert_allclose(self.tof, self.tof_true, rtol=1e-4)
+
+    def test_tof(self):
+        np.testing.assert_allclose(self.phase, self.phase_angle_true, rtol=1e-4)
+

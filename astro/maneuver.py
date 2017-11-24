@@ -256,7 +256,7 @@ def delta_v_vnc(dv_mag, alpha, beta, fpa):
 
 # TODO: Add unit test and improve this ot be more general
 def hohmann(r_i,r_f,ecc_i,ecc_f,nu_i,nu_f,mu):
-    """Hohmann Transfer for circle to circle or elliptical
+    """Hohmann Transfer between conic sections
 
     [dv_a,dv_b,tof ] = hohmann (r_i,r_f,ecc_i,ecc_f,nu_i,nu_f,mu)
 
@@ -282,6 +282,8 @@ def hohmann(r_i,r_f,ecc_i,ecc_f,nu_i,nu_f,mu):
         - Shankar Kulumani 15 Oct 2012
         - Shankar Kulumani 17 Oct 2012
             - added phase angle
+        - Shankar Kulumani 23 Nov 2017
+            - move to python
 
     References
         - AAE532 Notes
@@ -296,14 +298,14 @@ def hohmann(r_i,r_f,ecc_i,ecc_f,nu_i,nu_f,mu):
     p_f = kepler.semilatus_rectum(a_f, ecc_f)
     # if ( ecc_i < 1.0 ) and ( ecc_f < 1.0 ):
     # find first delta_v
-    v_i = np.sqrt( (2 * mu)/r_i - (mu/a_i) )
-    vt_a = np.sqrt( (2 * mu)/r_i- (mu/a_t) )
-    dv_a= np.absolute( vt_a - v_i )
+    v_i = vel_mag(r_i, a_i, mu)
+    vt_a = vel_mag(r_i, a_t, mu)
+    dv_a=  vt_a - v_i 
     
     # find second delta_v
-    v_f = np.sqrt( (2.0 * mu)/r_f - (mu/a_f) )
-    vt_b = np.sqrt( (2.0 * mu)/r_f - (mu/a_t) )
-    dv_b= np.absolute( v_f - vt_b )
+    v_f = vel_mag(r_f, a_f, mu)
+    vt_b = vel_mag(r_f, a_t, mu)
+    dv_b=  v_f - vt_b 
     
     # ----------------  find transfer time of flight  ---------- }
     tof = np.pi * np.sqrt( a_t**3 / mu ) # always 1/2 period
@@ -313,7 +315,6 @@ def hohmann(r_i,r_f,ecc_i,ecc_f,nu_i,nu_f,mu):
     
     return ( dv_a,dv_b,tof , phase_angle )    
 
-# TODO: Add documentation and  unit test
 def synodic_period(a1, a2, mu):
     r"""Compute synodic period between closed orbits
 
