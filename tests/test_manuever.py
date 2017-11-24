@@ -78,3 +78,11 @@ def test_vel_mag():
     v_true = 3.79259
     v = maneuver.vel_mag(r, a, mu)
     np.testing.assert_allclose(v, v_true, rtol=1e-4)
+
+def test_synodic_period():
+    a1 = constants.earth.orbit_sma 
+    a2 = constants.mars.orbit_sma 
+    mu = constants.sun.mu 
+    S_true = 67377144.56697
+    S = maneuver.synodic_period(a1, a2, mu)
+    np.testing.assert_allclose(S, S_true, rtol=1e-4)

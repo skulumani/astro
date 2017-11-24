@@ -315,12 +315,33 @@ def hohmann(r_i,r_f,ecc_i,ecc_f,nu_i,nu_f,mu):
 
 # TODO: Add documentation and  unit test
 def synodic_period(a1, a2, mu):
+    r"""Compute synodic period between closed orbits
+
+    S = synodic_period(a1, a2, mu)
+
+    Parameters
+    ----------
+    a1 : float
+        semimajor axis of smaller orbit
+    a2 : float
+        semimajor axis of larger orbit
+    mu : float
+        gravitational parameter of central body km^3/sec^2
+
+    Returns
+    -------
+    S : float
+        Synodic period in sec
+
+    Author
+    ------
+    Shankar Kulumani		GWU		skulumani@gwu.edu
+    """
     n1 = np.sqrt(mu/a1**3)
     n2 = np.sqrt(mu/ a2**3)
     S = 2 * np.pi / np.absolute(n2 - n1)
     return S
 
-# TODO: Add unit tests
 def vel_mag(r, a, mu):
     r"""Find the velocity magnitude using the energy equation
 
