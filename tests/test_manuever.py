@@ -108,3 +108,17 @@ class TestHohmannCircular():
     def test_tof(self):
         np.testing.assert_allclose(self.phase, self.phase_angle_true, rtol=1e-4)
 
+class TestDeltaV_VNC_Planar():
+    dv_mag = 0.75
+    alpha = np.deg2rad(-60)
+    beta = 0
+    fpa = np.deg2rad(21.8014)
+    dv_vnc_true = np.array([0.3750, -0.64952, 0])
+    dv_lvlh_true = np.array([-0.46379, 0.589404, 0])
+    dv_vnc, dv_lvlh = maneuver.delta_v_vnc(dv_mag, alpha, beta, fpa)
+    
+    def test_vnc(self):
+        np.testing.assert_allclose(self.dv_vnc,self.dv_vnc_true, rtol=1e-4)
+
+    def test_lvlh(self):
+        np.testing.assert_allclose(self.dv_lvlh, self.dv_lvlh_true, rtol=1e-4)

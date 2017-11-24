@@ -208,7 +208,7 @@ def planar_conic_orbit_intersection(p1, p2, ecc1, ecc2, dargp, nu1_old=np.deg2ra
 def delta_v_vnc(dv_mag, alpha, beta, fpa):
     """VNC LVLH Delta V vector
 
-    [dv_vnc dv_lvlh] = delta_v_vnc(dv_mag,alpha, beta, fpa)
+    ( dv_vnc, dv_lvlh ) = delta_v_vnc(dv_mag,alpha, beta, fpa)
 
     Purpose: 
         - Converts the alpha/beta angle of the Delta_V to the VNC frame
@@ -254,7 +254,6 @@ def delta_v_vnc(dv_mag, alpha, beta, fpa):
 
     return dv_vnc, dv_lvlh
 
-# TODO: Add unit test and improve this ot be more general
 def hohmann(r_i,r_f,ecc_i,ecc_f,nu_i,nu_f,mu):
     """Hohmann Transfer between conic sections
 
