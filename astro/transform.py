@@ -3,8 +3,29 @@
 """
 
 import numpy as np
-from astro import kepler, constants, geodetic
+from astro import kepler, constants, geodetic, time
 from kinematics import attitude
+
+# TODO: Add EOP and a full transformation here - compare to SPICE
+def dcm_eci2ecef(jd):
+    """Rotation matrix to convert from ECI to ECEF
+
+    Will gradually improve this function to include all of the Earth
+    motion terms. For now, just use sidereal time to get the rotation matrix
+    """
+
+    gst, _ = time.gstlst(jd, 0)
+
+    dcm = attitude.rot3(gst, 'r')
+
+    return dcm
+
+
+def dcm_ecef2eci(jd):
+    """Rotation matrix to transform from ECEF to ECI
+    """
+    dcm = dcm_eci2ecef(jd).T
+    return dcm
 
 # TODO: Documentation and unit testing
 def dcm_pqw2eci_vector(r, v, mu=constants.earth.mu):

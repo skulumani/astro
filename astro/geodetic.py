@@ -89,26 +89,6 @@ def lla2ecef(lat, lon, alt, r=6378.137, ee=8.1819190842622e-2):
     return np.array([x, y, z])
 
 
-# TODO: Add EOP and a full transformation here - compare to SPICE
-def eci2ecef(jd):
-    """Rotation matrix to convert from ECI to ECEF
-
-    Will gradually improve this function to include all of the Earth
-    motion terms. For now, just use sidereal time to get the rotation matrix
-    """
-
-    gst, _ = time.gstlst(jd, 0)
-
-    dcm = attitude.rot3(gst, 'r')
-
-    return dcm
-
-
-def ecef2eci(jd):
-    """Rotation matrix to transform from ECEF to ECI
-    """
-    dcm = eci2ecef(jd).T
-    return dcm
 
 # TODO: Change documentation to ECI (inertial frame) and verify
 
