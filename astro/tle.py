@@ -3,7 +3,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
-# import ephem
 from collections import namedtuple
 
 from . import time, kepler, geodetic
@@ -112,27 +111,6 @@ def get_tle_spacetrack(filename, flag='all'):
             all_tles = "Incorrect flag"
 
         f.write(all_tles)
-
-
-# def get_tle_ephem(filename):
-#     """Load TLEs from a file
-#     """
-#     satlist = []
-#     with open(filename, 'r') as f:
-#         l1 = f.readline()
-#         while l1:
-#             l2 = f.readline()
-#             l3 = f.readline()
-#             sat = ephem.readtle(l1, l2, l3)
-#             satlist.append(sat)
-#             print(sat.name)
-#             l1 = f.readline()
-
-#     print("{} satellites loaded into list".format(len(satlist)))
-#     return satlist
-
-# write my own TLE parser since ephem doesn't save all the values
-
 
 def validtle(l0, l1, l2):
     r"""Ensure 3 line TLEs are valid.
