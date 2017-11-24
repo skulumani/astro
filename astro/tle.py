@@ -130,14 +130,6 @@ def validtle(l0, l1, l2):
         requirements for the checking.  If this output is True then the three
         lines of the inputted TLE are probably valid.
 
-    Other Parameters
-    ----------------
-        None
-
-    Raises
-    ------
-        None
-
     See Also
     --------
     checksum: another related function to calculate the line checksum
@@ -149,6 +141,10 @@ def validtle(l0, l1, l2):
     TLEs are an old format, but they are well documented. In addition, the TLE
     has some inherent limitations on the expected accuracy of the ephemerides
     and the data contained within it.
+    
+    Author
+    ------
+    Shankar Kulumani 
 
     References
     ----------
@@ -156,9 +152,6 @@ def validtle(l0, l1, l2):
     .. [1] VALLADO, David A. Fundamentals of Astrodynamics and Applications. 3
     ed. Microcosm Press, 2007.
     .. [2] http://celestrak.com/NORAD/documentation/tle-fmt.asp
-
-    Examples
-    --------
 
     """
     l1_valid_start = int(l1[0]) == 1
@@ -175,11 +168,32 @@ def validtle(l0, l1, l2):
 
 
 def checksum(line):
-    """The checksums for each line are calculated by adding the all numerical
-    digits on that line, including the line number. One is added to the
-    checksum for each negative sign (-) on that line. All other non-digit
-    characters are ignored.  @note this excludes last char for the checksum
-    thats already there.
+    r"""Compute checksum for a TLE line
+
+    sum = checksum(line)
+
+    Parameters
+    ----------
+    line : string
+        A single line (string) from a TLE
+
+    Returns
+    -------
+    sum : int
+        The checksums for each line are calculated by adding the all numerical
+        digits on that line, including the line number. One is added to the
+        checksum for each negative sign (-) on that line. All other non-digit
+        characters are ignored.  @note this excludes last char for the checksum
+        thats already there.
+
+    Note
+    ----
+    Input the line as is, no need to convert to float or anything
+
+    Author
+    ------
+    Shankar Kulumani		GWU		skulumani@gwu.edu
+
     """
     L = line.strip()
     cksum = 0
@@ -197,9 +211,38 @@ def checksum(line):
     return cksum
 
 def stringScientificNotationToFloat(sn):
-    """Specific format is 5 digits, a + or -, and 1 digit, ex: 01234-5 which is
+    r"""TLE Scientific notation converter
+
+    num = stringScientificNotationToFloat(sn)
+
+    Parameters
+    ----------
+    sn : string
+        String from a TLE 
+
+    Returns
+    -------
+    num : float
+        Output the string as a float
+
+    Author
+    ------
+    Shankar Kulumani		GWU		skulumani@gwu.edu
+
+    References
+    ----------
+    Specific format is 5 digits, a + or -, and 1 digit, ex: 01234-5 which is
     0.01234e-5
-    """
+
+    Examples
+    --------
+    An example of how to use the function
+
+    >>> sn = '012345-5'
+    >>> stringScientificNotationToFloat(sn)
+    0.01234e-5
+    """ 
+
     return 1e-5 * float(sn[:6]) * 10**int(sn[6:])
 
 
