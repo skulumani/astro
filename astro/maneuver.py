@@ -322,9 +322,34 @@ def synodic_period(a1, a2, mu):
 
 # TODO: Add unit tests
 def vel_mag(r, a, mu):
-    """Energy equation to find magnitude of velocity in orbit
-    """
+    r"""Find the velocity magnitude using the energy equation
 
+    v = vel_mag(r, a, mu)
+
+    Parameters
+    ----------
+    r : float
+        radius of orbit in km
+    a : float
+        semimajor axis of orbit in km (negative for hyperbolic)
+    mu : float
+        gravitational parameter of central body km^3/sec^2
+
+    Returns
+    -------
+    v : float
+        velocity of orbit km/sec
+
+    Notes
+    -----
+    You may include some math:
+
+    .. math:: -\frac{\mu}{2 a} = \frac{v^2}{2} - \frac{\mu}{r}
+
+    Author
+    ------
+    Shankar Kulumani		GWU		skulumani@gwu.edu
+    """ 
     v = np.sqrt((2 * mu / r) - mu / a)
     return v
 

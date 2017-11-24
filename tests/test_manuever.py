@@ -1,5 +1,5 @@
 import numpy as np
-from astro import manuever, constants, kepler
+from astro import maneuver, constants, kepler
 import pdb
 class TestRVFPA2OrbitEl():
     r = 4 * constants.earth.radius
@@ -9,7 +9,7 @@ class TestRVFPA2OrbitEl():
     p_true = 19751.017296
     ecc_true = 0.687739800
     nu_true = 4.377814485
-    a, p, ecc, nu = manuever.rvfpa2orbit_el(r, v, fpa, constants.earth.mu)
+    a, p, ecc, nu = maneuver.rvfpa2orbit_el(r, v, fpa, constants.earth.mu)
 
     def test_semimajor_axis(self):
         """AAE532 PS6
@@ -34,7 +34,7 @@ class TestSingleImpulse():
     fpam = np.deg2rad(27.45)
     delta_v = 1.2
     alpha = np.deg2rad(30)
-    rf, vf, fpaf = manuever.single_impulse(rm, vm, fpam, delta_v, alpha)
+    rf, vf, fpaf = maneuver.single_impulse(rm, vm, fpam, delta_v, alpha)
 
     rf_true = rm
     vf_true = 2.7944049
@@ -54,7 +54,7 @@ def test_delta_v_solve_planar():
     v2 = 2.867
     fpa1 = np.deg2rad(26.03)
     fpa2 = 0
-    deltav, alpha, beta = manuever.delta_v_solve_planar(v1, v2, fpa1, fpa2)
+    deltav, alpha, beta = maneuver.delta_v_solve_planar(v1, v2, fpa1, fpa2)
     deltav_true = 1.2639818
     alpha_true = 1.47477394
     beta_true = np.pi - alpha
@@ -68,5 +68,13 @@ def test_planar_orbit_intersection():
     a2, p2, ecc2 = kepler.perapo2aecc(2 * constants.earth.radius, 6 * constants.earth.radius)
     dargp = np.deg2rad(35)
 
-    nu = manuever.planar_conic_orbit_intersection(p1, p2, ecc1, ecc2, dargp)
+    nu = maneuver.planar_conic_orbit_intersection(p1, p2, ecc1, ecc2, dargp)
     np.testing.assert_allclose(nu, np.deg2rad(110.342156))
+
+def test_vel_mag():
+    r = 5.04 * constants.earth.radius 
+    a = 6 * constants.earth.radius
+    mu = constants.earth.mu
+    v_true = 3.79259
+    v = maneuver.vel_mag(r, a, mu)
+    np.testing.assert_allclose(v, v_true, rtol=1e-4)
