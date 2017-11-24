@@ -1,0 +1,16 @@
+name: orbit_gui
+channels:
+- anaconda
+- defaults
+dependencies:
+- numpy
+- pip
+- matplotlib
+- ipython
+- pip:
+  - astro
+  - kinematics
+  - spacetrack
+  - spiceypy
+prefix: /home/shankar/anaconda3/envs/orbit_gui
+
