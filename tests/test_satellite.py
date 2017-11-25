@@ -1,5 +1,8 @@
 from astro import tle, satellite
 import numpy as np
+import os
+
+cwd = os.path.realpath(os.path.dirname(__file__))
 
 class TestISSUSAFA():
     l0 = "0 ISS (ZARYA)             "
