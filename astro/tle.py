@@ -14,10 +14,6 @@ import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
 import pdb
 
-deg2rad = np.pi / 180
-rad2deg = 180 / np.pi
-sec2day = 1 / (24 * 3600)
-day2sec = 24 * 3600
 
 # tuple to hold all the items from a single TLE
 TLE = namedtuple('TLE', [
@@ -362,58 +358,6 @@ def parsetle(l0, l1, l2):
                checksum2=checksum2, satname=satname, good=good)
 
 
-def j2dragpert(inc0, ecc0, n0, ndot2, mu=398600.5, re=6378.137, J2=0.00108263):
-    """
-    This file calculates the rates of change of the right ascension of the
-    ascending node(raandot), argument of periapsis(argdot), and
-    eccentricity(eccdot).  The perturbations are limited to J2 and drag only.
-
-    Author:   C2C Shankar Kulumani   USAFA/CS-19   719-333-4741
-            12 5 2014 - modified to remove global varaibles
-            17 Jun 2017 - Now in Python for awesomeness
-
-    Inputs:
-    inc0 - initial inclination (radians)
-    ecc0 - initial eccentricity (unitless)
-    n0 - initial mean motion (rad/sec)
-    ndot2 - mean motion rate divided by 2 (rad/sec^2)
-
-    Outputs:
-    raandot - nodal rate (rad/sec)
-    argdot - argument of periapsis rate (rad/sec)
-    eccdot - eccentricity rate (1/sec)
-
-    Globals: None
-
-    Constants:
-    mu - 398600.5 Earth gravitational parameter in km^3/sec^2
-    re - 6378.137 Earth radius in km
-    J2 - 0.00108263 J2 perturbation factor
-
-    Coupling: None
-
-    References:
-    Vallado
-    """
-
-    # calculate initial semi major axis and semilatus rectum
-    a0 = (mu / n0**2) ** (1 / 3)
-    p0 = a0 * (1 - ecc0**2)
-
-    # mean motion with J2
-    nvec = n0 * (1 + 1.5 * J2 * (re / p0)**2 *
-                 np.sqrt(1 - ecc0**2) * (1 - 1.5 * np.sin(inc0)**2))
-
-    # eccentricity rate
-    eccdot = (-2 * (1 - ecc0) * 2 * ndot2) / (3 * nvec)
-
-    # calculate nodal rate
-    raandot = (-1.5 * J2 * (re / p0)**2 * np.cos(inc0)) * nvec
-
-    # argument of periapsis rate
-    argdot = (1.5 * J2 * (re / p0)**2 * (2 - 2.5 * np.sin(inc0)**2)) * nvec
-
-    return (raandot, argdot, eccdot)
 
 
 def get_tle(filename):
