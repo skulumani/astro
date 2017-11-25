@@ -149,66 +149,6 @@ def test_rhoazel_pole_zenith():
     rho, az, el = geodetic.rhoazel(sat_eci, site_eci, site_lat, site_lst)
     np.testing.assert_allclose((rho, az, el), (true_rho, true_az, true_el))
 
-class TestECI2ECEF():
-    """Test to make sure we can convert a location on the earth to the correct ECEF vector
-    """
-
-    lonexp = np.deg2rad(72.5529)
-    latgdexp= np.deg2rad(34.352496)
-    latgcexp = np.deg2rad(34.173429)
-    altexp = 5085.22 # kilometer
-
-    eci_exp = np.array([6524.834, 6862.875, 6448.296])
-    jd_exp = 2449773.0
-    _, lst = time.gstlst(jd_exp, lonexp)
-    eci = geodetic.site2eci(latgdexp, altexp, lst)
-    ecef = geodetic.lla2ecef(latgdexp, lonexp, altexp)
-    Reci2ecef = geodetic.eci2ecef(jd_exp)
-    eci_from_ecef = Reci2ecef.T.dot(ecef)
-
-    def test_eci_vallado(self):
-        np.testing.assert_allclose(self.eci, self.eci_exp, rtol=1e-2)
-
-    def test_eci_from_ecef(self):
-        np.testing.assert_allclose(self.eci_from_ecef, self.eci_exp, rtol=1e-2)
-
-class TestECEF2ECI():
-    """Example pg.106 in BMW
-    """
-    lon = np.deg2rad(-57.296)
-    lat = 0
-    alt = 6.378 # kilometer above equator
-    date = (1970, 1, 2, 6, 0, 0)
-    jd, _ = time.date2jd(date[0], date[1], date[2], date[3], date[4], date[5]) 
-    gst0_exp = 1.749333
-    gst_exp = attitude.normalize(9.6245, 0, 2*np.pi)
-    lst_exp = attitude.normalize(8.6245, 0, 2*np.pi)
-
-    eci_exp = np.array([-0.697*6378.137, 0.718*6378.137, 0])
-
-    gst0 = time.gsttime0(date[0])
-    gst, lst = time.gstlst(jd, lon)
-
-    eci = geodetic.site2eci(lat, alt, lst)
-    ecef = geodetic.lla2ecef(lat,lon,alt)
-    Reci2ecef = geodetic.eci2ecef(jd)
-    eci_from_ecef = Reci2ecef.T.dot(ecef)
-
-    def test_gst0(self):
-        np.testing.assert_allclose(self.gst0, self.gst0_exp, rtol=1e-4)
-
-    def test_gst(self):
-        np.testing.assert_allclose(self.gst, self.gst_exp, rtol=1e-4)
-
-    def test_lst(self):
-        np.testing.assert_allclose(self.lst, self.lst_exp, rtol=1e-3)
-
-
-    def test_eci(self):
-        np.testing.assert_allclose(self.eci, self.eci_exp, rtol=1e-2)
-
-    def test_eci_from_ecef(self):
-        np.testing.assert_allclose(self.eci_from_ecef, self.eci_exp, rtol=1e-2)
 
 class TestRhoAzEl2SEZ():
 

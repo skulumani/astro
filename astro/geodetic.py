@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 import numpy as np
 from kinematics import attitude
-from . import time, constants
+from . import time, constants, transform
 import pdb
 # TODO: Make these funcitons vectorized to handle vector inputs
 
@@ -225,7 +225,7 @@ def rv2rhoazel(r_sat_eci, v_sat_eci, lat, lon, alt, jd):
     r_site_ecef = lla2ecef(lat, lon, alt)
 
     # convert sat and site to ecef
-    dcm_eci2ecef = eci2ecef(jd)
+    dcm_eci2ecef = transform.dcm_eci2ecef(jd)
     omega_earth = np.array([0, 0, constants.earth.omega])
 
     r_sat_ecef = dcm_eci2ecef.dot(r_sat_eci)
