@@ -5,7 +5,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 from collections import namedtuple
 
-from . import time, kepler, geodetic
+from astro import time, kepler, geodetic
+from astro.satellite import Satellite
 from kinematics import attitude
 
 import matplotlib.pyplot as plt

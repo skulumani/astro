@@ -5,7 +5,6 @@ from astro import tle
 import pdb
 import os
 
-cwd = os.path.realpath(os.path.dirname(__file__))
 
 class TestTLEISS():
     l0 = "0 ISS (ZARYA)"
