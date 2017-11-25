@@ -3,7 +3,6 @@
 import numpy as np
 from astro import tle
 import pdb
-import os
 
 
 class TestTLEISS():
