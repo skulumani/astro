@@ -130,10 +130,6 @@ def coe2rv(p_in, ecc_in, inc_in, raan_in, arg_p_in, nu_in, mu):
 def perapo2aecc(r_per, r_apo):
     """Apoapsis/Periapsis to Semi-major axis and Eccentricity
 
-    Purpose: 
-    - Convert known apoapsis and periapsis distances to semi-major axis
-    adn eccentricity
-
      a, p, ecc = perapo2aecc(r_per,r_apo)
 
     Inputs: 
