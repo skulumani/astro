@@ -16,7 +16,8 @@ Shankar Kulumani		GWU		skulumani@gwu.edu
 """
 import numpy as np
 from collections import namedtuple
-from astro import constants, time
+from astro import constants, time, kepler, geodetic
+from kinematics import attitude
 
 deg2rad = np.pi / 180
 rad2deg = 180 / np.pi
