@@ -375,3 +375,24 @@ def vel_mag(r, a, mu):
     return v
 
 # TODO: Add a phasing orbit function
+
+# TODO: Add documentation and unit test
+def simple_plane_change(v, del_inc):
+    """Simple plane change delta v
+    """
+
+    delta_v = 2 * v * np.sin(del_inc/ 2)
+    return delta_v
+
+
+# TODO: Add combined plane change function 
+# TODO: Update documentation and unit tests
+def plane_change(v1, v2, delta_inc):
+    """Solve for DeltaV using law of cosines for plane change
+
+    (delta_v) = plane_change(v_1,v_2,delta_inc)
+
+    Inputs: 
+    """
+    delta_v = np.sqrt(v2**2+v1**2-2*v2*v1*np.cos(delta_inc))
+    return delta_v
