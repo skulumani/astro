@@ -20,6 +20,10 @@ from astro import constants, time, kepler, geodetic
 from kinematics import attitude
 import pdb
 
+import matplotlib.pyplot as plt
+import matplotlib.lines as mlines
+import matplotlib.patches as mpatches
+
 deg2rad = np.pi / 180
 rad2deg = 180 / np.pi
 sec2day = 1 / (24 * 3600)
@@ -458,7 +462,6 @@ class Satellite(object):
 def j2dragpert(inc0, ecc0, n0, ndot2, mu=398600.5, re=6378.137, J2=0.00108263):
     """Perturbed Kepler Propogator including J2 and drag
 
-
     Inputs:
     inc0 - initial inclination (radians)
     ecc0 - initial eccentricity (unitless)
@@ -512,12 +515,3 @@ def j2dragpert(inc0, ecc0, n0, ndot2, mu=398600.5, re=6378.137, J2=0.00108263):
 
     return (raandot, argdot, eccdot, adot)
 
-# TODO add documentation and unit testing from vallado pg 647
-def perturbed_kepler(p0, ecc0, inc0, raan0, argp0, nu0, dt, raandot, argdot,
-                     eccdot, adot, n0=0, ndot2=0, nddot6=0,
-                     mu=constants.earth.mu):
-    """Propogate using a perturbed kepler propogator
-
-    """
-
-    return coe

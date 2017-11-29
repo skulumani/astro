@@ -9,9 +9,6 @@ from astro import time, kepler, geodetic
 from astro.satellite import Satellite
 from kinematics import attitude
 
-import matplotlib.pyplot as plt
-import matplotlib.lines as mlines
-import matplotlib.patches as mpatches
 import pdb
 
 
