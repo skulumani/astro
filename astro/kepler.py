@@ -1508,9 +1508,12 @@ def semilatus_rectum(a, ecc):
 
     """
     p = a * (1 - ecc**2)
-    if ecc == 1:
-        print('Parabolic orbits a = infty, just setting p = 0')
-        p = 0
+    
+    if hasattr(ecc, "__iter__"):
+        p[ np.absolute(ecc - 1) < 1e-6] = 0
+    else:
+        if np.absolute(ecc-1) < 1e-6:
+            p = 0
 
     return p
 
