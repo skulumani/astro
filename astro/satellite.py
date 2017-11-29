@@ -44,7 +44,9 @@ class Satellite(object):
         epoch_year = (2000 + elements.epoch_year
                       if elements.epoch_year < 70
                       else 1900 + elements.epoch_year)
+
         # working units
+        nddot6 = elements.nddot_over_6 * (2 * np.pi) * (sec2day**3)
         ndot2 = elements.ndot_over_2 * (2 * np.pi) * (sec2day**2)
         inc0 = elements.inc * deg2rad
         raan0 = elements.raan * deg2rad
@@ -55,7 +57,7 @@ class Satellite(object):
         epoch_day = elements.epoch_day
 
         # calculate perturbations raan, argp, ecc
-        raandot, argpdot, eccdot = j2dragpert(inc0, ecc0, n0, ndot2)
+        # raandot, argpdot, eccdot = j2dragpert(inc0, ecc0, n0, ndot2)
 
         # calculate epoch julian date
         mo, day, hour, mn, sec = time.dayofyr2mdhms(epoch_year, epoch_day)
@@ -66,15 +68,13 @@ class Satellite(object):
         self.satnum = elements.satnum
         self.tle = elements
         self.ndot2 = ndot2
+        self.nddot6 = nddot6
         self.inc0 = inc0
         self.raan0 = raan0
         self.ecc0 = ecc0
         self.argp0 = argp0
         self.mean0 = mean0
         self.n0 = n0
-        self.raandot = raandot
-        self.argpdot = argpdot
-        self.eccdot = eccdot
         self.epoch_jd = epoch_jd
         self.epoch_year = epoch_year
         self.epoch_day = epoch_day
@@ -123,38 +123,51 @@ class Satellite(object):
         n0 = self.n0
         ecc0 = self.ecc0
         ndot2 = self.ndot2
-        eccdot = self.eccdot
+        nddot6 = self.nddot6
         raan0 = self.raan0
-        raandot = self.raandot
         argp0 = self.argp0
-        argpdot = self.argpdot
         mean0 = self.mean0
+        inc0 = self.inc0
+        a0 = (mu / n0**2 ) ** ( 1/3)
+        p0 = kepler.semilatus_rectum(a0, ecc0)
+        _, nu0, _ = kepler.kepler_eq_E(mean0, ecc0)
 
-        # mean motion at future time
-        n = n0 + ndot2 * 2 * deltat
-        ecc = ecc0 + eccdot * deltat
-        raan = raan0 + raandot * deltat
-        argp = argp0 + argpdot * deltat
+        # propogate through each step in deltat
+        p, ecc, inc, raan, argp, nu, a, n, E, M = ([] for i in range(10))
 
-        # get true anomaly at future time
-        mean = mean0 + n0 * deltat + ndot2 * deltat**2
-        mean = attitude.normalize(mean, 0, 2 * np.pi)
+        for dt in deltat:
+            coe = perturbed_kepler(p0, ecc0, inc0, raan0, argp0, nu0, dt, n0, ndot2, nddot6)
+            
+            p.append(coe.p)
+            ecc.append(coe.ecc)
+            inc.append(coe.inc)
+            raan.append(coe.raan)
+            argp.append(coe.argp)
+            nu.append(coe.nu)
+            a.append(coe.a)
+            n.append(coe.n)
+            E.append(coe.E)
+            M.append(coe.mean)
 
-        E, nu, count = kepler.kepler_eq_E(mean, ecc)
+            p0, ecc0, inc0, raan0, argp0, nu0, n0 = coe.p, coe.ecc, coe.inc, coe.raan, coe.argp, coe.nu, coe.n
 
-        a = (mu / n**2)**(1 / 3)
-        p = a * (1 - ecc**2)
-        inc = self.inc0 * np.ones_like(p)
-
+        p, ecc, inc, raan, argp, nu, a, n, E, M = (np.array(arr) for arr in [p,
+                                                                            ecc,
+                                                                            inc,
+                                                                            raan,
+                                                                            argp,
+                                                                            nu,
+                                                                            a, n, E, M])
         # convert to ECI
         r_eci, v_eci, _, _ = kepler.coe2rv(p, ecc, inc, raan, argp, nu, mu)
 
         # save all of the variables to the object
         self.jd_span = jd_span
-        self.coe = COE(n=n, ecc=ecc, raan=raan, argp=argp, mean=mean,
+        self.coe = COE(n=n, ecc=ecc, raan=raan, argp=argp, mean=,
                        E=E, nu=nu, a=a, p=p, inc=inc)
         self.r_eci = r_eci
         self.v_eci = v_eci
+
         return 0
 
     def visible(self, site):
@@ -440,14 +453,8 @@ class Satellite(object):
         plt.show()
 
 def j2dragpert(inc0, ecc0, n0, ndot2, mu=398600.5, re=6378.137, J2=0.00108263):
-    """
-    This file calculates the rates of change of the right ascension of the
-    ascending node(raandot), argument of periapsis(argdot), and
-    eccentricity(eccdot).  The perturbations are limited to J2 and drag only.
+    """Perturbed Kepler Propogator including J2 and drag
 
-    Author:   C2C Shankar Kulumani   USAFA/CS-19   719-333-4741
-            12 5 2014 - modified to remove global varaibles
-            17 Jun 2017 - Now in Python for awesomeness
 
     Inputs:
     inc0 - initial inclination (radians)
@@ -459,6 +466,7 @@ def j2dragpert(inc0, ecc0, n0, ndot2, mu=398600.5, re=6378.137, J2=0.00108263):
     raandot - nodal rate (rad/sec)
     argdot - argument of periapsis rate (rad/sec)
     eccdot - eccentricity rate (1/sec)
+    adot - semi major axis rate (km/sec)
 
     Globals: None
 
@@ -467,15 +475,21 @@ def j2dragpert(inc0, ecc0, n0, ndot2, mu=398600.5, re=6378.137, J2=0.00108263):
     re - 6378.137 Earth radius in km
     J2 - 0.00108263 J2 perturbation factor
 
-    Coupling: None
+    Coupling: 
+        kepler.semilatus_rectum - compute semilatus rectum
+
+    Author:   C2C Shankar Kulumani   USAFA/CS-19   719-333-4741
+            12 5 2014 - modified to remove global varaibles
+            17 Jun 2017 - Now in Python for awesomeness
+            29 Nov 2017 - Include drag effect on a, ecc
 
     References:
-    Vallado
+        Vallado
     """
 
     # calculate initial semi major axis and semilatus rectum
     a0 = (mu / n0**2) ** (1 / 3)
-    p0 = a0 * (1 - ecc0**2)
+    p0 = kepler.semilatus_rectum(a0, ecc0)
 
     # mean motion with J2
     nvec = n0 * (1 + 1.5 * J2 * (re / p0)**2 *
@@ -489,5 +503,41 @@ def j2dragpert(inc0, ecc0, n0, ndot2, mu=398600.5, re=6378.137, J2=0.00108263):
 
     # argument of periapsis rate
     argdot = (1.5 * J2 * (re / p0)**2 * (2 - 2.5 * np.sin(inc0)**2)) * nvec
+    
+    # semi major axis rate
+    adot = - 2 / 3 * a0 / nvec * 2 * ndot2
 
-    return (raandot, argdot, eccdot)
+    return (raandot, argdot, eccdot, adot)
+
+# TODO add documentation and unit testing from vallado pg 647
+def perturbed_kepler(p0, ecc0, inc0, raan0, argp0, nu0, dt, n0=0, ndot2=0, nddot6=0, mu=constants.earth.mu):
+    """Propogate using a perturbed kepler propogator
+
+    """
+    # initial semimajor axis
+    a0 = p0 / (1 - ecc0**2)
+
+    # compute initial mean, eccentric anomaly
+    M0, E0 = kepler.nu2anom(nu0, ecc0)
+
+    # find perturbations
+    raandot, argdot, eccdot, adot = j2dragpert(inc0, ecc0, n0, ndot2)
+
+    # update orbital elements
+    a1 = a0 + adot * dt
+    ecc1 = ecc0 + eccdot * dt
+    raan1 = raan0 + raandot * dt
+    argp1 = argp0 + argdot * dt
+    inc1 = inc0
+    p1 = kepler.semilatus_rectum(a1, ecc1)
+    n1 = n0 + ndot2 * 2 * dt
+
+    M1 = M0 + n0 * dt + ndot2 * dt**2 + nddot6 * dt**3
+    M1 = attitude.normalize(M1, 0, 2 * np.pi)
+
+    E1, nu1, _ = kepler.kepler_eq_E(M1, ecc1)
+    
+    coe = COE(n=n1, ecc=ecc1, raan=raan1, argp=argp1, mean=M1,
+              E=E1, nu=nu1, a=a1, p=p1, inc=inc1)
+
+    return coe
