@@ -18,6 +18,7 @@ import numpy as np
 from collections import namedtuple
 from astro import constants, time, kepler, geodetic
 from kinematics import attitude
+import pdb
 
 deg2rad = np.pi / 180
 rad2deg = 180 / np.pi
@@ -57,7 +58,7 @@ class Satellite(object):
         epoch_day = elements.epoch_day
 
         # calculate perturbations raan, argp, ecc
-        # raandot, argpdot, eccdot = j2dragpert(inc0, ecc0, n0, ndot2)
+        raandot, argpdot, eccdot, adot = j2dragpert(inc0, ecc0, n0, ndot2)
 
         # calculate epoch julian date
         mo, day, hour, mn, sec = time.dayofyr2mdhms(epoch_year, epoch_day)
@@ -78,6 +79,11 @@ class Satellite(object):
         self.epoch_jd = epoch_jd
         self.epoch_year = epoch_year
         self.epoch_day = epoch_day
+
+        self.raandot = raandot
+        self.argpdot=argpdot
+        self.eccdot = eccdot
+        self.adot = adot
 
     def tle_update(self, jd_span, mu=398600.5):
         """Update the state of satellite given a JD time span
@@ -120,6 +126,8 @@ class Satellite(object):
         """
 
         deltat = (jd_span - self.epoch_jd) * day2sec
+
+        # epoch orbit parameters
         n0 = self.n0
         ecc0 = self.ecc0
         ndot2 = self.ndot2
@@ -128,48 +136,43 @@ class Satellite(object):
         argp0 = self.argp0
         mean0 = self.mean0
         inc0 = self.inc0
-        a0 = (mu / n0**2 ) ** ( 1/3)
-        p0 = kepler.semilatus_rectum(a0, ecc0)
+        adot = self.adot
+        eccdot = self.eccdot
+        raandot = self.raandot
+        argpdot = self.argpdot
+
         _, nu0, _ = kepler.kepler_eq_E(mean0, ecc0)
+        a0 = kepler.n2a(n0, mu)
+        M0, E0 = kepler.nu2anom(nu0, ecc0)
 
-        # propogate through each step in deltat
-        p, ecc, inc, raan, argp, nu, a, n, E, M = ([] for i in range(10))
+        # propogated elements
+        a1 = a0 + adot * deltat # either use this or compute a1 from n1 instead
+        ecc1 = ecc0 + eccdot * deltat
+        raan1 = raan0 + raandot * deltat
+        argp1 = argp0 + argpdot * deltat
+        inc1 = inc0 * np.ones_like(ecc1)
+        n1 = n0 + ndot2 * 2 * deltat
+        # a1 = kepler.n2a(n1, mu)
+        p1 = kepler.semilatus_rectum(a1, ecc1)
 
-        for dt in deltat:
-            coe = perturbed_kepler(p0, ecc0, inc0, raan0, argp0, nu0, dt, n0, ndot2, nddot6)
-            
-            p.append(coe.p)
-            ecc.append(coe.ecc)
-            inc.append(coe.inc)
-            raan.append(coe.raan)
-            argp.append(coe.argp)
-            nu.append(coe.nu)
-            a.append(coe.a)
-            n.append(coe.n)
-            E.append(coe.E)
-            M.append(coe.mean)
+        M1 = M0 + n0 * deltat+ ndot2 *deltat**2 + nddot6 *deltat**3
+        M1 = attitude.normalize(M1, 0, 2 * np.pi)
+        E1, nu1, _ = kepler.kepler_eq_E(M1, ecc1)
 
-            p0, ecc0, inc0, raan0, argp0, nu0, n0 = coe.p, coe.ecc, coe.inc, coe.raan, coe.argp, coe.nu, coe.n
-
-        p, ecc, inc, raan, argp, nu, a, n, E, M = (np.array(arr) for arr in [p,
-                                                                            ecc,
-                                                                            inc,
-                                                                            raan,
-                                                                            argp,
-                                                                            nu,
-                                                                            a, n, E, M])
-        # convert to ECI
-        r_eci, v_eci, _, _ = kepler.coe2rv(p, ecc, inc, raan, argp, nu, mu)
+        # convert to vectors
+        r_eci, v_eci, _, _ = kepler.coe2rv(p1, ecc1, inc1, raan1, argp1, nu1, mu)
 
         # save all of the variables to the object
         self.jd_span = jd_span
-        self.coe = COE(n=n, ecc=ecc, raan=raan, argp=argp, mean=,
-                       E=E, nu=nu, a=a, p=p, inc=inc)
+        self.coe = COE(n=n1, ecc=ecc1, raan=raan1, argp=argp1, mean=M1,
+                       E=E1, nu=nu1, a=a1, p=p1, inc=inc1)
+
         self.r_eci = r_eci
         self.v_eci = v_eci
 
         return 0
-
+    
+    # TODO Reformat visibility check to be more efficient. Don't ahve to compute and store all sun vectors
     def visible(self, site):
         """Check if current sat is visible from the site
         """
@@ -510,34 +513,11 @@ def j2dragpert(inc0, ecc0, n0, ndot2, mu=398600.5, re=6378.137, J2=0.00108263):
     return (raandot, argdot, eccdot, adot)
 
 # TODO add documentation and unit testing from vallado pg 647
-def perturbed_kepler(p0, ecc0, inc0, raan0, argp0, nu0, dt, n0=0, ndot2=0, nddot6=0, mu=constants.earth.mu):
+def perturbed_kepler(p0, ecc0, inc0, raan0, argp0, nu0, dt, raandot, argdot,
+                     eccdot, adot, n0=0, ndot2=0, nddot6=0,
+                     mu=constants.earth.mu):
     """Propogate using a perturbed kepler propogator
 
     """
-    # initial semimajor axis
-    a0 = p0 / (1 - ecc0**2)
-
-    # compute initial mean, eccentric anomaly
-    M0, E0 = kepler.nu2anom(nu0, ecc0)
-
-    # find perturbations
-    raandot, argdot, eccdot, adot = j2dragpert(inc0, ecc0, n0, ndot2)
-
-    # update orbital elements
-    a1 = a0 + adot * dt
-    ecc1 = ecc0 + eccdot * dt
-    raan1 = raan0 + raandot * dt
-    argp1 = argp0 + argdot * dt
-    inc1 = inc0
-    p1 = kepler.semilatus_rectum(a1, ecc1)
-    n1 = n0 + ndot2 * 2 * dt
-
-    M1 = M0 + n0 * dt + ndot2 * dt**2 + nddot6 * dt**3
-    M1 = attitude.normalize(M1, 0, 2 * np.pi)
-
-    E1, nu1, _ = kepler.kepler_eq_E(M1, ecc1)
-    
-    coe = COE(n=n1, ecc=ecc1, raan=raan1, argp=argp1, mean=M1,
-              E=E1, nu=nu1, a=a1, p=p1, inc=inc1)
 
     return coe
