@@ -1594,3 +1594,17 @@ def period2sma(period, mu):
     """
     a = ((period / 2 / np.pi)**2 * mu )**(1/3)
     return a
+
+# TODO Documetnation and unit tests
+def n2a(n, mu):
+    """Convert mean motion to semi major axis
+    """
+    a = (mu / n**2)**(1/3)
+    return a
+
+# TODO Documenation and unit tests
+def a2n(a, mu):
+    """Convert semi major axis to mean motion
+    """
+    n = np.sqrt(mu/a**3)
+    return n
