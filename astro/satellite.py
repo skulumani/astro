@@ -395,9 +395,9 @@ class Satellite(object):
         ax = plt.subplot(111, projection='polar')
 
         line = ax.plot(az, mapr(np.rad2deg(el)))[0]
-
-        ax.text(az[0], mapr(np.rad2deg(el[0])), start_string)
-        # ax.text(az[-1], mapr(np.rad2deg(el[-1])), end_string)
+        
+        ax.plot(az[0], mapr(np.rad2deg(el[0])), marker='.', color='green', markersize=25)
+        ax.plot(az[-1], mapr(np.rad2deg(el[-1])), marker='.', color='red', markersize=25)
 
         ax.set_yticks(range(-10, 90, 10))
         ax.set_yticklabels(map(str, range(90, -10, -10)))
