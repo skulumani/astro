@@ -4,6 +4,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 from collections import namedtuple
+import urllib.request
 
 from astro import time, kepler, geodetic
 from astro.satellite import Satellite
@@ -20,6 +21,14 @@ TLE = namedtuple('TLE', [
     'inc', 'raan', 'ecc', 'argp', 'ma', 'mean_motion', 'epoch_rev',
     'checksum2', 'good'])
 
+
+def get_tle_visible(filename='/tmp/visible_tle.txt'):
+    """Download visible tle list from Celestrak
+    """
+    url = 'https://www.celestrak.com/NORAD/elements/visual.txt'
+    with urllib.request.urlopen(url) as response, open(filename, 'wb') as out_file:
+        data = response.read() # a `bytes` object
+        out_file.write(data)
 
 def get_tle_spacetrack(filename, flag='all'):
     r"""Download TLEs from spacetrack.org
