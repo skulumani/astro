@@ -82,7 +82,7 @@ setup(
                       'kinematics'],
     
     # command line scripts
-    scripts=['bin/predict'],
+    scripts=['astro/predict.py'],
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,
