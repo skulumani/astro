@@ -466,3 +466,188 @@ def j2dragpert(inc0, ecc0, n0, ndot2, mu=398600.5, re=6378.137, J2=0.00108263):
 
     return (raandot, argdot, eccdot, adot)
 
+def tle_update(sat, jd_span, mu=398600.5):
+    """Update the state of satellite given a JD time span
+
+    This procedure uses the method of general perturbations to update
+    classical elements from epoch to a future time for inclined elliptical
+    orbits.  It includes the effects due to first order secular rates
+    (second order for mean motion) caused by drag and J2.
+
+    Author:   C2C Shankar Kulumani   USAFA/CS-19   719-333-4741
+
+    Inputs:
+        deltat - elapsed time since epoch (sec)
+        n0 - mean motion at epoch (rad/sec)
+        ndot2 - mean motion rate divided by 2 (rad/sec^2)
+        ecc0 - eccentricity at epoch (unitless)
+        eccdot - eccentricity rate (1/sec)
+        raan0 - RAAN at epoch (rad)
+        raandot - RAAN rate (rad/sec)
+        argp0 - argument of periapsis at epoch (rad)
+        argdot - argument of periapsis rate (rad/sec)
+        mean0 - mean anomaly at epoch
+
+    Outputs:
+        n - mean motion at epoch + deltat (rad/sec)
+        ecc -  eccentricity at epoch + deltat (unitless)
+        raan - RAAN at epoch + deltat (rad)
+        argp - argument of periapsis at epoch + deltat (rad)
+        nu -  true anomaly at epoch + deltat (rad)
+
+    Globals: None
+
+    Constants: None
+
+    Coupling:
+        newton.m
+
+    References:
+        Astro 321 PREDICT LSN 24-25
+    """
+
+    deltat = (jd_span - sat.epoch_jd) * day2sec
+
+    # epoch orbit parameters
+    n0 = sat.n0
+    ecc0 = sat.ecc0
+    ndot2 = sat.ndot2
+    nddot6 = sat.nddot6
+    raan0 = sat.raan0
+    argp0 = sat.argp0
+    mean0 = sat.mean0
+    inc0 = sat.inc0
+    adot = sat.adot
+    eccdot = sat.eccdot
+    raandot = sat.raandot
+    argpdot = sat.argpdot
+
+    _, nu0, _ = kepler.kepler_eq_E(mean0, ecc0)
+    a0 = kepler.n2a(n0, mu)
+    M0, E0 = kepler.nu2anom(nu0, ecc0)
+
+    # propogated elements
+    a1 = a0 + adot * deltat # either use this or compute a1 from n1 instead
+    ecc1 = ecc0 + eccdot * deltat
+    raan1 = raan0 + raandot * deltat
+    argp1 = argp0 + argpdot * deltat
+    inc1 = inc0 * np.ones_like(ecc1)
+    n1 = n0 + ndot2 * 2 * deltat
+    # a1 = kepler.n2a(n1, mu)
+    p1 = kepler.semilatus_rectum(a1, ecc1)
+
+    M1 = M0 + n0 * deltat+ ndot2 *deltat**2 + nddot6 *deltat**3
+    M1 = attitude.normalize(M1, 0, 2 * np.pi)
+    E1, nu1, _ = kepler.kepler_eq_E(M1, ecc1)
+
+    # convert to vectors
+    r_eci, v_eci, _, _ = kepler.coe2rv(p1, ecc1, inc1, raan1, argp1, nu1, mu)
+
+    return r_eci
+
+def visible(sat_eci, site, jd_span):
+    """Check if current sat is visible from the site
+    """
+    site_eci = site['eci']
+    sun_eci = site['sun_eci']
+
+    alpha = np.arccos(np.einsum('ij,ij->i', site_eci, sun_eci) /
+                        np.linalg.norm(site_eci, axis=1) / np.linalg.norm(sun_eci,
+                                                                        axis=1))
+    beta = np.arccos(np.einsum('ij,ij->i', sat_eci, sun_eci) /
+                        np.linalg.norm(sat_eci, axis=1) / np.linalg.norm(sun_eci,
+                                                                        axis=1))
+    sun_alt = np.linalg.norm(sun_eci, axis=1) * np.sin(beta)
+
+    jd_vis = []
+    rho_vis = []
+    az_vis = []
+    el_vis = []
+
+    # create array to store all the passes
+    all_passes = []
+    current_pass = PASS(jd=[], az=[], el=[], site_eci=[], sat_eci=[],
+                        gst=[], lst=[], sun_alt=[], alpha=[], beta=[],
+                        sun_eci=[], rho=[])
+
+    jd_last = jd_span[0]
+    for (jd, a, b, sa, si, su, su_alt, lst, gst) in zip(jd_span, alpha,
+                                                        beta, sat_eci,
+                                                        site_eci, sun_eci,
+                                                        sun_alt, site['lst'],
+                                                        site['gst']):
+
+        if a > np.pi / 2:
+            rho, az, el = geodetic.rhoazel(sa, si, site['lat'], lst)
+
+            if rho < 1500 and el > 10 * deg2rad:
+                if b < np.pi / 2 or su_alt > 6378.137:
+                    jd_vis.append(jd)
+                    rho_vis.append(rho)
+                    az_vis.append(az)
+                    el_vis.append(el)
+
+                    # we have a visible state - save to current pass if
+                    # time since last visible is small enough if not then
+                    # we have to create another pass namedtuple
+                    if np.absolute(jd_last - jd) > (10 / 24 / 60):
+                        if current_pass.jd:  # new pass
+                            all_passes.append(current_pass)
+                            current_pass = PASS(jd=[], az=[], el=[],
+                                                site_eci=[], sat_eci=[],
+                                                gst=[], lst=[], sun_alt=[],
+                                                alpha=[], beta=[],
+                                                sun_eci=[], rho=[])
+
+                    current_pass.jd.append(jd)
+                    current_pass.az.append(az)
+                    current_pass.el.append(el)
+                    current_pass.site_eci.append(si)
+                    current_pass.sat_eci.append(sa)
+                    current_pass.gst.append(gst)
+                    current_pass.lst.append(lst)
+                    current_pass.sun_alt.append(su_alt)
+                    current_pass.alpha.append(a)
+                    current_pass.beta.append(b)
+                    current_pass.sun_eci.append(su)
+                    current_pass.rho.append(rho)
+                    jd_last = jd
+
+    all_passes.append(current_pass)
+    return all_passes
+
+def parallel_predict(sat, jd_span, site):
+    eci = tle_update(sat, jd_span)
+    all_passes = visible(eci, site, jd_span)
+
+    return all_passes
+
+def output(sat, pass_vis, filename):
+    """Write to output file
+    """
+    space = '    '
+    with open(filename, 'a') as f:
+
+        f.write('%s %05.0f\n' % (sat.satname, sat.satnum))
+        f.write(
+            'PASS    MON/DAY    HR:MIN(UT)    RHO(KM)    AZ(DEG)    EL(DEG)    SAT          \n')
+        f.write(
+            '-------------------------------------------------------------------------------\n\n')
+
+        for ii, cur_pass in enumerate(pass_vis):
+            for jd, rho, az, el in zip(cur_pass.jd, cur_pass.rho, cur_pass.az, cur_pass.el):
+                # convert julian day to normal date
+                yr, mo, day, hr, mn, sec = time.jd2date(jd)
+
+                # if sec > 30:
+                #     mn = mn + 1
+                #     if mn == 60:
+                #         hr = hr + 1
+                #         mn = 0
+                f.write('%4.0f%s' % (ii, space))
+                f.write('%3.0f/%3.0f%s' % (mo, day, space))
+                f.write('%02.0f:%02.0f:%3.1f%s' % (hr, mn, sec, space))
+                f.write('%7.2f%s' % (rho, space))
+                f.write('%7.2f%s' % (az * 180 / np.pi, space))
+                f.write('%7.2f%s' % (el * 180 / np.pi, space))
+                f.write('%13s\n' % (sat.satname))

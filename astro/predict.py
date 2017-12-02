@@ -12,11 +12,11 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from collections import defaultdict
 import numpy as np
-from astro import geodetic, time, planets, tle, constants, transform
+from astro import geodetic, time, planets, tle, constants, transform, satellite
 from kinematics import attitude
 import os
 import pdb
-import datetime, argparse
+import datetime, argparse, multiprocessing, operator, functools
 
 deg2rad = constants.deg2rad
 rad2deg = constants.rad2deg
@@ -30,9 +30,13 @@ def predict(date_start, date_end, ifile='./tle.txt', ofile='./output.txt'):
     ifile = os.path.abspath(ifile)
     ofile = os.path.abspath(ofile)
 
-    site_lat = np.deg2rad(float(input("Site Latitude (38.925) : ") or "38.925"))
-    site_lon = np.deg2rad(float(input("Site Longitude (-77.057) : ") or "-77.057"))
-    site_alt = float(input("Site Altitude (0.054) : ") or "0.054")
+    # site_lat = np.deg2rad(float(input("Site Latitude (38.925) : ") or "38.925"))
+    # site_lon = np.deg2rad(float(input("Site Longitude (-77.057) : ") or "-77.057"))
+    # site_alt = float(input("Site Altitude (0.054) : ") or "0.054")
+    
+    site_lat = np.deg2rad(38.925)
+    site_lon = np.deg2rad(-77.057)
+    site_alt = 0.054
 
     site_ecef = geodetic.lla2ecef(site_lat, site_lon, site_alt)
     
@@ -89,12 +93,20 @@ def predict(date_start, date_end, ifile='./tle.txt', ofile='./output.txt'):
 
     # now we have to read the TLE
     sats = tle.get_tle(ifile)
+    
+    parallel_predict = functools.partial(satellite.parallel_predict, jd_span=jd_span, site=site)
 
-    # now propogate and the check if each satellite is visible
-    for sat in sats:
-        sat.tle_update(jd_span)
-        sat.visible(site)
-        sat.output(ofile)
+    with multiprocessing.Pool(multiprocessing.cpu_count() - 1) as p:
+        sats_passes = p.map(parallel_predict, sats)
+    
+    for sat, pass_vis in zip(sats, sats_passes):
+        satellite.output(sat, pass_vis, ofile)
+
+    # for sat in sats:
+    #     sat.tle_update(jd_span)
+    #     sat.visible(site)
+    #     sat.output(ofile)
+
 
 if __name__ == "__main__":
     
