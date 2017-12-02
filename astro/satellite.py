@@ -349,7 +349,7 @@ class Satellite(object):
         """Write to output file
         """
         space = '    '
-        with open(filename, 'w') as f:
+        with open(filename, 'a') as f:
 
             f.write('%s %05.0f\n' % (self.satname, self.satnum))
             f.write(
