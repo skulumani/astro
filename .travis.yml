@@ -6,7 +6,6 @@ python:
 - '3.5'
 - '3.6'
 before_install:
-- pip install numpy spiceypy spacetrack kinematics
 - pip install -r requirements.txt
 install:
 - python setup.py install
