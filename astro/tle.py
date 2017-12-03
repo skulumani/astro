@@ -65,7 +65,7 @@ def get_tle_spacetrack(filename, flag='all'):
     """
     from spacetrack import SpaceTrackClient
 
-    password = input('Enter SpaceTrack.org password: ')
+    password = getpass.getpass('Enter SpaceTrack.org password: ')
     st = SpaceTrackClient('shanks.k', password)
     with open(filename, 'w') as f:
         if flag == 'all':
@@ -93,6 +93,7 @@ def get_tle_spacetrack(filename, flag='all'):
             all_tles = "Incorrect flag"
 
         f.write(all_tles)
+        return 0
 
 def validtle(l0, l1, l2):
     r"""Ensure 3 line TLEs are valid.
