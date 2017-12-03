@@ -99,7 +99,7 @@ setup(
     # testing requires for pytest
     setup_requires=['pytest-runner'],
 
-    test_require=['pytest'],
+    tests_require=['pytest'],
 
     python_requires='>=3',
 
