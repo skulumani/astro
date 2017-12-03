@@ -48,37 +48,20 @@ def get_tle_spacetrack(filename, flag='all'):
         TLE set to download from the website.
         all - Download bulk catalog
         visible - Download the visible satellite list
-        testing - Download personal list called Testing
+        stations - Download personal list called STATIONS
+        brightest - download personal list called BRIGHTEST
         rv2coe - list used in RV2COE
         comfix - list used in COMFIX
+        propogate - list used in PROPOGATE
 
     Returns
     -------
-    None
-
-    Other Parameters
-    ----------------
-    None
-
-    Raises
-    ------
-    None
-
-    See Also
-    --------
-    None
-
-    Notes
-    -----
+    None : writes to filename
 
     References
     ----------
 
     .. [1] spacetrack - https://github.com/python-astrodynamics/spacetrack
-
-    Examples
-    --------
-
     """
     from spacetrack import SpaceTrackClient
 
@@ -87,9 +70,12 @@ def get_tle_spacetrack(filename, flag='all'):
     with open(filename, 'w') as f:
         if flag == 'all':
             all_tles = st.tle_latest(ordinal=1, format='3le')
-        elif flag == 'testing':
+        elif flag == 'stations':
             all_tles = st.tle_latest(
-                favorites='Testing', ordinal=1, format='3le')
+                favorites='STATIONS', ordinal=1, format='3le')
+        elif flag == 'brightest':
+            all_tles = st.tle_latest(
+                favorites='BRIGHTEST', ordinal=1, format='3le')
         elif flag == 'visible':
             all_tles = st.tle_latest(
                 favorites='Visible', ordinal=1, format='3le')
