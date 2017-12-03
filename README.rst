@@ -3,6 +3,7 @@ Astrodynamics in Python
 
 ``astro`` is Python package to perform basic astrodynamics.
 
++-------------------------+---------------------+--------------------------+------------+
 | Continuous Integration  | Code Coverage       | Docs                     | Citation   |
 +=========================+=====================+==========================+============+
 | |Travis Build Status|   | |Coverage Status|   | |Documentation Status|   | |Citation| |
