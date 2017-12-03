@@ -111,7 +111,7 @@ if __name__ == "__main__":
     end_utc = list((datetime.datetime.today() + datetime.timedelta(days=7)).timetuple()[0:6])
     
     # default output filename
-    output_name = '/tmp/' + datetime.datetime.now().isoformat() + '_output.txt'
+    output_name = datetime.datetime.now().isoformat() + '_output.txt'
 
     # parse inputs
     parser = argparse.ArgumentParser(description='PREDICT satellite passes')
