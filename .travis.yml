@@ -10,7 +10,7 @@ matrix:
           python: 3.6
 
 before_install:
-- pip install spiceypy
+- pip install spiceypy --no-cache-dir
 install:
 - python setup.py install
 script:
