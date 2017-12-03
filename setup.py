@@ -79,7 +79,9 @@ setup(
     install_requires=['numpy',
                       'spacetrack',
                       'spiceypy',
-                      'kinematics'],
+                      'kinematics',
+                      'scipy',
+                      'matplotlib'],
     
     # command line scripts
     scripts=['astro/predict.py',
