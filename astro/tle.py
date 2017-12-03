@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """Download and handle TLEs
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
