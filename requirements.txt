@@ -4,5 +4,6 @@ matplotlib
 kinematics
 spiceypy
 spacetrack
+coveralls
 pytest
 pytest-cov
