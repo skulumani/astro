@@ -1,15 +1,34 @@
 language: python
 sudo: false
-python:
-- '3.5.4'
-- '3.6.0'
+matrix:
+    include:
+        - os: linux
+          dist: trusty
+          python: 3.5
+        - os: linux
+          dist: trusty
+          python: 3.6
+        - os: osx
+          language: generic
+          env: PYVERSION='3.5.4'
+        - os: osx
+          language: generic
+          env: PYVERSION='3.6.0'
+
 before_install:
+- if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update; fi
+- if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew upgrade pyenv; fi
+- if [ "$TRAVIS_OS_NAME" == "osx" ]; then eval "$(pyenv init -)"; fi
+- if [ "$TRAVIS_OS_NAME" == "osx" ]; then pyenv install $PYVERSION; fi
+- if [ "$TRAVIS_OS_NAME" == "osx" ]; then pyenv global $PYVERSION; fi
+- if [ "$TRAVIS_OS_NAME" == "osx" ]; then pyenv versions; fi
+- if [ "$TRAVIS_OS_NAME" == "osx" ]; then python --version; fi
+- pip install -U pip
 - pip install -U wheel
 - pip wheel numpy
 - pip install --use-wheel numpy
 - pip install twine
 - pip install --use-wheel -r requirements.txt
-- pip install coveralls
 install:
 - python setup.py install
 script:
@@ -24,5 +43,6 @@ deploy:
     secure: u3QpDzRUyFQDStc+ZLNKNHafSj+DFnjPxjbaylljdcU12a97FBgR9iK+QAODt0qsF86i3hIZwPgvLJ0ibD4s/EFfKgQPSpYPPzQsnQOYu6szjU8b1V4TT8JaRCW3qofFC6IRVxxWAdECx1MebtpeDO7Ab7U+M3fFMXjQbM3vOYZHiM5ynB3nvRfxFuLg44M9cU0hQdhVYWz3L9CylNgHsXBDL1VLufjY+5uXZmq/UnvXNjXuuv0D7bNM+opCkr8gzAvtZhr94G6AbAmRRfSWFJtHQuV8yNIf9jOC7vR5JhBJ8mos9ljVZIYevA4rf+ejB58AUP8dwBso1zMArgW+bAgjQjSsYIILDtc8CX4TPPLKJIcpwdFfhSICa2EzmCFba8fUwWQH9k9vXyx8IFMbMoyvDoG5yrlRGMtKTjJDrPJVHoS18t+YBlrqCN71ylMmTd98Isc8ERM89bPRcBnU8BD5sBu82wSkCeS7FozhgGZ9L14q91R8nQ0sf3dkLUcHPRq4rDYTKOlkW48qWxmXbdd6FJCH/HY9RBVCj1Xxqfnkt5AWoC0MIw62JccTXBvyQizgHeEsENz17K5Gg6yTkpIW8zHaX6+VlXmP791F6xaMgv+WebpAO/TKw6VmUOB9Mm6RmEF30T81ne4WWv1+m8ZNTEJz7RozLlDi75JX0AM=
   on:
     tags: true
+    branch: master
     distributions: sdist bdist_wheel
     repo: skulumani/astro
