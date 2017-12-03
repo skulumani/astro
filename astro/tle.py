@@ -390,4 +390,18 @@ def get_tle(filename):
     print("Parsed {} SATs".format(len(sats)))
     return sats
 
+if __name__ == '__main__':
+    # parse arguments to download tles to a file if desired
+    output_name = datetime.datetime.now().isoformat() + '_tle.txt' 
+    parser = argparse.ArgumentParser(description='TLE downloader')
+    parser.add_argument('--output', '-o', help='Output path to save the TLEs',
+                        default=output_name, action='store', type=str)
+    parser.add_argument('list', help='TLE list to download', choices=['visible', 'stations', 'all', 'brightest'],
+                        type=str)
+    args = parser.parse_args()
 
+    tle_flag = args.list
+    ofile = args.output
+    
+    get_tle_spacetrack(ofile, tle_flag)
+    
