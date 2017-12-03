@@ -35,7 +35,8 @@ Docs will be hosted on Read the Docs
 Citing ``astro``
 ================
 
-Create a citation
+If you find this package useful it would be very helpful if you can cite it in your work.
+You can use the citation link above.
 
 Dependencies
 ============
