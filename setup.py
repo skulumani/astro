@@ -95,9 +95,9 @@ setup(
     },
 
     # testing requires for pytest
-    setup_requires=['pytest-runner',],
+    setup_requires=['pytest-runner'],
 
-    test_require=['pytest',],
+    test_require=['pytest'],
 
     python_requires='>=3',
 

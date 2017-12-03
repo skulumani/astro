@@ -1,6 +1,5 @@
-pytest
 numpy
-matplotlib
+kinematics
 spiceypy
 spacetrack
 pytest
