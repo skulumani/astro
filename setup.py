@@ -94,6 +94,11 @@ setup(
         'test': ['pytest', 'pytest-cov', 'coverage'],
     },
 
+    # testing requires for pytest
+    setup_requires=['pytest-runner',],
+
+    test_require=['pytest',],
+
     python_requires='>=3',
 
 )
