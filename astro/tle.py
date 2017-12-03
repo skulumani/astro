@@ -12,7 +12,7 @@ from astro import time, kepler, geodetic
 from astro.satellite import Satellite
 from kinematics import attitude
 
-import pdb
+import pdb, argparse, datetime, getpass
 
 
 # tuple to hold all the items from a single TLE
