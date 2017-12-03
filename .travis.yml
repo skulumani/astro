@@ -4,7 +4,11 @@ python:
 - '3.5.4'
 - '3.6.0'
 before_install:
-- pip install -r requirements.txt
+- pip install -U wheel
+- pip wheel numpy
+- pip install --use-wheel numpy
+- pip install twine
+- pip install --use-wheel -r requirements.txt
 - pip install coveralls
 install:
 - python setup.py install
