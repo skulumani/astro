@@ -30,14 +30,10 @@ def predict(date_start, date_end, ifile='./tle.txt', ofile='./output.txt'):
     ifile = os.path.abspath(ifile)
     ofile = os.path.abspath(ofile)
 
-    # site_lat = np.deg2rad(float(input("Site Latitude (38.925) : ") or "38.925"))
-    # site_lon = np.deg2rad(float(input("Site Longitude (-77.057) : ") or "-77.057"))
-    # site_alt = float(input("Site Altitude (0.054) : ") or "0.054")
+    site_lat = np.deg2rad(float(input("Site Latitude (38.925) : ") or "38.925"))
+    site_lon = np.deg2rad(float(input("Site Longitude (-77.057) : ") or "-77.057"))
+    site_alt = float(input("Site Altitude (0.054) : ") or "0.054")
     
-    site_lat = np.deg2rad(38.925)
-    site_lon = np.deg2rad(-77.057)
-    site_alt = 0.054
-
     site_ecef = geodetic.lla2ecef(site_lat, site_lon, site_alt)
     
     jd_start, _ = time.date2jd(date_start[0], date_start[1], date_start[2], date_start[3],
