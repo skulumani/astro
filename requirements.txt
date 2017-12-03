@@ -1,0 +1,7 @@
+pytest
+numpy
+matplotlib
+spiceypy
+spacetrack
+pytest
+pytest-cov
