@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 import numpy as np
 from kinematics import attitude
-from . import time, constants, transform
+from astro import time, constants, transform
 import pdb
 # TODO: Make these funcitons vectorized to handle vector inputs
 
