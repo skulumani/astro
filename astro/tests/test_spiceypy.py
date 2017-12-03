@@ -10,10 +10,6 @@ import pdb
 
 from astro import kernels
 
-def test_correct_enviornment_loaded():
-    opencv_envl = '/home/shankar/anaconda3/envs/astro'
-    np.testing.assert_equal(sys.prefix, opencv_envl)
-
 def test_spiceypy_installation_correct():
     spice_version = 'CSPICE_N0066'
     np.testing.assert_equal(spice.tkvrsn('TOOLKIT'),spice_version)
