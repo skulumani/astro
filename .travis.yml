@@ -1,18 +1,11 @@
 language: python
 sudo: false
-matrix:
-    include:
-        - os: linux
-          dist: trusty
-          python: 3.5
-        - os: linux
-          dist: trusty
-          python: 3.6
-        - os: osx
-          language: generic
-          env: PYVERSION='3.5.4'
-        - os: osx
-          language: generic
-          env: PYVERSION='3.6.0'
+python:
+- '3.5'
+- '3.6'
+
 install:
 - python setup.py install
+
+coverage:
+- coverage run --source=astro setup.py test
