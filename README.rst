@@ -13,6 +13,9 @@ Astrodynamics in Python
    :target: https://travis-ci.org/skulumani/astro
 .. |Coverage Status| image:: https://coveralls.io/repos/github/skulumani/astro/badge.svg?branch=master
    :target: https://coveralls.io/github/skulumani/astro?branch=master
+.. |Documentation Status| image:: https://readthedocs.org/projects/astro-python/badge/?version=latest
+    :target: http://astro-python.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
 .. |Citation| image:: https://zenodo.org/badge/95155784.svg
    :target: https://zenodo.org/badge/latestdoi/95155784
 
