@@ -3,6 +3,18 @@ Astrodynamics in Python
 
 ``astro`` is Python package to perform basic astrodynamics.
 
+| Continuous Integration  | Code Coverage       | Docs                     | Citation   |
++=========================+=====================+==========================+============+
+| |Travis Build Status|   | |Coverage Status|   | |Documentation Status|   | |Citation| |
++-------------------------+---------------------+--------------------------+------------+
+
+.. |Travis Build Status| image:: https://travis-ci.org/skulumani/astro.svg?branch=master
+   :target: https://travis-ci.org/skulumani/astro
+.. |Coverage Status| image:: https://coveralls.io/repos/github/skulumani/astro/badge.svg?branch=master
+   :target: https://coveralls.io/github/skulumani/astro?branch=master
+.. |Citation| image:: https://zenodo.org/badge/95155784.svg
+   :target: https://zenodo.org/badge/latestdoi/95155784
+
 Installation
 ============
 
