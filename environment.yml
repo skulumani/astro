@@ -8,9 +8,12 @@ dependencies:
 - matplotlib
 - ipython
 - pip:
-  - astro
-  - kinematics
-  - spacetrack
-  - spiceypy
+    - astro
+    - kinematics
+    - spacetrack
+    - spiceypy
+    - sphinx
+    - sphinx-autobuild
+    - twine
 prefix: /home/shankar/anaconda3/envs/orbit_gui
 
