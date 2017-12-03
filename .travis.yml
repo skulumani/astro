@@ -7,5 +7,5 @@ python:
 install:
 - python setup.py install
 
-coverage:
+script:
 - coverage run --source=astro setup.py test
