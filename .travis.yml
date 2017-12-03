@@ -10,13 +10,13 @@ matrix:
           python: 3.6
 
 before_install:
+- pip install --user numpy scipy matplotlib
 - pip install spiceypy --no-cache-dir
 install:
 - python setup.py install
 script:
-- pytest --cov=astro 
+- pytest
 after_success:
-- coverage report
 - coveralls
 deploy:
   provider: pypi
