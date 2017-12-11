@@ -7,7 +7,9 @@ from urllib.request import urlretrieve
 import pdb
 import spiceypy as spice
 
-
+# TODO Logging for downloading of kernels
+# TODO Switch to hosting kernels on Github instead of downloading directly
+# TODO Better handling of errors in downloading and verifying that kernels exist
 cwd = os.path.realpath(os.path.dirname(__file__))
 directory = 'kernels'
 
