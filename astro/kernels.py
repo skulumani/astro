@@ -170,6 +170,13 @@ class NearKernels(object):
         # get the path for each kernel
         self.logger.info('Now converting all the URLs to a local path by parsing the URLs')
 
+        self.urlList = [self.Lsk_url, self.Ck_url, self.Sclk_url, self.Pck3_url,
+                        self.PckEros1_url, self.PckEros2_url, self.Fk_url,
+                        self.Ikgrs_url, self.Ikmsi_url, self.Iknis_url, self.Iknlr_url,
+                        self.Ikxrs_url, self.SpkPlanet_url, self.SpkEros_url,
+                        self.SpkEros2_url, self.SpkMath_url, self.SpkNearLanded_url,
+                        self.SpkNearOrbit_url, self.SpkStations_url]
+
         self.Lsk = getPathfromUrl(self.Lsk_url)
         self.Ck = getPathfromUrl(self.Ck_url)
         self.Sclk = getPathfromUrl(self.Sclk_url)
@@ -194,12 +201,6 @@ class NearKernels(object):
         self.SpkNearOrbit = getPathfromUrl(self.SpkNearOrbit_url)
         self.SpkStations = getPathfromUrl(self.SpkStations_url)
 
-        self.urlList = [self.Lsk_url, self.Ck_url, self.Sclk_url, self.Pck3_url,
-                        self.PckEros1_url, self.PckEros2_url, self.Fk_url,
-                        self.Ikgrs_url, self.Ikmsi_url, self.Iknis_url, self.Iknlr_url,
-                        self.Ikxrs_url, self.SpkPlanet_url, self.SpkEros_url,
-                        self.SpkEros2_url, self.SpkMath_url, self.SpkNearLanded_url,
-                        self.SpkNearOrbit_url, self.SpkStations_url]
 
         self.kernelList = [self.Lsk, self.Ck, self.Sclk, self.Pck3, self.PckEros1,
                            self.PckEros2, self.Fk, self.Ikgrs, self.Ikmsi, self.Iknis,
