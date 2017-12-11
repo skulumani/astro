@@ -8,6 +8,7 @@ import spiceypy as spice
 
 import logging
 
+# TODO Reduce the total amount of data that needs to be downloaded for testing spiceypy
 # TODO Logging for downloading of kernels
 # TODO Switch to hosting kernels on Github instead of downloading directly
 # TODO Better handling of errors in downloading and verifying that kernels exist
@@ -43,15 +44,45 @@ def getKernelNameFromUrl(url):
 
 
 def getPathfromUrl(url):
-    """Extract the path from the url
+    r"""Create the local path given a URL
+
+    path = getPathfromUrl(url)
+
+    Parameters
+    ----------
+    url : str
+        URL location for the kernel file
+
+    Returns
+    -------
+    path : str
+        local path for kernel
+
+    Author
+    ------
+    Shankar Kulumani		GWU		skulumani@gwu.edu
     """
     return str(os.path.join(cwd, directory, getKernelNameFromUrl(url)))
 
 
-def cleanupFile(path):
-    """Delete a file from the given path
+def delete_file(path, logger=logging.getLogger(__name__)):
+    r"""Delete a given kernel
+
+    delete_file(path)
+
+    Parameters
+    ----------
+    path : str
+        Path to the kernel. It will be deleted
+
+    Author
+    ------
+    Shankar Kulumani		GWU		skulumani@gwu.edu
     """
-    pass
+
+    if os.path.exists(path):
+        os.remove(path)
+        logger.info('Deleted {}'.format(path))
 
 
 class NearKernels(object):
