@@ -39,7 +39,7 @@ class TestSpiceyPyFunctions():
         np.testing.assert_array_almost_equal(R_E2E, np.eye(3))
         spice.kclear()
 
-    @pytest.mark.skip('failing')
+    # @pytest.mark.skip('failing')
     def test_spicepy_state_transformation(self):
         spice.furnsh(self.cass.metakernel)
         T = spice.sxform('IAU_EARTH', 'IAU_SATURN', self.etOne)
