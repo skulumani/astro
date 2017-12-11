@@ -8,12 +8,22 @@ matrix:
         - os: linux
           dist: trusty
           python: 3.6
+        - os: osx
+          language: generic
+          env: PYVERSION='3.5.4'
+        - os: osx
+          language: generic
+          env: PYVERSION='3.6.0'
 
-branches:
-    only:
-        - master
-
+# TODO Use a conda setup script like in my other repo
 before_install:
+- if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update; fi
+- if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew outdated | grep -q pyenv && brew upgrade pyenv || true; fi
+- if [ "$TRAVIS_OS_NAME" == "osx" ]; then eval "$(pyenv init -)"; fi
+- if [ "$TRAVIS_OS_NAME" == "osx" ]; then pyenv install $PYVERSION; fi
+- if [ "$TRAVIS_OS_NAME" == "osx" ]; then pyenv global $PYVERSION; fi
+- if [ "$TRAVIS_OS_NAME" == "osx" ]; then pyenv versions; fi
+- if [ "$TRAVIS_OS_NAME" == "osx" ]; then python --version; fi
 - pip install --upgrade pip setuptools wheel
 - pip install --only-binary=numpy,scipy numpy scipy
 - pip install spiceypy --no-cache-dir
