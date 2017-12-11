@@ -83,6 +83,8 @@ def delete_file(path, logger=logging.getLogger(__name__)):
     if os.path.exists(path):
         os.remove(path)
         logger.info('Deleted {}'.format(path))
+    else:
+        logger.info('{} does not exist'.format(path))
 
 
 class NearKernels(object):
@@ -316,11 +318,7 @@ def cleanupKernels(kernelObj=CassiniKernels):
     """Delete all the Kernels
     """
     for kernel in kernelObj.kernelList:
-        if os.path.exists(kernel):
-            os.remove(kernel)
-        else:
-            print("Path doesn't exist: {}".format(kernel))
-
+        delete_file(kernel)
 
 def attemptDownload(url, kernelName, targetFileName, num_attempts=5):
     """Download the file from a specific url
