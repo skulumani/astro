@@ -320,23 +320,25 @@ def cleanupKernels(kernelObj=CassiniKernels):
     for kernel in kernelObj.kernelList:
         delete_file(kernel)
 
-def attemptDownload(url, kernelName, targetFileName, num_attempts=5):
+def attemptDownload(url, kernelName, targetFileName, num_attempts=5, logger=logging.getLogger(__name__)):
     """Download the file from a specific url
     """
     current_attempt = 0
     while current_attempt < num_attempts:
         try:
-            print("Attempting to download kernel: {}".format(kernelName))
+            logger.info("Attempting to download kernel: {}".format(kernelName))
             urlretrieve(url, targetFileName)
             break
-        except:
+        except: # TODO Catch URL exception ehre - just a warning also catch a real error if the download fails log it both
             pass
+
         current_attempt = current_attempt + 1
-        print("Attempting to download kernel again...")
+        logger.info("Attempting to download kernel again...")
         time.sleep(2 + current_attempt)
 
     if current_attempt >= num_attempts:
-        print("Error downloading kernel: {}. Check if it exists at url: {}".format(
+        # TODO Add an exception here for a real failure
+        logger.error("Error downloading kernel: {}. Check if it exists at url: {}".format(
             kernelName, url))
 
 
