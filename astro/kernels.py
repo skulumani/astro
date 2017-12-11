@@ -4,12 +4,15 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os
 import time
 from urllib.request import urlretrieve
-import pdb
 import spiceypy as spice
+
+import logging
 
 # TODO Logging for downloading of kernels
 # TODO Switch to hosting kernels on Github instead of downloading directly
 # TODO Better handling of errors in downloading and verifying that kernels exist
+
+# all kernels are saved to the astro package path
 cwd = os.path.realpath(os.path.dirname(__file__))
 directory = 'kernels'
 
@@ -18,47 +21,97 @@ if not os.path.isdir(os.path.join(cwd, directory)):
 
 
 def getKernelNameFromUrl(url):
-    """Extract the Kernal name from a URL
-    """
+    r"""Parse URL to get the kernel name
+
+    kernel_name = getKernelNameFromUrl(url)
+
+    Parameters
+    ----------
+    url : str
+        URL for kernel (direct link)
+
+    Returns
+    -------
+    kernel_name : str
+        Outputs the last part of the URL - the filename of the kernel
+
+    Author
+    ------
+    Shankar Kulumani		GWU		skulumani@gwu.edu
+    """ 
     return str(url.split('/')[-1])
+
 
 def getPathfromUrl(url):
     """Extract the path from the url
     """
     return str(os.path.join(cwd, directory, getKernelNameFromUrl(url)))
 
+
 def cleanupFile(path):
     """Delete a file from the given path
     """
+    pass
+
 
 class NearKernels(object):
-    """List of urls and kernels for the Near mission
+    r"""SPICE Kernels for NEAR mission
 
-	This only downloads data for 2001, not the whole mission.
+    NearKernels(path, logger)
 
+    Parameters
+    ----------
+    path : str
+        Path to store all kernels. Defaults to CWD of astro package
+    logger: logging logger object
+        Logger for writing logs. If not given will be instantiated
+
+    Notes
+    -----
+    This only downloads data for 2001, not the whole mission.
+
+    Author
+    ------
+    Shankar Kulumani		GWU		skulumani@gwu.edu
+
+    References
+    ----------
     More data on Near is available:
     https://pdssbn.astro.umd.edu/data_sb/missions/near/index.shtml
     """
 
-    def __init__(self, path=cwd):
-        """Construct all the member variables for NEAR
+    def __init__(self, path=cwd, logger=logging.getLogger(name=__name__)):
+        r"""Instantiate the NearKernel object
+
+        Notes
+        -----
+        This holds all the links and paths to the NEAR kernels.
+        Also will create a metakernel which can be loaded by SPICE
+
+        Author
+        ------
+        Shankar Kulumani		GWU		skulumani@gwu.edu
+
         """
+        self.logger = logger
+        self.logger.debug('Instantiating NearKernels')
+
         self.near_id = '-93'
         self.eros_id = '2000433'
         
         self.near_body_frame = 'NEAR_SC_BUS_PRIME'
-        self.near_body_frame_id = -93000 
+        self.near_body_frame_id = -93000
         self.near_msi_frame = 'NEAR_MSI'
         self.near_msi_frame_id = -93001
         self.eros_body_frame = 'IAU_EROS'
         self.eros_body_frame_id = 2000433
 
         self.inertial_frame = 'J2000'
-            
+
         # mission start from near_171.tsc in UTC
         self.start_et = -122138129.0388301
-        self.start_utc = '1996-02-17 20:43:28.775 UTC' 
-        
+        self.start_utc = '1996-02-17 20:43:28.775 UTC'
+
         self.Lsk_url = 'https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/a_old_versions/naif0008.tls'
         self.Ck_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/ck/near_20010101_20010228_v01.bc'
         self.Sclk_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/sclk/near_171.tsc'
@@ -74,7 +127,7 @@ class NearKernels(object):
         self.Iknis_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/ik/nis14.ti'
         self.Iknlr_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/ik/nlr04.ti'
         self.Ikxrs_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/ik/xrs12.ti'
-    
+
         self.SpkPlanet_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/spk/de403s.bsp'
         self.SpkEros_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/spk/eros80.bsp'
         self.SpkEros2_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/spk/erosephem_1999004_2002181.bsp'
@@ -82,24 +135,26 @@ class NearKernels(object):
         self.SpkNearLanded_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/spk/near_eroslanded_nav_v1.bsp'
         self.SpkNearOrbit_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/spk/near_erosorbit_nav_v1.bsp'
         self.SpkStations_url = 'https://naif.jpl.nasa.gov/pub/naif/pds/data/near-a-spice-6-v1.0/nearsp_1000/data/spk/stations.bsp'
-
+        
         # get the path for each kernel
+        self.logger.info('Now converting all the URLs to a local path by parsing the URLs')
+
         self.Lsk = getPathfromUrl(self.Lsk_url)
         self.Ck = getPathfromUrl(self.Ck_url)
         self.Sclk = getPathfromUrl(self.Sclk_url)
 
         self.PckEros1 = getPathfromUrl(self.PckEros1_url)
-        self.PckEros2 = getPathfromUrl(self.PckEros2_url) 
-        self.Pck3 = getPathfromUrl(self.Pck3_url) 
+        self.PckEros2 = getPathfromUrl(self.PckEros2_url)
+        self.Pck3 = getPathfromUrl(self.Pck3_url)
 
-        self.Fk = getPathfromUrl(self.Fk_url) 
+        self.Fk = getPathfromUrl(self.Fk_url)
 
         self.Ikgrs = getPathfromUrl(self.Ikgrs_url)
         self.Ikmsi = getPathfromUrl(self.Ikmsi_url)
         self.Iknis = getPathfromUrl(self.Iknis_url)
         self.Iknlr = getPathfromUrl(self.Iknlr_url)
         self.Ikxrs = getPathfromUrl(self.Ikxrs_url)
-    
+
         self.SpkPlanet = getPathfromUrl(self.SpkPlanet_url)
         self.SpkEros = getPathfromUrl(self.SpkEros_url)
         self.SpkEros2 = getPathfromUrl(self.SpkEros2_url)
@@ -107,23 +162,27 @@ class NearKernels(object):
         self.SpkNearLanded = getPathfromUrl(self.SpkNearLanded_url)
         self.SpkNearOrbit = getPathfromUrl(self.SpkNearOrbit_url)
         self.SpkStations = getPathfromUrl(self.SpkStations_url)
-        
-        self.urlList = [self.Lsk_url, self.Ck_url, self.Sclk_url, self.Pck3_url, 
-                self.PckEros1_url, self.PckEros2_url, self.Fk_url,
-                self.Ikgrs_url, self.Ikmsi_url, self.Iknis_url, self.Iknlr_url, 
-                self.Ikxrs_url, self.SpkPlanet_url, self.SpkEros_url, 
-                self.SpkEros2_url, self.SpkMath_url, self.SpkNearLanded_url, 
-                self.SpkNearOrbit_url, self.SpkStations_url]
 
-        self.kernelList = [self.Lsk, self.Ck, self.Sclk, self.Pck3, self.PckEros1, 
-                self.PckEros2, self.Fk, self.Ikgrs, self.Ikmsi, self.Iknis, 
-                self.Iknlr, self.Ikxrs, self.SpkPlanet, self.SpkEros, 
-                self.SpkEros2, self.SpkMath, self.SpkNearLanded, 
-                self.SpkNearOrbit, self.SpkStations]
+        self.urlList = [self.Lsk_url, self.Ck_url, self.Sclk_url, self.Pck3_url,
+                        self.PckEros1_url, self.PckEros2_url, self.Fk_url,
+                        self.Ikgrs_url, self.Ikmsi_url, self.Iknis_url, self.Iknlr_url,
+                        self.Ikxrs_url, self.SpkPlanet_url, self.SpkEros_url,
+                        self.SpkEros2_url, self.SpkMath_url, self.SpkNearLanded_url,
+                        self.SpkNearOrbit_url, self.SpkStations_url]
+
+        self.kernelList = [self.Lsk, self.Ck, self.Sclk, self.Pck3, self.PckEros1,
+                           self.PckEros2, self.Fk, self.Ikgrs, self.Ikmsi, self.Iknis,
+                           self.Iknlr, self.Ikxrs, self.SpkPlanet, self.SpkEros,
+                           self.SpkEros2, self.SpkMath, self.SpkNearLanded,
+                           self.SpkNearOrbit, self.SpkStations]
 
         self.nameList = [getKernelNameFromUrl(url) for url in self.urlList]
         self.kernelDescription = 'Metal Kernel for 2001 NEAR orbit and landing'
+
+        self.logger.info('Starting the download for NEAR kernels')
         getKernels(self, os.path.realpath(path))
+
+        self.logger.info('Creating a NEAR metakernel')
         self.metakernel = writeMetaKernel(self, 'near2001.tm')
 
         self.info()
@@ -136,8 +195,8 @@ class NearKernels(object):
         spice.furnsh(self.metakernel)
 
         self.spkList = [self.SpkPlanet, self.SpkEros, self.SpkEros2,
-                self.SpkMath, self.SpkNearLanded, self.SpkNearOrbit,
-                self.SpkStations]
+                        self.SpkMath, self.SpkNearLanded, self.SpkNearOrbit,
+                        self.SpkStations]
 
         self.ckList = [self.Ck]
         self.pckList = [self.PckEros1, self.PckEros2]
@@ -177,7 +236,7 @@ class NearKernels(object):
                 self.pckframes[spice.frmnam(code)] = code
 
         spice.kclear()
-        
+
 
 class CassiniKernels(object):
     """List of urls and kernels for the Cassini mission
@@ -198,7 +257,7 @@ class CassiniKernels(object):
         self.Ik_url = 'https://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/ik/release.11/cas_iss_v09.ti'
         self.TourSpk_url = 'https://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/spk/030201AP_SK_SM546_T45.bsp'
         self.satSpk_url = 'https://naif.jpl.nasa.gov/pub/naif/CASSINI/kernels/spk/020514_SE_SAT105.bsp'
-        
+
         self.Lsk = getPathfromUrl(self.Lsk_url)
         self.Sclk = getPathfromUrl(self.Sclk_url)
         self.Pck = getPathfromUrl(self.Pck_url)
@@ -208,17 +267,18 @@ class CassiniKernels(object):
         self.Ik = getPathfromUrl(self.Ik_url)
         self.TourSpk = getPathfromUrl(self.TourSpk_url)
         self.satSpk = getPathfromUrl(self.satSpk_url)
-        
-        self.urlList = [self.Lsk_url, self.Sclk_url, self.Pck_url, self.Fk_url, 
-                self.Ck_url, self.Spk_url, self.Ik_url, self.TourSpk_url,
-                self.satSpk_url]
+
+        self.urlList = [self.Lsk_url, self.Sclk_url, self.Pck_url, self.Fk_url,
+                        self.Ck_url, self.Spk_url, self.Ik_url, self.TourSpk_url,
+                        self.satSpk_url]
         self.kernelList = [self.Lsk, self.Sclk, self.Pck, self.Fk, self.Ck,
-                    self.Spk, self.Ik, self.TourSpk, self.satSpk]
+                           self.Spk, self.Ik, self.TourSpk, self.satSpk]
         self.nameList = [getKernelNameFromUrl(url) for url in self.urlList]
 
         self.kernelDescription = 'Metal Kernel for Cassini Orbiter'
         getKernels(self, os.path.realpath(path))
         self.metakernel = writeMetaKernel(self, 'cassini.tm')
+
 
 def cleanupKernels(kernelObj=CassiniKernels):
     """Delete all the Kernels
@@ -246,13 +306,14 @@ def attemptDownload(url, kernelName, targetFileName, num_attempts=5):
         time.sleep(2 + current_attempt)
 
     if current_attempt >= num_attempts:
-        print("Error downloading kernel: {}. Check if it exists at url: {}".format(kernelName, url))
+        print("Error downloading kernel: {}. Check if it exists at url: {}".format(
+            kernelName, url))
 
 
 def getKernels(kernelObj=CassiniKernels, path=cwd):
     """Download all the Kernels
     """
-        
+
     for url in kernelObj.urlList:
         kernelName = getKernelNameFromUrl(url)
         kernelFile = os.path.join(path, directory, kernelName)
@@ -262,6 +323,7 @@ def getKernels(kernelObj=CassiniKernels, path=cwd):
 
     return 0
 
+
 def writeMetaKernel(kernelObj, filename='testKernel.tm'):
     """Write a user defined meta kernel file
     """
@@ -269,7 +331,8 @@ def writeMetaKernel(kernelObj, filename='testKernel.tm'):
         metaKernel.write('\\begintext\n\n')
         metaKernel.write('Created: Shankar Kulumani\n')
         if kernelObj.kernelDescription:
-            metaKernel.write('Description: {}\n'.format(kernelObj.kernelDescription))
+            metaKernel.write('Description: {}\n'.format(
+                kernelObj.kernelDescription))
 
         metaKernel.write('\n')
 
@@ -291,5 +354,6 @@ def writeMetaKernel(kernelObj, filename='testKernel.tm'):
 
     return os.path.join(cwd, directory, filename)
 
+
 if __name__ == '__main__':
-    pass 
+    pass
