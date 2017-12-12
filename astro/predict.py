@@ -39,9 +39,7 @@ def predict(site_location, date_start, date_end, ifile='./tle.txt',
 
     site_lat = np.deg2rad(site_location[0])
     site_lon = np.deg2rad(site_location[1])
-    site_alt = float(site_location[2])
-    
-    site_ecef = geodetic.lla2ecef(site_lat, site_lon, site_alt)
+    site_alt = site_location[2]
     
     jd_start, _ = time.date2jd(date_start[0], date_start[1], date_start[2], date_start[3],
                                date_start[4], date_start[5])
@@ -51,6 +49,10 @@ def predict(site_location, date_start, date_end, ifile='./tle.txt',
     jd_step = 2 / (24 * 60) # step size in minutes
     jd_span = np.arange(jd_start, jd_end, jd_step)
     
+    # build the site dictionary
+    site = build_site(jd_span, np.deg2rad(site_location[0]), 
+                      np.deg2rad(site_location[1]), float(site_location[2]))
+
     # echo check some data
     with open(ofile, 'w') as f:
         f.write('PREDICT RESULTS : Shankar Kulumani\n\n')
@@ -65,6 +67,30 @@ def predict(site_location, date_start, date_end, ifile='./tle.txt',
         
         f.write('Start Julian Date   = {}\n'.format(jd_start))
         f.write('End Julian Date     = {}\n\n'.format(jd_end))
+
+
+    # now we have to read the TLE
+    sats = tle.get_tle(ifile)
+    
+    parallel_predict = functools.partial(satellite.parallel_predict, jd_span=jd_span, site=site)
+
+    with multiprocessing.Pool(multiprocessing.cpu_count() - 1) as p:
+        sats_passes = p.map(parallel_predict, sats)
+    
+    for sat, pass_vis in zip(sats, sats_passes):
+        satellite.output(sat, pass_vis, ofile)
+
+    # for sat in sats:
+    #     sat.tle_update(jd_span)
+    #     sat.visible(site)
+    #     sat.output(ofile)
+
+    return sats, sats_passes, site 
+
+# TODO Build a site function for predict
+# TODO Add documentation and unit testing
+def build_site(jd_span, site_lat, site_lon, site_alt):
+    site_ecef = geodetic.lla2ecef(site_lat, site_lon, site_alt)
 
     # loop over jd span
     site = defaultdict(list)
@@ -92,25 +118,7 @@ def predict(site_location, date_start, date_end, ifile='./tle.txt',
     for key, item in site.items():
         site[key] = np.squeeze(np.array(item))
 
-    # update the downloaded TLEs if necessary
-
-    # now we have to read the TLE
-    sats = tle.get_tle(ifile)
-    
-    parallel_predict = functools.partial(satellite.parallel_predict, jd_span=jd_span, site=site)
-
-    with multiprocessing.Pool(multiprocessing.cpu_count() - 1) as p:
-        sats_passes = p.map(parallel_predict, sats)
-    
-    for sat, pass_vis in zip(sats, sats_passes):
-        satellite.output(sat, pass_vis, ofile)
-
-    # for sat in sats:
-    #     sat.tle_update(jd_span)
-    #     sat.visible(site)
-    #     sat.output(ofile)
-
-    return sats, sats_passes, site 
+    return site
 
 # TODO Add documentation
 def parse_args(args):
