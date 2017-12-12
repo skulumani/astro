@@ -31,6 +31,7 @@ ee = constants.earth.ee
 
 # TODO Add documentation and units for inputs
 # TODO Setup logging
+# TODO Give some detail on the location of the input and output files (print to stderr)
 def predict(site_location, date_start, date_end, ifile='./tle.txt',
             ofile='./output.txt'):
 
