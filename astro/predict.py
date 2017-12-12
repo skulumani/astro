@@ -13,10 +13,13 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from collections import defaultdict
 import numpy as np
 from astro import geodetic, time, planets, tle, constants, transform, satellite
-from kinematics import attitude
 import os
-import pdb
-import datetime, argparse, multiprocessing, operator, functools
+import tempfile
+import sys
+import datetime
+import argparse
+import multiprocessing
+import functools
 
 deg2rad = constants.deg2rad
 rad2deg = constants.rad2deg
@@ -27,7 +30,7 @@ eesqrd = constants.earth.eesqrd
 ee = constants.earth.ee
 
 # TODO Add documentation and units for inputs
-# TODO: Allow for site location inputs into functino
+# TODO Setup logging
 def predict(site_location, date_start, date_end, ifile='./tle.txt',
             ofile='./output.txt'):
 
@@ -109,38 +112,50 @@ def predict(site_location, date_start, date_end, ifile='./tle.txt',
 
     return sats, sats_passes, site 
 
-if __name__ == "__main__":
-    
+# TODO Add documentation
+def parse_args(args):
+
     # default start and end times if none are given
     start_utc = list(datetime.datetime.today().timetuple()[0:6])
     end_utc = list((datetime.datetime.today() + datetime.timedelta(days=7)).timetuple()[0:6])
     
     # default output filename
-    output_name = datetime.datetime.now().isoformat() + '_output.txt'
+    output_name = os.path.join(tempfile.gettempdir(),'predict_output.txt')
 
     # parse inputs
+    # TODO Figure out command line arguments which should be positional vs optional
+    # TODO Use logging in this funciton
+
     parser = argparse.ArgumentParser(description='PREDICT satellite passes')
-    parser.add_argument('--start', '-s', help='UTC Space separated list of year month day of start of prediction window.', 
+
+    parser.add_argument('latitude', help='Latitude (deg) of Observation site', type=float)
+    parser.add_argument('longitude', help='Longitude (deg) of Observation site', type=float)
+    parser.add_argument('altitude', help='Altitude (km) of Observation site', type=float)
+
+    parser.add_argument('--start', help='UTC Space separated list of year month day of start of prediction window.', 
                         default=start_utc, action='store', nargs=3, type=int)
-    parser.add_argument('--end', '-e', help='UTC Space separated list of year month day of end of prediction window.', 
+    parser.add_argument('--end', help='UTC Space separated list of year month day of end of prediction window.', 
                         default=end_utc, action='store', nargs=3, type=int)
     # option to use saved tle
     parser.add_argument('-i', '--input', help='Path to input tle file', action='store', type=str)
 
     parser.add_argument('-o', '--output', help='Path to output file', action='store', type=str,
                         default=output_name)
-    parser.add_argumetn('--site', nargs=3, help='Location of Observation site (lat (deg), long (deg), alt (km)', type=float)
 
-    args = parser.parse_args()
+    args = parser.parse_args(args)
 
     # option to download spacetrack tle and then run predict
     if not args.input:
         print('Using Celestrak visible sats')
-        ifile = '/tmp/visible_tle.txt'
+        ifile = os.path.join(tempfile.gettempdir(),'predict_input.txt')
         tle.get_tle_visible(ifile)
     else:
         ifile = args.input
     
-    predict(args.site, args.start, args.end, ifile, args.output)
+    return (args.latitude, args.longitude, args.altitude), args.start, args.end, ifile, args.output
+
+if __name__ == "__main__":
+    site_location, start, end, input_file, output_file = parse_args(sys.argv[1:])
+    predict(site_location, start, end, input_file, output_file)
 
 
