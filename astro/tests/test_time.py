@@ -50,12 +50,16 @@ def test_vallado_312_dayofyear():
     actual_mdhms = time.dayofyr2mdhms(2001, 77.5097222)
     np.testing.assert_allclose(actual_mdhms, expected_mdhms)
 
+# TODO Finish adding dates from table 3-3
 class TestDayOfLeapYear():
     # Table 3-3 from Vallado
     def test_jan_1(self):
-        days = time.finddays(2000, 1, 1, 0, 0, 0)
-        np.testing.assert_allclose(days, 1)
+        yrmdhms = (2000, 1, 1, 0, 0, 0)
+        days = time.finddays(yrmdhms[0], yrmdhms[1], yrmdhms[2], yrmdhms[3], yrmdhms[4], yrmdhms[5])
+        mdhms = time.dayofyr2mdhms(yrmdhms[0], 1)
 
+        np.testing.assert_allclose(days, 1)
+        np.testing.assert_allclose(mdhms, yrmdhms[1:])
     def test_jan_31(self):
         days = time.finddays(2000, 1, 31, 0, 0, 0)
         np.testing.assert_allclose(days, 31)
