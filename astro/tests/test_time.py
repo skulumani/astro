@@ -34,6 +34,18 @@ def test_jd2date_vallado_p409():
     actual_date = time.jd2date(2449857.636829)
     np.testing.assert_allclose(actual_date, expected_date, rtol=1e-3)
 
+def test_jd2date_begining_of_year():
+    expected_date = (2000, 1, 1, 0, 0, 0)
+    actual_date = time.jd2date(2451544.5)
+    np.testing.assert_allclose(actual_date, expected_date)
+
+def test_dayofyr2mdhms_leap():
+    yr = 2000
+    days = 31+29
+    expected_date = (2, 29, 0, 0, 0)
+    actual_output = time.dayofyr2mdhms(yr, days)
+    np.testing.assert_allclose(actual_output, expected_date)
+
 def test_dayofyr2mdhms_january():
     yr = 2017
     days = 1.5
@@ -97,3 +109,4 @@ class TestTimeGSTValladoEx3_3():
 
     def test_gst(self):
         np.testing.assert_allclose(self.gst, self.gstexp)
+
