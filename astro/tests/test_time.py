@@ -50,6 +50,11 @@ def test_vallado_312_dayofyear():
     actual_mdhms = time.dayofyr2mdhms(2001, 77.5097222)
     np.testing.assert_allclose(actual_mdhms, expected_mdhms)
 
+def test_finddays_special_year():
+    expected_days = 365
+    actual_days = time.finddays(1800, 12, 31, 0, 0, 0)
+    np.testing.assert_allclose(actual_days, expected_days)
+
 # TODO Finish adding dates from table 3-3
 class TestDayOfLeapYear():
     # Table 3-3 from Vallado
@@ -75,9 +80,9 @@ def test_jd2date_vallado_p409():
     np.testing.assert_allclose(actual_date, expected_date, rtol=1e-3)
 
 def test_jd2date_begining_of_year():
-    expected_date = (2000, 1, 1, 0, 0, 0)
-    actual_date = time.jd2date(2451544.5)
-    np.testing.assert_allclose(actual_date, expected_date)
+    expected_date = (2000, 1, 1, 9, 35, 59.99999)
+    actual_date = time.jd2date(2451544.9)
+    np.testing.assert_allclose(actual_date, expected_date, rtol=1e-4)
 
 def test_dayofyr2mdhms_leap():
     yr = 2000
