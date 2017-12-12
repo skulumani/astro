@@ -1,5 +1,6 @@
 language: python
 sudo: false
+# TODO Implement mac os x testing
 matrix:
     include:
         - os: linux
@@ -9,10 +10,7 @@ matrix:
           dist: trusty
           python: 3.6
 
-branches:
-    only:
-        - master
-
+# TODO Use a conda setup script like in my other repo
 before_install:
 - pip install --upgrade pip setuptools wheel
 - pip install --only-binary=numpy,scipy numpy scipy
