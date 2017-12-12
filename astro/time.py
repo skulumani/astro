@@ -21,7 +21,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 from kinematics import attitude
 
-
+# TODO Setup logging
 def date2jd(yr, mon, day, hr, minute, sec):
     """Convert date to Julian Date
 
@@ -99,7 +99,7 @@ def dayofyr2mdhms(yr, days):
     Constants     :
         LMonth(12)  - Integer Array containing the number of days per month
 
-    Coupling      : None
+    Coupling      : finddays is the inverse
 
     References    :
         None.
@@ -311,34 +311,33 @@ def finddays(yr, mo, day, hr, m, sec):
         None.
 
     Coupling      :
-        None.
+        dayofyr2mdhms is the inverse
 
     """
+    # shift index values to be 1 - 12
+    LMonth = np.array([ 0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31])
+   
+    # TODO: Add logger ehre for leap vs. non leap year
+    if yr % 4 == 0 :
+        if yr % 100 == 0:
+            if yr % 400 == 0:
+                LMonth[2] = 29
+            else:
+                LMonth[2] = 28
+        else:
+            LMonth[2] = 29
+    else:
+        LMonth[2] = 28
+    
+    
+    ii = 1
+    DDays = 0
+    while ii < mo and ii < 12:
+        DDays = DDays + LMonth[ii]
+        ii += 1
 
-    LMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-    if (yr - 1900) % 4 == 0:
-        LMonth[1] = 29
-
-    i = 1
-    DDays = 0.0
-    while (i < mo) and (i < 11):
-        DDays = DDays + LMonth[i]
-        i = i + 1
-
-    DDays = DDays + (day - 1) + hr / 24.0 + m / 1440.0 + sec / 86400.0
+    DDays = DDays + day + hr / 24.0 + m / 1440.0 + sec / 86400.0
 
     return DDays
 
 
-if __name__ == "__main__":
-    # test JD for J2000
-    yr = 2000
-    mon = 1
-    day = 1
-    hour = 12
-    minute = 0
-    sec = 0
-
-    JD, MJD = date2jd(yr, mon, day, hour, minute, sec)
-
-    print("J2000: %9.2f" % JD)

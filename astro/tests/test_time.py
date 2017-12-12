@@ -22,7 +22,43 @@ def test_julian_day_lower_limit():
 
 def test_finddays_newyears():
     ddays = time.finddays(2017, 1, 1, 0, 0, 0)
-    np.testing.assert_equal(ddays, 0)
+    np.testing.assert_equal(ddays, 1)
+
+def test_finddays_leapday():
+    dday = time.finddays(2000, 2, 29, 0, 0, 0)
+    np.testing.assert_equal(dday, 31+29)
+
+def test_finddays_vallado_311():
+    expected_days = 129.0
+    actual_days = time.finddays(1992, 5, 8, 0, 0, 0)
+    np.testing.assert_allclose(actual_days, expected_days)
+
+def test_dayofyr2mdhms_vallado_311():
+    actual_yr, actual_days = 1992, 129.0
+    actual_mo, actual_day, actual_hr, actual_min, actual_sec = 5, 8, 0, 0, 0
+
+    actual_mdhms = time.dayofyr2mdhms(1992, 129)
+    np.testing.assert_allclose(actual_mdhms, (actual_mo, actual_day, actual_hr, actual_min, actual_sec))
+
+def test_vallado_312_converting_fractional_days():
+    expected_days = 77.5097222
+    actual_days = time.finddays(2001, 3, 18, 12, 14, 0)
+    np.testing.assert_allclose(actual_days, expected_days)
+
+def test_vallado_312_dayofyear():
+    expected_mdhms = (3, 18, 12, 13, 59.99808)
+    actual_mdhms = time.dayofyr2mdhms(2001, 77.5097222)
+    np.testing.assert_allclose(actual_mdhms, expected_mdhms)
+
+class TestDayOfLeapYear():
+    # Table 3-3 from Vallado
+    def test_jan_1(self):
+        days = time.finddays(2000, 1, 1, 0, 0, 0)
+        np.testing.assert_allclose(days, 1)
+
+    def test_jan_31(self):
+        days = time.finddays(2000, 1, 31, 0, 0, 0)
+        np.testing.assert_allclose(days, 31)
 
 def test_date2jd_vallado_p409():
     # example from 7-1 Vallado pg. 409
