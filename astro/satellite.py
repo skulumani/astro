@@ -254,7 +254,7 @@ class Satellite(object):
         self.el_vis = el_vis
         self.pass_vis = all_passes
 
-    # TODO: Update documentation
+    # TODO: Update documentation and add a test using COMFIX
     def visible_radar(self, site):
         """Check if current sat is visible from the site given an example radar sensor
         """
@@ -374,7 +374,8 @@ class Satellite(object):
                     f.write('%7.2f%s' % (az * 180 / np.pi, space))
                     f.write('%7.2f%s' % (el * 180 / np.pi, space))
                     f.write('%13s\n' % (self.satname))
-
+    
+    # TODO Need to test a visible pass and compare. Look up figure testing in matplotlib
     def plot_pass(self, pass_num):
         """Try and plot a pass on a polar plot
         """
