@@ -79,9 +79,9 @@ def test_jd2date_vallado_p409():
     actual_date = time.jd2date(2449857.636829)
     np.testing.assert_allclose(actual_date, expected_date, rtol=1e-3)
 
-def test_jd2date_begining_of_year():
-    expected_date = (2000, 1, 1, 9, 35, 59.99999)
-    actual_date = time.jd2date(2451544.9)
+def test_jd2date_1900():
+    expected_date = (1899, 12, 31, 0, 0, 0)
+    actual_date = time.jd2date(2415019.5)
     np.testing.assert_allclose(actual_date, expected_date, rtol=1e-4)
 
 def test_dayofyr2mdhms_leap():
