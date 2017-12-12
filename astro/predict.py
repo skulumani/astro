@@ -26,13 +26,17 @@ re = constants.earth.radius
 eesqrd = constants.earth.eesqrd
 ee = constants.earth.ee
 
-def predict(date_start, date_end, ifile='./tle.txt', ofile='./output.txt'):
+# TODO Add documentation and units for inputs
+# TODO: Allow for site location inputs into functino
+def predict(site_location, date_start, date_end, ifile='./tle.txt',
+            ofile='./output.txt'):
+
     ifile = os.path.abspath(ifile)
     ofile = os.path.abspath(ofile)
 
-    site_lat = np.deg2rad(float(input("Site Latitude (38.925) : ") or "38.925"))
-    site_lon = np.deg2rad(float(input("Site Longitude (-77.057) : ") or "-77.057"))
-    site_alt = float(input("Site Altitude (0.054) : ") or "0.054")
+    site_lat = np.deg2rad(site_location[0])
+    site_lon = np.deg2rad(site_location[1])
+    site_alt = float(site_location[2])
     
     site_ecef = geodetic.lla2ecef(site_lat, site_lon, site_alt)
     
@@ -103,6 +107,7 @@ def predict(date_start, date_end, ifile='./tle.txt', ofile='./output.txt'):
     #     sat.visible(site)
     #     sat.output(ofile)
 
+    return sats, sats_passes, site 
 
 if __name__ == "__main__":
     
@@ -118,12 +123,13 @@ if __name__ == "__main__":
     parser.add_argument('--start', '-s', help='UTC Space separated list of year month day of start of prediction window.', 
                         default=start_utc, action='store', nargs=3, type=int)
     parser.add_argument('--end', '-e', help='UTC Space separated list of year month day of end of prediction window.', 
-                        default=end_utc, action='store', nargs=6, type=int)
+                        default=end_utc, action='store', nargs=3, type=int)
     # option to use saved tle
     parser.add_argument('-i', '--input', help='Path to input tle file', action='store', type=str)
 
     parser.add_argument('-o', '--output', help='Path to output file', action='store', type=str,
                         default=output_name)
+    parser.add_argumetn('--site', nargs=3, help='Location of Observation site (lat (deg), long (deg), alt (km)', type=float)
 
     args = parser.parse_args()
 
@@ -135,6 +141,6 @@ if __name__ == "__main__":
     else:
         ifile = args.input
     
-    predict(args.start, args.end, ifile, args.output)
+    predict(args.site, args.start, args.end, ifile, args.output)
 
 
