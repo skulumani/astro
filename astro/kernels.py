@@ -87,6 +87,8 @@ def delete_file(path, logger=logging.getLogger(__name__)):
         logger.info('{} does not exist'.format(path))
 
 
+# TODO : Create a list for each type of kernel, a list for SPK, FK, BSP, etc.
+# Then have logic setup to automatically download each specific type of kernel for the object
 class NearKernels(object):
     r"""SPICE Kernels for NEAR mission
 
