@@ -10,6 +10,9 @@ Author
 ------
 Shankar Kulumani		GWU		skulumani@gwu.edu
 """
+from kinematics import attitude
+from astro import kepler
+
 import numpy as np
 
 import logging
@@ -272,7 +275,7 @@ def findc2c3(psi):
 def lambert_minenergy(r1, r2, r_body, mu_body, direction):
     """Lambert minimum energy ellipse
 
-   [v1 v2 a p ecc] = lambert_minenergy(r1,r2,r_body,mu_body)
+   ( v1 v2 a p ecc ) = lambert_minenergy(r1,r2,r_body,mu_body)
 
    Purpose: 
        - Finds the minimum energy solution to lamberts problems given two
@@ -293,8 +296,8 @@ def lambert_minenergy(r1, r2, r_body, mu_body, direction):
        - F - position vector of vacant focus in km 
        
    Dependencies: 
-       - fg_nu.m - calculates velocity vectors using f and g functions
-       - crash_check.m - check for crash into central body
+       - fg_nu - calculates velocity vectors using f and g functions
+       - crash_check - check for crash into central body
 
    Author: 
        - Shankar Kulumani 5 Nov 2012
@@ -309,55 +312,54 @@ def lambert_minenergy(r1, r2, r_body, mu_body, direction):
        - AAE532 Notes LSN 30-33
        - Vallado 3rd edition
     """
-% find transfer angle
-mag_r1 = norm(r1);
-mag_r2 = norm(r2);
-cos_nu = dot(r1,r2)/(mag_r1*mag_r2);
-switch direction
-    case 'short'
-        sin_nu = norm(cross(r1,r2))/(mag_r1*mag_r2);
-    case 'long'
-        sin_nu = -norm(cross(r1,r2))/(mag_r1*mag_r2);
-end
+    # find transfer angle
+    mag_r1 = np.linalg.norm(r1)
+    mag_r2 = np.linalg.norm(r2)
+    cos_nu = np.dot(r1,r2)/(mag_r1*mag_r2)
 
-delta_nu = atan2(sin_nu,cos_nu);
-delta_nu = revcheck(delta_nu);
+    if direction == 'short':
+        sin_nu = np.linalg.norm(np.cross(r1,r2))/(mag_r1*mag_r2)
+    elif direction == 'long':
+        sin_nu = -np.linalg.norm(np.cross(r1,r2))/(mag_r1*mag_r2)
 
-% Intermediate parameters
+    delta_nu = np.arctan2(sin_nu,cos_nu)
+    # TODO Check on angle range for delta nu
+    delta_nu = attitude.normalize(delta_nu, 0, 2* np.pi)
 
-% c = sqrt(mag_r1^2+mag_r2^2-2*mag_r1*mag_r2*cos(delta_nu)); % Chord
-c_vec = r2-r1;
-c = norm(c_vec);
-s = (mag_r1+mag_r2+c)/2; % Semiperimeter
-a = s/2;
-% p = mag_r1*mag_r2/c*(1-cos(delta_nu)); % Semiparameter?
+    # Intermediate parameters
 
-alpha = 2*asin(sqrt(s/(2*a)));
-beta = 2*asin(sqrt((s-c)/(2*a)));
+    # c = sqrt(mag_r1^2+mag_r2^2-2*mag_r1*mag_r2*cos(delta_nu)); % Chord
+    c_vec = r2-r1
+    c = np.linalg.norm(c_vec)
+    s = (mag_r1+mag_r2+c)/2 # Semiperimeter
+    a = s/2
+    # p = mag_r1*mag_r2/c*(1-cos(delta_nu)); % Semiparameter?
 
-p = 4*a*(s-mag_r1)*(s-mag_r2)/c^2*(sin(1/2*(alpha + beta))^2);
+    alpha = 2*np.arcsin(np.sqrt(s/(2*a)))
+    beta = 2*np.arcsin(np.sqrt((s-c)/(2*a)))
 
-% Transfer orbit physical properties
+    p = 4*a*(s-mag_r1)*(s-mag_r2)/c**2*(sin(1/2*(alpha + beta))**2)
 
-ecc = sqrt(1-2*p/s);
-% ecc = c/(2*a);
+    # Transfer orbit physical properties
 
-% vacant focus
-F = (2*a-mag_r1)*c_vec/c + r1;
-% F = (2*a_m-norm(r1))*-c/norm(c) + r1
+    ecc = np.sqrt(1-2*p/s)
+    # ecc = c/(2*a);
 
-% find velocity at each point
-% V0 = (sqrt(mu*p)/(r0*r*sin(v)))*(R - (1 - r/p*(1-cos(v)))*R0);
-[v1 v2 f g f_dot g_dot] = fg_nu(r1,r2,delta_nu,p,mu_body);
+    # vacant focus
+    F = (2*a-mag_r1)*c_vec/c + r1
+    # F = (2*a_m-norm(r1))*-c/norm(c) + r1
 
-% Transfer orbit time
-B = 2*asin(sqrt((s-c)/s));
-if delta_nu > pi
-    B = -B;
-end
-tof = sqrt(a^3/mu_body)*(pi - B + sin(B));
+    # find velocity at each point
+    # V0 = (sqrt(mu*p)/(r0*r*sin(v)))*(R - (1 - r/p*(1-cos(v)))*R0);
+    ( v1, v2, f, g, f_dot, g_dot ) = kepler.fg_nu(r1,r2,delta_nu,p,mu_body)
 
-% Check for crash
-crash_check(r1,v1,r2,v2,mu_body,r_body);
+    # Transfer orbit time
+    B = 2*np.arcsin(np.sqrt((s-c)/s))
+    if delta_nu > pi:
+        B = -B
+    tof = np.sqrt(a**3/mu_body)*(pi - B + np.sin(B))
 
+    # Check for crash
+    crash_check(r1,v1,r2,v2,mu_body,r_body)
 
+    return v1, v2, a, p, ecc
