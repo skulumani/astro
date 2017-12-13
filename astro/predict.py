@@ -29,12 +29,57 @@ re = constants.earth.radius
 eesqrd = constants.earth.eesqrd
 ee = constants.earth.ee
 
-# TODO Add documentation and units for inputs
 # TODO Setup logging
 # TODO Give some detail on the location of the input and output files (print to stderr)
 def predict(site_location, date_start, date_end, ifile='./tle.txt',
             ofile='./output.txt'):
+    r"""PREDICT satellite passes for a given Earth location
 
+    sats, all_passes, site = predict(site_location, date_start, date_end, 
+                                        ifile, ofile)
+
+    Parameters
+    ----------
+    site_location : array_like
+        latitude (deg), longitude (deg), altitude (km) of obs site
+    date_start : array_like
+        yr, month, day, hr, min, sec for window start
+    date_end : array_like
+        yr, month, day, hr, min, sec for window end
+    ifile : str
+        path to input TLE file
+    ofile : str
+        path to output file
+
+    Returns
+    -------
+    sats : array of Satellite objects
+        Holds the data from TLE and updating functions
+    all_passes : array of Pass objects
+        holds the data for each visible pass
+    site : dictionary
+        dictionary holding the site information
+
+    See Also
+    --------
+    see the Satellite module which holds much of the required functions
+
+    Author
+    ------
+    Shankar Kulumani		GWU		skulumani@gwu.edu
+
+    References
+    ----------
+    Look at Astro 321 or MAE3145 or Vallado
+    """
+    print("""
+    ____________ ___________ _____ _____ _____ 
+    | ___ \ ___ \  ___|  _  \_   _/  __ \_   _|
+    | |_/ / |_/ / |__ | | | | | | | /  \/ | |  
+    |  __/|    /|  __|| | | | | | | |     | |  
+    | |   | |\ \| |___| |/ / _| |_| \__/\ | |  
+    \_|   \_| \_\____/|___/  \___/ \____/ \_/  """)
+                                           
     ifile = os.path.abspath(ifile)
     ofile = os.path.abspath(ofile)
 
@@ -58,13 +103,26 @@ def predict(site_location, date_start, date_end, ifile='./tle.txt',
     with open(ofile, 'w') as f:
         f.write('PREDICT RESULTS : Shankar Kulumani\n\n')
         f.write('Check Input Data : \n\n')
-        f.write('Site Latitude    = {:9.6f} rad = {:9.6f} deg\n'.format(site_lat, np.rad2deg(site_lat)))
-        f.write('Site Longitude   = {:9.6f} rad = {:9.6f} deg\n'.format(site_lon, np.rad2deg(site_lon)))
-        f.write('Site Altitude    = {:9.6f} km  = {:9.6f} m\n'.format(site_alt, site_alt * 1000))
+        f.write('Site Latitude    = {:9.6f} rad = {:9.6f} deg\n'.format(site_lat,
+                                                                        np.rad2deg(site_lat)))
+        f.write('Site Longitude   = {:9.6f} rad = {:9.6f} deg\n'.format(site_lon, 
+                                                                        np.rad2deg(site_lon)))
+        f.write('Site Altitude    = {:9.6f} km  = {:9.6f} m\n'.format(site_alt, 
+                                                                      site_alt * 1000))
         
         f.write('\nObservation Window :\n\n')
-        f.write('Start Date : {} UTC\n'.format(datetime.datetime(int(date_start[0]), int(date_start[1]), int(date_start[2]), int(date_start[3]), int(date_start[4]), int(date_start[5])).isoformat()))
-        f.write('End Date   : {} UTC\n\n'.format(datetime.datetime(int(date_end[0]),int(date_end[1]),int(date_end[2]),int(date_end[3]),int(date_end[4]),int(date_end[5])).isoformat()))
+        f.write('Start Date : {} UTC\n'.format(datetime.datetime(int(date_start[0]), 
+                                                                 int(date_start[1]), 
+                                                                 int(date_start[2]), 
+                                                                 int(date_start[3]), 
+                                                                 int(date_start[4]), 
+                                                                 int(date_start[5])).isoformat()))
+        f.write('End Date   : {} UTC\n\n'.format(datetime.datetime(int(date_end[0]),
+                                                                   int(date_end[1]),
+                                                                   int(date_end[2]),
+                                                                   int(date_end[3]),
+                                                                   int(date_end[4]),
+                                                                   int(date_end[5])).isoformat()))
         
         f.write('Start Julian Date   = {}\n'.format(jd_start))
         f.write('End Julian Date     = {}\n\n'.format(jd_end))
@@ -85,12 +143,36 @@ def predict(site_location, date_start, date_end, ifile='./tle.txt',
     #     sat.tle_update(jd_span)
     #     sat.visible(site)
     #     sat.output(ofile)
+	
+    print("Output saved to : \n{}".format(ofile))
 
     return sats, sats_passes, site 
 
-# TODO Build a site function for predict
-# TODO Add documentation and unit testing
 def build_site(jd_span, site_lat, site_lon, site_alt):
+    r"""Create the site dictionary
+
+    site = build_site(jd_span, site_lat, site_lon, site_alt)
+
+    Parameters
+    ----------
+    jd_span : array
+        Array of Julian date times for teh window
+    site_lat : float
+        site latitude in radians
+    site_lon : float
+        site longitude in radians
+    site_alt : float
+        site altitude in kilometers
+
+    Returns
+    -------
+    site : dictionary
+        site dicitonary holding data on the observation site
+
+    Author
+    ------
+    Shankar Kulumani		GWU		skulumani@gwu.edu
+    """ 
     site_ecef = geodetic.lla2ecef(site_lat, site_lon, site_alt)
 
     # loop over jd span
@@ -121,8 +203,24 @@ def build_site(jd_span, site_lat, site_lon, site_alt):
 
     return site
 
-# TODO Add documentation
 def parse_args(args):
+    r"""Parse arguments from PREDICT 
+
+    (args.latitude, args.longitude, args.altitude), args.start, args.end,
+    ifile, args.output = parse_args(args)
+
+    Parameters
+    ----------
+    args : system command line arguments
+
+    Returns
+    -------
+    Predict data from the system arguments
+
+    Author
+    ------
+    Shankar Kulumani		GWU		skulumani@gwu.edu
+    """ 
 
     # default start and end times if none are given
     start_utc = list(datetime.datetime.today().timetuple()[0:6])
@@ -155,10 +253,11 @@ def parse_args(args):
 
     # option to download spacetrack tle and then run predict
     if not args.input:
-        print('Using Celestrak visible sats')
+	# logging here
         ifile = os.path.join(tempfile.gettempdir(),'predict_input.txt')
         tle.get_tle_visible(ifile)
     else:
+	# different logging
         ifile = args.input
     
     return (args.latitude, args.longitude, args.altitude), args.start, args.end, ifile, args.output
