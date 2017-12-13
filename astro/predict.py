@@ -20,6 +20,7 @@ import datetime
 import argparse
 import multiprocessing
 import functools
+import logging
 
 deg2rad = constants.deg2rad
 rad2deg = constants.rad2deg
@@ -29,8 +30,6 @@ re = constants.earth.radius
 eesqrd = constants.earth.eesqrd
 ee = constants.earth.ee
 
-# TODO Setup logging
-# TODO Give some detail on the location of the input and output files (print to stderr)
 def predict(site_location, date_start, date_end, ifile='./tle.txt',
             ofile='./output.txt'):
     r"""PREDICT satellite passes for a given Earth location
@@ -79,6 +78,8 @@ def predict(site_location, date_start, date_end, ifile='./tle.txt',
     |  __/|    /|  __|| | | | | | | |     | |  
     | |   | |\ \| |___| |/ / _| |_| \__/\ | |  
     \_|   \_| \_\____/|___/  \___/ \____/ \_/  """)
+
+    logger = logging.getLogger(__name__)
                                            
     ifile = os.path.abspath(ifile)
     ofile = os.path.abspath(ofile)
@@ -96,10 +97,12 @@ def predict(site_location, date_start, date_end, ifile='./tle.txt',
     jd_span = np.arange(jd_start, jd_end, jd_step)
     
     # build the site dictionary
+    logger.info('Starting to create site dicitonary')
     site = build_site(jd_span, np.deg2rad(site_location[0]), 
                       np.deg2rad(site_location[1]), float(site_location[2]))
 
     # echo check some data
+    logger.info('Write some input data to the output file {}'.format(ofile))
     with open(ofile, 'w') as f:
         f.write('PREDICT RESULTS : Shankar Kulumani\n\n')
         f.write('Check Input Data : \n\n')
@@ -129,13 +132,19 @@ def predict(site_location, date_start, date_end, ifile='./tle.txt',
 
 
     # now we have to read the TLE
+    logger.info('Read TLEs from {}'.format(ifile))
     sats = tle.get_tle(ifile)
-    
+    logger.debug('Read {} sats'.format(len(sats))) 
+
     parallel_predict = functools.partial(satellite.parallel_predict, jd_span=jd_span, site=site)
+    
+    logger.info('Starting parallel processing for satellites')
 
     with multiprocessing.Pool(multiprocessing.cpu_count() - 1) as p:
         sats_passes = p.map(parallel_predict, sats)
     
+    logger.info('Now outputting visible data to textfile')
+
     for sat, pass_vis in zip(sats, sats_passes):
         satellite.output(sat, pass_vis, ofile)
 
@@ -239,9 +248,9 @@ def parse_args(args):
     parser.add_argument('longitude', help='Longitude (deg) of Observation site', type=float)
     parser.add_argument('altitude', help='Altitude (km) of Observation site', type=float)
 
-    parser.add_argument('--start', help='UTC Space separated list of year month day of start of prediction window.', 
+    parser.add_argument('--start', '-s', help='UTC Space separated list of year month day of start of prediction window.', 
                         default=start_utc, action='store', nargs=3, type=int)
-    parser.add_argument('--end', help='UTC Space separated list of year month day of end of prediction window.', 
+    parser.add_argument('--end', '-e', help='UTC Space separated list of year month day of end of prediction window.', 
                         default=end_utc, action='store', nargs=3, type=int)
     # option to use saved tle
     parser.add_argument('-i', '--input', help='Path to input tle file', action='store', type=str)
@@ -260,7 +269,10 @@ def parse_args(args):
 	# different logging
         ifile = args.input
     
-    return (args.latitude, args.longitude, args.altitude), args.start, args.end, ifile, args.output
+    start_date = (args.start[0], args.start[1], args.start[2], 0, 0, 0)
+    end_date = (args.end[0], args.end[1], args.end[2], 0, 0, 0)
+
+    return (args.latitude, args.longitude, args.altitude), start_date, end_date, ifile, args.output
 
 if __name__ == "__main__":
     site_location, start, end, input_file, output_file = parse_args(sys.argv[1:])
