@@ -159,76 +159,67 @@ def lambert_universal(r1, r2, direction, num_rev, tof, mu, r_body):
                 y= magr1 + magr2
 
             # ----------- check for negative values of y ----------
-            if (  ( vara > 0.0 ) && ( y < 0.0 ) ) 
-                ynegktr= 1;
-                while (( y < 0.0 ) && ( ynegktr < 10 ))
-                    psinew= 0.8*(1.0/c3new)*( 1.0 ...
-                        - (magr1+magr2)*sqrt(c2new)/vara  );
-                    % -------- find c2 and c3 functions -----------
-                    [c2new,c3new] = findc2c3( psinew );
-                    psiold = psinew;
-                    lower  = psiold;
-                    if ( abs(c2new) > tol )
-                        y= magr1 + magr2 - ( vara*(1.0-psiold*c3new)/sqrt(c2new) );
-                    else
-                        y= magr1 + magr2;
-                    end
-                    
-                    
-                    ynegktr = ynegktr + 1;
-                end % while
-            end  % if  y neg
-            
-            if ( ynegktr < 10 )
-                if ( abs(c2new) > tol )
-                    xold= sqrt( y/c2new );
-                else
-                    xold= 0.0;
-                end
-                xoldcubed= xold^3;
-                dtnew    = (xoldcubed*c3new + vara*sqrt(y))/sqrt(mu);
-                
-                % --------  readjust upper and lower bounds -------
-                if ( dtnew < tof )
-                    lower= psiold;
-                end
-                if ( dtnew > tof )
-                    upper= psiold;
-                end
-                psinew= (upper+lower) * 0.5;
-                
-                % ------------- find c2 and c3 functions ----------
-                [c2new,c3new] = findc2c3( psinew );
-                psiold = psinew;
-                loops = loops + 1;
-                
-                % --- make sure the first guess isn't too close ---
-                if ( (abs(dtnew - tof) < tol) && (loops == 1) );
-                    dtnew= tof-1.0;
-                end
-            end  % if  ynegktr < 10
-        
-        end % while loop
-        
-        if ( (loops >= max_iter) || (ynegktr >= 10) )
-            fprintf('\nERROR: Did not converge\n')
-            if ( ynegktr >= 10 )
-                fprintf('\nERROR: Y Negative\n')
-            end
-        else
-            % --- use f and g series to find velocity vectors -----
-            f   = 1.0 - y/magr1;
-            gdot= 1.0 - y/magr2;
-            g   = vara*sqrt( y/mu );  % 1 over g
-            
-            v1 = (r2-f*r1)/g;
-            v2 = (gdot*r2-r1)/g;
-            
-        end   % if  the answer has converged
-    else
-        fprintf('\nERROR: 180 deg transfer\n')
-    end  % if  var a > 0.0
+            if (  ( vara > 0.0 ) and ( y < 0.0 ) ):
+                ynegktr= 1
+                while (( y < 0.0 ) and ( ynegktr < 10 )):
+                    psinew= 0.8*(1.0/c3new)*( 1.0 - (magr1+magr2)*np.sqrt(c2new)/vara  )
 
-    crash_check(r1,v1,r2,v2,mu,r_body);
+                    # -------- find c2 and c3 functions -----------
+                    ( c2new,c3new ) = findc2c3( psinew )
+                    psiold = psinew
+                    lower  = psiold
+                    if ( np.absolute(c2new) > tol ):
+                        y= magr1 + magr2 - ( vara*(1.0-psiold*c3new)/np.sqrt(c2new) )
+                    else:
+                        y= magr1 + magr2
+                    
+                    ynegktr = ynegktr + 1
+            
+            if ( ynegktr < 10 ):
+                if ( np.absolute(c2new) > tol ):
+                    xold= np.sqrt( y/c2new )
+                else:
+                    xold= 0.0
+
+                xoldcubed= xold**3
+                dtnew    = (xoldcubed*c3new + vara*np.sqrt(y))/np.sqrt(mu)
+                
+                # --------  readjust upper and lower bounds -------
+                if ( dtnew < tof ):
+                    lower= psiold
+
+                if ( dtnew > tof ):
+                    upper= psiold
+
+                psinew= (upper+lower) * 0.5
+                
+                # ------------- find c2 and c3 functions ----------
+                ( c2new,c3new ) = findc2c3( psinew )
+                psiold = psinew
+                loops = loops + 1
+                
+                # --- make sure the first guess isn't too close ---
+                if ( (np.absolute(dtnew - tof) < tol) and (loops == 1) ):
+                    dtnew= tof-1.0
+        
+        if ( (loops >= max_iter) or (ynegktr >= 10) ):
+            # TODO Throw assertion about not converging and log
+            if ( ynegktr >= 10 ):
+                # TODO Throw log that Y is negative
+                print('\nERROR: Y Negative\n')
+        else:
+            # --- use f and g series to find velocity vectors -----
+            f   = 1.0 - y/magr1
+            gdot= 1.0 - y/magr2
+            g   = vara*np.sqrt( y/mu )  # 1 over g
+            
+            v1 = (r2-f*r1)/g
+            v2 = (gdot*r2-r1)/g
+            
+    else:
+        # TODO Throw error about 180 deg transfer
+        print('\nERROR: 180 deg transfer\n')
+
+    crash_check(r1,v1,r2,v2,mu,r_body)
 
     return v1, v2, errorl
