@@ -13,7 +13,9 @@ from astro.satellite import Satellite
 from kinematics import attitude
 
 import pdb, argparse, datetime, getpass
-
+import logging
+import tempfile
+import os
 
 # tuple to hold all the items from a single TLE
 TLE = namedtuple('TLE', [
@@ -24,13 +26,33 @@ TLE = namedtuple('TLE', [
     'checksum2', 'good'])
 
 
-def get_tle_visible(filename='/tmp/visible_tle.txt'):
-    """Download visible tle list from Celestrak
-    """
+def get_tle_visible(filename=os.path.join(tempfile.gettempdir(), 'visible.txt')):
+    r"""Download visible satellites from Celestrak
+
+    get_tle_visible(outfile)
+
+    Parameters
+    ----------
+    filename : str
+        File to write the TLEs
+
+    Author
+    ------
+    Shankar Kulumani		GWU		skulumani@gwu.edu
+    """ 
+    logger = logging.getLogger(__name__)
     url = 'https://www.celestrak.com/NORAD/elements/visual.txt'
-    with urllib.request.urlopen(url) as response, open(filename, 'wb') as out_file:
-        data = response.read() # a `bytes` object
-        out_file.write(data)
+    try:
+        logger.info('Trying to download visible TLEs from celestrak')
+        with urllib.request.urlopen(url) as response, open(filename, 'wb') as out_file:
+            data = response.read() # a `bytes` object
+            out_file.write(data)
+        logger.info('Succesfully downloaded the visible TLEs')
+    except urllib.error.HTTPError as err:
+        logger.warning('Celestrak URL error')
+        logger.info('Now trying to download from SpaceTrack instead')
+        get_tle_spacetrack(filename, 'visible')
+
 
 def get_tle_spacetrack(filename, flag='all'):
     r"""Download TLEs from spacetrack.org
@@ -64,7 +86,9 @@ def get_tle_spacetrack(filename, flag='all'):
     .. [1] spacetrack - https://github.com/python-astrodynamics/spacetrack
     """
     from spacetrack import SpaceTrackClient
-
+    logger = logging.getLogger(__name__)
+    
+    logger.info('Getting SpaceTrack password and connecting')
     password = getpass.getpass('Enter SpaceTrack.org password: ')
     st = SpaceTrackClient('shanks.k', password)
     with open(filename, 'w') as f:
@@ -89,7 +113,7 @@ def get_tle_spacetrack(filename, flag='all'):
             all_tles = st.tle_latest(favorites='PROPAGATE', ordinal=1,
                                      format='3le')
         else:
-            print("Incorrect TLE favorites flag")
+            logger.warning('Incorrect flag for spacetrack')
             all_tles = "Incorrect flag"
 
         f.write(all_tles)
@@ -146,6 +170,10 @@ def validtle(l0, l1, l2):
     .. [2] http://celestrak.com/NORAD/documentation/tle-fmt.asp
 
     """
+    logger = logging.getLogger(__name__)
+    
+    logger.info('Verying TLE is valid')
+
     l1_valid_start = int(l1[0]) == 1
     l2_valid_start = int(l2[0]) == 2
 
@@ -154,6 +182,7 @@ def validtle(l0, l1, l2):
 
     l1_valid_checksum = int(l1[-1]) == checksum(l1)
     l2_valid_checksum = int(l2[-1]) == checksum(l2)
+
     return (l1_valid_start and l2_valid_start and
             l1_valid_length and l2_valid_length and
             l1_valid_checksum and l1_valid_checksum and l2_valid_checksum)
