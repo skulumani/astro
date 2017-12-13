@@ -248,9 +248,9 @@ def parse_args(args):
     parser.add_argument('longitude', help='Longitude (deg) of Observation site', type=float)
     parser.add_argument('altitude', help='Altitude (km) of Observation site', type=float)
 
-    parser.add_argument('--start', help='UTC Space separated list of year month day of start of prediction window.', 
+    parser.add_argument('--start', '-s', help='UTC Space separated list of year month day of start of prediction window.', 
                         default=start_utc, action='store', nargs=3, type=int)
-    parser.add_argument('--end', help='UTC Space separated list of year month day of end of prediction window.', 
+    parser.add_argument('--end', '-e', help='UTC Space separated list of year month day of end of prediction window.', 
                         default=end_utc, action='store', nargs=3, type=int)
     # option to use saved tle
     parser.add_argument('-i', '--input', help='Path to input tle file', action='store', type=str)
@@ -269,7 +269,10 @@ def parse_args(args):
 	# different logging
         ifile = args.input
     
-    return (args.latitude, args.longitude, args.altitude), args.start, args.end, ifile, args.output
+    start_date = (args.start[0], args.start[1], args.start[2], 0, 0, 0)
+    end_date = (args.end[0], args.end[1], args.end[2], 0, 0, 0)
+
+    return (args.latitude, args.longitude, args.altitude), start_date, end_date, ifile, args.output
 
 if __name__ == "__main__":
     site_location, start, end, input_file, output_file = parse_args(sys.argv[1:])
