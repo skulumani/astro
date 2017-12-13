@@ -95,6 +95,8 @@ def lambert_universal(r1, r2, direction, num_rev, tof, mu, r_body):
         - Shankar Kulumani 7 Nov 2012
         - Shankar Kulumani 14 Nov 2012
             - added crash check
+        - Shankar Kulumani 13 Dec 2017 
+            - in python
 
     References
         - Vallado
