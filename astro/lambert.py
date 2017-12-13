@@ -272,6 +272,7 @@ def findc2c3(psi):
 
     return c2, c3
 
+# TODO add unit tests
 def lambert_minenergy(r1, r2, r_body, mu_body, direction):
     """Lambert minimum energy ellipse
 
