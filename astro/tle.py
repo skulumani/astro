@@ -389,6 +389,7 @@ def get_tle(filename):
     """Assuming a file with 3 Line TLEs is given this will parse the file
     and save all the elements to a list or something.
     """
+    logger = logging.getLogger(__name__)
     sats = []
     tles = 0
     lines = 0
@@ -410,13 +411,13 @@ def get_tle(filename):
                     sats.append(Satellite(elements))
 
             else:
-                # TODO logging
-                pass
+                logger.warning('INVALID TLE \n{}\n{}\n{}'.format(l0, l1, l2))
 
             l0 = f.readline().strip()
             lines += 1
     
-    # TODO Logging about number of TLEs and lines read
+    logger.info('{} TLEs parsed'.format(tles))
+
     return sats
 
 def parse_args(args):
