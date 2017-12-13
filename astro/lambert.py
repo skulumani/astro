@@ -225,3 +225,46 @@ def lambert_universal(r1, r2, direction, num_rev, tof, mu, r_body):
     crash_check(r1,v1,r2,v2,mu,r_body)
 
     return v1, v2, errorl
+
+def findc2c3(psi):
+    """Find C2 and C3 functions from psi
+
+    [c2,c3] = findc2c3 ( psi )
+
+    Inputs: 
+        - psi - psi variable in rad
+
+    Outputs: 
+        - c2 - C2 function
+        - c3 - C3 function
+
+    Dependencies: 
+        - none
+
+    Author: 
+        - Shankar Kulumani 16 Sept 2012
+            - list revisions
+        - Shankar Kulumani 13 Dec 2017
+            - in python
+
+    References
+        - Vallado 3rd Edition Alg 1 pg 71  
+    """
+
+
+    small =     1e-6
+
+    if ( psi > small ):
+        sqrt_psi = np.sqrt( psi )
+        c2 = (1.0 - np.cos( sqrt_psi )) / psi
+        c3 = (sqrt_psi-np.sin( sqrt_psi )) / ( sqrt_psi**3 )
+    else:
+        if ( psi < -small ):
+            sqrt_psi = np.sqrt( -psi )
+            c2 = (1.0 -np.cosh( sqrt_psi )) / psi
+            c3 = (np.sinh( sqrt_psi ) - sqrt_psi) / ( sqrt_psi**3 )
+        else:
+            c2 = 0.5
+            c3 = 1/6
+
+    return c2, c3
