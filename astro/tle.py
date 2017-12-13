@@ -445,7 +445,7 @@ def parse_args(args):
     parser.add_argument('output', help='Output path to save the TLEs',
                         default=output_name, action='store', type=str)
 
-    args = parser.parse_args()
+    args = parser.parse_args(args)
     
     return args.output, args.list
 
