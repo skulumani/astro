@@ -268,3 +268,96 @@ def findc2c3(psi):
             c3 = 1/6
 
     return c2, c3
+
+def lambert_minenergy(r1, r2, r_body, mu_body, direction):
+    """Lambert minimum energy ellipse
+
+   [v1 v2 a p ecc] = lambert_minenergy(r1,r2,r_body,mu_body)
+
+   Purpose: 
+       - Finds the minimum energy solution to lamberts problems given two
+       position vectors.
+
+   Inputs: 
+       - r1 - initial position vector in km (1x3 or 3x1)
+       - r2 - final position vector in km (1x3 or 3x1)
+       - r_body - radius of central body in km (check for collision)
+       - mu_body - gravitational parameter of central body in km^3/sec^2
+       - direction - 'long' or 'short' direction of travel 
+   Outputs: 
+       - v1 - initial velocity vector in km/sec
+       - v2 - final velocity vector in km/sec
+       - a - semimajor axis of transfer ellipse in km
+       - p - semiparameter of transfer ellipse in km
+       - ecc - eccentricity of transfer ellipse
+       - F - position vector of vacant focus in km 
+       
+   Dependencies: 
+       - fg_nu.m - calculates velocity vectors using f and g functions
+       - crash_check.m - check for crash into central body
+
+   Author: 
+       - Shankar Kulumani 5 Nov 2012
+       - Shankar Kulumani 6 Nov 2012
+           - added vacant focus calculation
+       - Shankar Kulumani 14 Nov 2012
+           - added crash check
+        - Shankar Kulumani 13 Dec 2017
+            - now in python
+
+   References
+       - AAE532 Notes LSN 30-33
+       - Vallado 3rd edition
+    """
+% find transfer angle
+mag_r1 = norm(r1);
+mag_r2 = norm(r2);
+cos_nu = dot(r1,r2)/(mag_r1*mag_r2);
+switch direction
+    case 'short'
+        sin_nu = norm(cross(r1,r2))/(mag_r1*mag_r2);
+    case 'long'
+        sin_nu = -norm(cross(r1,r2))/(mag_r1*mag_r2);
+end
+
+delta_nu = atan2(sin_nu,cos_nu);
+delta_nu = revcheck(delta_nu);
+
+% Intermediate parameters
+
+% c = sqrt(mag_r1^2+mag_r2^2-2*mag_r1*mag_r2*cos(delta_nu)); % Chord
+c_vec = r2-r1;
+c = norm(c_vec);
+s = (mag_r1+mag_r2+c)/2; % Semiperimeter
+a = s/2;
+% p = mag_r1*mag_r2/c*(1-cos(delta_nu)); % Semiparameter?
+
+alpha = 2*asin(sqrt(s/(2*a)));
+beta = 2*asin(sqrt((s-c)/(2*a)));
+
+p = 4*a*(s-mag_r1)*(s-mag_r2)/c^2*(sin(1/2*(alpha + beta))^2);
+
+% Transfer orbit physical properties
+
+ecc = sqrt(1-2*p/s);
+% ecc = c/(2*a);
+
+% vacant focus
+F = (2*a-mag_r1)*c_vec/c + r1;
+% F = (2*a_m-norm(r1))*-c/norm(c) + r1
+
+% find velocity at each point
+% V0 = (sqrt(mu*p)/(r0*r*sin(v)))*(R - (1 - r/p*(1-cos(v)))*R0);
+[v1 v2 f g f_dot g_dot] = fg_nu(r1,r2,delta_nu,p,mu_body);
+
+% Transfer orbit time
+B = 2*asin(sqrt((s-c)/s));
+if delta_nu > pi
+    B = -B;
+end
+tof = sqrt(a^3/mu_body)*(pi - B + sin(B));
+
+% Check for crash
+crash_check(r1,v1,r2,v2,mu_body,r_body);
+
+
