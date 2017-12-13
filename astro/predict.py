@@ -20,6 +20,7 @@ import datetime
 import argparse
 import multiprocessing
 import functools
+import logging
 
 deg2rad = constants.deg2rad
 rad2deg = constants.rad2deg
@@ -29,8 +30,6 @@ re = constants.earth.radius
 eesqrd = constants.earth.eesqrd
 ee = constants.earth.ee
 
-# TODO Setup logging
-# TODO Give some detail on the location of the input and output files (print to stderr)
 def predict(site_location, date_start, date_end, ifile='./tle.txt',
             ofile='./output.txt'):
     r"""PREDICT satellite passes for a given Earth location
@@ -79,6 +78,8 @@ def predict(site_location, date_start, date_end, ifile='./tle.txt',
     |  __/|    /|  __|| | | | | | | |     | |  
     | |   | |\ \| |___| |/ / _| |_| \__/\ | |  
     \_|   \_| \_\____/|___/  \___/ \____/ \_/  """)
+
+    logger = logging.getLogger(__name__)
                                            
     ifile = os.path.abspath(ifile)
     ofile = os.path.abspath(ofile)
@@ -96,10 +97,12 @@ def predict(site_location, date_start, date_end, ifile='./tle.txt',
     jd_span = np.arange(jd_start, jd_end, jd_step)
     
     # build the site dictionary
+    logger.info('Starting to create site dicitonary')
     site = build_site(jd_span, np.deg2rad(site_location[0]), 
                       np.deg2rad(site_location[1]), float(site_location[2]))
 
     # echo check some data
+    logger.info('Write some input data to the output file {}'.format(ofile))
     with open(ofile, 'w') as f:
         f.write('PREDICT RESULTS : Shankar Kulumani\n\n')
         f.write('Check Input Data : \n\n')
@@ -129,13 +132,19 @@ def predict(site_location, date_start, date_end, ifile='./tle.txt',
 
 
     # now we have to read the TLE
+    logger.info('Read TLEs from {}'.format(ifile))
     sats = tle.get_tle(ifile)
-    
+    logger.debug('Read {} sats'.format(len(sats))) 
+
     parallel_predict = functools.partial(satellite.parallel_predict, jd_span=jd_span, site=site)
+    
+    logger.info('Starting parallel processing for satellites')
 
     with multiprocessing.Pool(multiprocessing.cpu_count() - 1) as p:
         sats_passes = p.map(parallel_predict, sats)
     
+    logger.info('Now outputting visible data to textfile')
+
     for sat, pass_vis in zip(sats, sats_passes):
         satellite.output(sat, pass_vis, ofile)
 
