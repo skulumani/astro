@@ -334,3 +334,13 @@ class TestTLESL3():
 
     def test_checksum2(self):
         np.testing.assert_allclose(self.elements.checksum2, 2)
+
+class TestParser():
+    ofile_actual, sl_actual = tle.parse_args(['stations', 'tle.txt'])
+    
+    def test_sat_list(self):
+        np.testing.assert_string_equal(self.sl_actual, 'stations')
+
+    def test_ofile(self):
+        np.testing.assert_string_equal(self.ofile_actual, 'tle.txt')
+

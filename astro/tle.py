@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-
-"""Download and handle TLEs
+"""Module to download and handle TLEs
 """
+
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
@@ -13,6 +13,7 @@ from astro.satellite import Satellite
 from kinematics import attitude
 
 import pdb, argparse, datetime, getpass
+import sys
 import logging
 import tempfile
 import os
@@ -388,6 +389,7 @@ def get_tle(filename):
     """Assuming a file with 3 Line TLEs is given this will parse the file
     and save all the elements to a list or something.
     """
+    logger = logging.getLogger(__name__)
     sats = []
     tles = 0
     lines = 0
@@ -409,28 +411,49 @@ def get_tle(filename):
                     sats.append(Satellite(elements))
 
             else:
-                # TODO logging
-                pass
+                logger.warning('INVALID TLE \n{}\n{}\n{}'.format(l0, l1, l2))
 
             l0 = f.readline().strip()
             lines += 1
     
-    # TODO Logging about number of TLEs and lines read
+    logger.info('{} TLEs parsed'.format(tles))
+
     return sats
 
-if __name__ == '__main__':
-    # TODO Move parsing to a function like in predict
-    # parse arguments to download tles to a file if desired
+def parse_args(args):
+    r"""Parse arguments from TLE
+
+    = parse_args(args)
+
+    Parameters
+    ----------
+    args : system command line arguments
+
+    Returns
+    -------
+    TLE inputs data from the system arguments
+
+    Author
+    ------
+    Shankar Kulumani		GWU		skulumani@gwu.edu
+    """
     output_name = datetime.datetime.now().isoformat() + '_tle.txt' 
     parser = argparse.ArgumentParser(description='TLE downloader')
-    parser.add_argument('--output', '-o', help='Output path to save the TLEs',
-                        default=output_name, action='store', type=str)
-    parser.add_argument('list', help='TLE list to download', choices=['visible', 'stations', 'all', 'brightest'],
-                        type=str)
-    args = parser.parse_args()
 
-    tle_flag = args.list
-    ofile = args.output
+    parser.add_argument('list', help='TLE list to download', choices=['visible', 'stations', 'all', 'brightest', 'celestrak'],
+                        type=str)
+
+    parser.add_argument('output', help='Output path to save the TLEs',
+                        default=output_name, action='store', type=str)
+
+    args = parser.parse_args(args)
     
-    get_tle_spacetrack(ofile, tle_flag)
+    return args.output, args.list
+
+if __name__ == '__main__': 
+    ofile, sat_list = parse_args(sys.argv[1:])
+    if sat_list == 'celestrak':
+        get_tle_visible(ofile)
+    else:
+        get_tle_spacetrack(ofile, sat_list)
     
