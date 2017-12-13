@@ -17,6 +17,7 @@ import numpy as np
 
 import logging
 
+# TODO Add unit test
 def crash_check(r1, v1, r2, v2, mu, r_body):
     """Check if orbit intersects the surface
 
@@ -67,7 +68,7 @@ def crash_check(r1, v1, r2, v2, mu, r_body):
 
     return rp
 
-
+# TODO Add unit test
 def lambert_universal(r1, r2, direction, num_rev, tof, mu, r_body):
     """Lambert solver using universal variables
 
@@ -229,6 +230,7 @@ def lambert_universal(r1, r2, direction, num_rev, tof, mu, r_body):
 
     return v1, v2, errorl
 
+# TODO Add unit test
 def findc2c3(psi):
     """Find C2 and C3 functions from psi
 
