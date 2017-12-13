@@ -1646,6 +1646,56 @@ def fg_propogate(r_old, v_old, nu_old, nu_new, p, ecc, mu):
     return r_new, v_new, f, g, f_dot, g_dot, delta_nu
 
 # TODO Add unit tests
+def fg_velocity(r1, r2, delta_nu, p, mu):
+    """F and G function using delta true anomaly
+
+    Purpose: 
+        - Solves for new velocity vectors using f and g functions adn a
+        change in true anomaly
+
+    [v1 v2 f g f_dot g_dot] = fg_nu(r1,r2,dnu,p,mu)
+
+    Inputs: 
+        - r1 - initial position vector (1x3 or 3x1) in km
+        - r2 - final position vector ( same size as r1) in km
+        - dnu - delta true anomaly between r1 and r2
+        - p - semi-parameter of orbit in km
+        - mu - gravitational parameter in km^3/sec^2
+
+    Outputs: 
+        - v1 - initial velocity vector in km/sec
+        - v2 - final velocity vector in km/sec
+        - f - f function 
+        - g - g function
+        - f_dot - f dot function
+        - g_dot - g dot function
+
+    Dependencies: 
+        - none
+
+    Author: 
+        - Shankar Kulumani 5 Nov 2012
+            - list revisions
+
+    References
+        - AAE532 LSN 18  
+    """
+    r = np.linalg.norm(r2)
+    r0 = np.linalg.norm(r1)
+
+    f = 1-(r/p)*(1-np.cos(delta_nu))
+    g = (r*r0/np.sqrt(mu*p))*np.sin(delta_nu)
+
+    v1 = (r2-f*r1)/g
+
+    f_dot = (np.dot(r1,v1)/(p*r0)*(1-np.cos(delta_nu)))-(1/r0*np.sqrt(mu/p)*np.sin(delta_nu))
+    g_dot = 1-r0/p*(1-np.cos(delta_nu))
+
+    v2 = f_dot*r1+g_dot*v1
+
+    return v1, v2, f, g, f_dot, g_dot
+
+# TODO Add unit tests
 def period2sma(period, mu):
     """Convert period to semi major axis
     """
