@@ -380,17 +380,17 @@ def get_tle(filename):
                     sats.append(Satellite(elements))
 
             else:
-                print("Invalid TLE")
+                # TODO logging
+                pass
 
             l0 = f.readline().strip()
             lines += 1
-
-    print("Read {} lines which should be {} TLEs".format(lines, lines / 3))
-    print("Found {} TLEs".format(tles))
-    print("Parsed {} SATs".format(len(sats)))
+    
+    # TODO Logging about number of TLEs and lines read
     return sats
 
 if __name__ == '__main__':
+    # TODO Move parsing to a function like in predict
     # parse arguments to download tles to a file if desired
     output_name = datetime.datetime.now().isoformat() + '_tle.txt' 
     parser = argparse.ArgumentParser(description='TLE downloader')
