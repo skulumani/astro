@@ -369,7 +369,7 @@ class Satellite(object):
                     #         mn = 0
                     f.write('%4.0f%s' % (ii, space))
                     f.write('%3.0f/%3.0f%s' % (mo, day, space))
-                    f.write('%02.0f:%02.0f:%3.1f%s' % (hr, mn, sec, space))
+                    f.write('%02.0f:%02.0f:%02.0f%s' % (hr, mn, sec, space))
                     f.write('%7.2f%s' % (rho, space))
                     f.write('%7.2f%s' % (az * 180 / np.pi, space))
                     f.write('%7.2f%s' % (el * 180 / np.pi, space))
@@ -647,7 +647,7 @@ def output(sat, pass_vis, filename):
                 #         mn = 0
                 f.write('%4.0f%s' % (ii, space))
                 f.write('%3.0f/%3.0f%s' % (mo, day, space))
-                f.write('%02.0f:%02.0f:%3.1f%s' % (hr, mn, sec, space))
+                f.write('%02.0f:%02.0f:%02.0f%s' % (hr, mn, sec, space))
                 f.write('%7.2f%s' % (rho, space))
                 f.write('%7.2f%s' % (az * 180 / np.pi, space))
                 f.write('%7.2f%s' % (el * 180 / np.pi, space))
