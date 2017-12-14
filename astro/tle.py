@@ -437,6 +437,16 @@ def parse_args(args):
     ------
     Shankar Kulumani		GWU		skulumani@gwu.edu
     """
+    print("""
+       _____ _      _____ 
+      |_   _| |    |  ___|
+        | | | |    | |__  
+        | | | |    |  __| 
+        | | | |____| |___ 
+        \_/ \_____/\____/ 
+                    
+                    """)
+
     output_name = datetime.datetime.now().isoformat() + '_tle.txt' 
     parser = argparse.ArgumentParser(description='TLE downloader')
 
