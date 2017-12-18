@@ -190,7 +190,7 @@ class Satellite(object):
         beta = np.arccos(np.einsum('ij,ij->i', sat_eci, sun_eci) /
                          np.linalg.norm(sat_eci, axis=1) / np.linalg.norm(sun_eci,
                                                                           axis=1))
-        sun_alt = np.linalg.norm(sun_eci, axis=1) * np.sin(beta)
+        sun_alt = np.linalg.norm(sat_eci, axis=1) * np.sin(beta)
 
         jd_vis = []
         rho_vis = []
@@ -269,7 +269,7 @@ class Satellite(object):
         beta = np.arccos(np.einsum('ij,ij->i', sat_r_eci, sun_eci) /
                          np.linalg.norm(sat_r_eci, axis=1) / np.linalg.norm(sun_eci,
                                                                           axis=1))
-        sun_alt = np.linalg.norm(sun_eci, axis=1) * np.sin(beta)
+        sun_alt = np.linalg.norm(sat_r_eci, axis=1) * np.sin(beta)
 
         jd_vis = []
         rho_vis = []
@@ -558,7 +558,7 @@ def visible(sat_eci, site, jd_span):
     beta = np.arccos(np.einsum('ij,ij->i', sat_eci, sun_eci) /
                         np.linalg.norm(sat_eci, axis=1) / np.linalg.norm(sun_eci,
                                                                         axis=1))
-    sun_alt = np.linalg.norm(sun_eci, axis=1) * np.sin(beta)
+    sun_alt = np.linalg.norm(sat_eci, axis=1) * np.sin(beta)
 
     jd_vis = []
     rho_vis = []
