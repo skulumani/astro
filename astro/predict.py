@@ -31,6 +31,8 @@ eesqrd = constants.earth.eesqrd
 ee = constants.earth.ee
 
 # TODO Make the time step user selctable (optional)
+
+
 def predict(site_location, date_start, date_end, step_sec=60,
             ifile='./tle.txt', ofile='./output.txt'):
     r"""PREDICT satellite passes for a given Earth location
@@ -257,9 +259,9 @@ def parse_args(args):
     parser.add_argument(
         'altitude', help='Altitude (km) of Observation site', type=float)
 
-    parser.add_argument('--start', '-s', help='UTC Space separated list of year month day of start of prediction window.',
+    parser.add_argument('-s', '--start', help='UTC Space separated list of year month day of start of prediction window.',
                         default=start_utc, action='store', nargs=3, type=int)
-    parser.add_argument('--end', '-e', help='UTC Space separated list of year month day of end of prediction window.',
+    parser.add_argument('-e', '--end', help='UTC Space separated list of year month day of end of prediction window.',
                         default=end_utc, action='store', nargs=3, type=int)
     # option to use saved tle
     parser.add_argument(
@@ -267,7 +269,7 @@ def parse_args(args):
 
     parser.add_argument('-o', '--output', help='Path to output file', action='store', type=str,
                         default=output_name)
-    
+
     parser.add_argument('-st', '--step', help='Step size in seconds for propogation',
                         action='store', type=int, default=60)
 
