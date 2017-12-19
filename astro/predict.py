@@ -30,7 +30,7 @@ re = constants.earth.radius
 eesqrd = constants.earth.eesqrd
 ee = constants.earth.ee
 
-
+# TODO Make the time step user selctable (optional)
 def predict(site_location, date_start, date_end, ifile='./tle.txt',
             ofile='./output.txt'):
     r"""PREDICT satellite passes for a given Earth location
