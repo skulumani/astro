@@ -31,8 +31,8 @@ eesqrd = constants.earth.eesqrd
 ee = constants.earth.ee
 
 # TODO Make the time step user selctable (optional)
-def predict(site_location, date_start, date_end, ifile='./tle.txt',
-            ofile='./output.txt'):
+def predict(site_location, date_start, date_end, step_sec=60,
+            ifile='./tle.txt', ofile='./output.txt'):
     r"""PREDICT satellite passes for a given Earth location
 
     sats, all_passes, site = predict(site_location, date_start, date_end, 
@@ -46,6 +46,8 @@ def predict(site_location, date_start, date_end, ifile='./tle.txt',
         yr, month, day, hr, min, sec for window start
     date_end : array_like
         yr, month, day, hr, min, sec for window end
+    step_sec : float
+        Step size in seconds for prediction window
     ifile : str
         path to input TLE file
     ofile : str
@@ -94,8 +96,7 @@ def predict(site_location, date_start, date_end, ifile='./tle.txt',
                                date_start[4], date_start[5])
     jd_end, _ = time.date2jd(date_end[0], date_end[1], date_end[2], date_end[3],
                              date_end[4], date_end[5])
-
-    jd_step = (60/60) / (24 * 60)  # step size in minutes
+    jd_step = step_sec / 86400
     jd_span = np.arange(jd_start, jd_end, jd_step)
 
     # build the site dictionary
@@ -266,6 +267,9 @@ def parse_args(args):
 
     parser.add_argument('-o', '--output', help='Path to output file', action='store', type=str,
                         default=output_name)
+    
+    parser.add_argument('-st', '--step', help='Step size in seconds for propogation',
+                        action='store', type=int, default=60)
 
     args = parser.parse_args(args)
 
@@ -281,10 +285,11 @@ def parse_args(args):
     start_date = (args.start[0], args.start[1], args.start[2], 0, 0, 0)
     end_date = (args.end[0], args.end[1], args.end[2], 0, 0, 0)
 
-    return (args.latitude, args.longitude, args.altitude), start_date, end_date, ifile, args.output
+    return ((args.latitude, args.longitude, args.altitude), start_date,
+            end_date, args.step, ifile, args.output)
 
 
 if __name__ == "__main__":
-    site_location, start, end, input_file, output_file = parse_args(
+    site_location, start, end, step_sec, input_file, output_file = parse_args(
         sys.argv[1:])
-    predict(site_location, start, end, input_file, output_file)
+    predict(site_location, start, end, step_sec, input_file, output_file)

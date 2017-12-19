@@ -22,7 +22,7 @@ class TestPredict():
         self.output_file = os.path.join(str(tmpdir), 'output.txt')
 
         self.sats, self.sats_passes, self.site = predict.predict(site_location, start_date,
-                                                end_date, self.input_file,
+                                                end_date, 10, self.input_file,
                                                 self.output_file)
     # just check the first one
     
@@ -40,7 +40,7 @@ class TestParserMinimumInput():
     longitude = -104.2
     altitude = 2.184
 
-    site_location, start, end, input_file, output_file = predict.parse_args([str(latitude), str(longitude), str(altitude)])
+    site_location, start, end, step_sec, input_file, output_file = predict.parse_args([str(latitude), str(longitude), str(altitude)])
 
     def test_latitude(self):
         np.testing.assert_allclose(self.site_location[0], self.latitude)
