@@ -95,7 +95,7 @@ def predict(site_location, date_start, date_end, ifile='./tle.txt',
     jd_end, _ = time.date2jd(date_end[0], date_end[1], date_end[2], date_end[3],
                              date_end[4], date_end[5])
 
-    jd_step = (10/60) / (24 * 60)  # step size in minutes
+    jd_step = (60/60) / (24 * 60)  # step size in minutes
     jd_span = np.arange(jd_start, jd_end, jd_step)
 
     # build the site dictionary
