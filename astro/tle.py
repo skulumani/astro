@@ -51,9 +51,36 @@ def get_tle_visible(filename=os.path.join(tempfile.gettempdir(), 'visible.txt'))
         logger.info('Succesfully downloaded the visible TLEs')
     except urllib.error.HTTPError as err:
         logger.warning('Celestrak URL error')
-        logger.info('Now trying to download from SpaceTrack instead')
-        get_tle_spacetrack(filename, 'visible')
+        # logger.info('Now trying to download from SpaceTrack instead')
+        # get_tle_spacetrack(filename, 'visible')
 
+
+def get_tle_stations(filename=os.path.join(tempfile.gettempdir(), 'stations.txt')):
+    r"""Download stations satellites from Celestrak
+
+    get_tle_stations(outfile)
+
+    Parameters
+    ----------
+    filename : str
+        File to write the TLEs
+
+    Author
+    ------
+    Shankar Kulumani		GWU		skulumani@gwu.edu
+    """ 
+    logger = logging.getLogger(__name__)
+    url = 'https://www.celestrak.com/NORAD/elements/stations.txt'
+    try:
+        logger.info('Trying to download visible TLEs from celestrak')
+        with urllib.request.urlopen(url) as response, open(filename, 'wb') as out_file:
+            data = response.read() # a `bytes` object
+            out_file.write(data)
+        logger.info('Succesfully downloaded the stations TLEs')
+    except urllib.error.HTTPError as err:
+        logger.warning('Celestrak URL error')
+        # logger.info('Now trying to download from SpaceTrack instead')
+        # get_tle_spacetrack(filename, 'visible')
 
 def get_tle_spacetrack(filename, flag='all'):
     r"""Download TLEs from spacetrack.org
@@ -90,8 +117,9 @@ def get_tle_spacetrack(filename, flag='all'):
     logger = logging.getLogger(__name__)
     
     logger.info('Getting SpaceTrack password and connecting')
+    username = input('Enter SpaceTrack.org username: ')
     password = getpass.getpass('Enter SpaceTrack.org password: ')
-    st = SpaceTrackClient('shanks.k', password)
+    st = SpaceTrackClient(username, password)
     with open(filename, 'w') as f:
         if flag == 'all':
             all_tles = st.tle_latest(ordinal=1, format='3le')
@@ -437,6 +465,22 @@ def parse_args(args):
     ------
     Shankar Kulumani		GWU		skulumani@gwu.edu
     """
+
+    output_name = datetime.datetime.now().isoformat() + '_tle.txt' 
+    parser = argparse.ArgumentParser(description='TLE downloader')
+
+    parser.add_argument('list', help='TLE list to download from Celestrak',
+                        choices=['visible', 'stations'], type=str)
+
+    parser.add_argument('output', help='Output path to save the TLEs',
+                        default=output_name, action='store', type=str)
+    
+    args = parser.parse_args(args)
+    
+    return args.output, args.list
+
+if __name__ == '__main__': 
+    ofile, sat_list = parse_args(sys.argv[1:])
     print("""
        _____ _      _____ 
       |_   _| |    |  ___|
@@ -446,24 +490,8 @@ def parse_args(args):
         \_/ \_____/\____/ 
                     
                     """)
-
-    output_name = datetime.datetime.now().isoformat() + '_tle.txt' 
-    parser = argparse.ArgumentParser(description='TLE downloader')
-
-    parser.add_argument('list', help='TLE list to download', choices=['visible', 'stations', 'all', 'brightest', 'celestrak'],
-                        type=str)
-
-    parser.add_argument('output', help='Output path to save the TLEs',
-                        default=output_name, action='store', type=str)
-
-    args = parser.parse_args(args)
-    
-    return args.output, args.list
-
-if __name__ == '__main__': 
-    ofile, sat_list = parse_args(sys.argv[1:])
-    if sat_list == 'celestrak':
+    if sat_list == 'visible':
         get_tle_visible(ofile)
-    else:
-        get_tle_spacetrack(ofile, sat_list)
+    elif sat_list == 'stations':
+        get_tle_stations(ofile)
     
