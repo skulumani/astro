@@ -26,7 +26,13 @@ class TestValladoExample():
         v1_expected = np.array([2.047409, 2.924003, 0])
         v2_expected = np.array([-3.447919, 0.923867, 0])
         tof_expected = 75.6708 * 60
-        a_expected = 10699.451
-        v1, v2, tof, a, p, ecc = lambert.lambert_minenergy(self.r1, self.r2, constants.earth.radius, constants.earth.mu, 'short')
-        np.testing.assert_allclose(v1, v1_expected)
+        a_expected = 10699.48385
+        v1, v2, tof, a, p, ecc = lambert.lambert_minenergy(self.r1, self.r2,
+                                                           constants.earth.radius,
+                                                           constants.earth.mu,
+                                                           'short')
+        np.testing.assert_allclose(v1, v1_expected, rtol=1e-5)
+        np.testing.assert_allclose(v2, v2_expected, rtol=1e-5)
+        np.testing.assert_allclose(tof, tof_expected, rtol=1e-5)
+        np.testing.assert_allclose(a, a_expected)
 
