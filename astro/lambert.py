@@ -68,7 +68,6 @@ def crash_check(r1, v1, r2, v2, mu, r_body):
 
     return rp
 
-# TODO Add unit test
 def lambert_universal(r1, r2, direction, num_rev, tof, mu, r_body):
     """Lambert solver using universal variables
 
@@ -274,7 +273,6 @@ def findc2c3(psi):
 
     return c2, c3
 
-# TODO add unit tests
 def lambert_minenergy(r1, r2, r_body, mu_body, direction):
     """Lambert minimum energy ellipse
 
