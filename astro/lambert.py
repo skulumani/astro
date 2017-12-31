@@ -352,11 +352,11 @@ def lambert_minenergy(r1, r2, r_body, mu_body, direction):
 
     # find velocity at each point
     # V0 = (sqrt(mu*p)/(r0*r*sin(v)))*(R - (1 - r/p*(1-cos(v)))*R0);
-    ( v1, v2, f, g, f_dot, g_dot ) = kepler.fg_nu(r1,r2,delta_nu,p,mu_body)
+    ( v1, v2, f, g, f_dot, g_dot ) = kepler.fg_velocity(r1,r2,delta_nu,p,mu_body)
 
     # Transfer orbit time
     B = 2*np.arcsin(np.sqrt((s-c)/s))
-    if delta_nu > pi:
+    if delta_nu > np.pi:
         B = -B
     tof = np.sqrt(a**3/mu_body)*(np.pi - B + np.sin(B))
 
