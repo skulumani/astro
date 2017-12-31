@@ -1588,6 +1588,113 @@ def nu_solve(p, e, r):
     nu = np.arccos( p / r / e - 1 / e)
     return nu, -nu
 
+# TODO NEed unit test
+def fg_propogate(r_old, v_old, nu_old, nu_new, p, ecc, mu):
+    """F and G relationship propogator
+
+    Purpose: 
+        - Find new position and velocity vectors in inertial frame using f
+        and g relationships
+
+            [r_new v_new f g f_dot g_dot delta_nu] = fandg_nu(r_old,v_old,nu_old,nu_new,p,ecc,mu)
+
+    Inputs: 
+        - r_old - position vector in inertial frame in km
+        - v_old - velocity vecotr in inertial frame in km/sec
+        - nu_old - true anomaly at initial condition in rad
+        - nu_new - true anomaly at final position in rad
+        - p - semi-latus rectum of orbit in km
+        - ecc - eccentricity of orbit
+        - mu - gravitational parameter of central body in km^3/sec^2
+
+    Outputs: 
+        - r_new - new position vector (3,)
+        - v_new - new velocity vector (3,)
+        - f - f function value
+        - g - g function value
+        - f_dot - fdot value
+        - g_dot - gdot value
+        - delta_nu - change in true anomaly
+
+    Dependencies: 
+        - None
+
+    Author: 
+        - Shankar Kulumani 13 Oct 2012
+            - list revisions
+        - Shankar Kulumani 13 December 2017
+            - moving to python
+
+    References
+        - AAE532 LSN 14 notes
+        - AAE532_PS7.pdf
+    """
+    delta_nu = nu_new-nu_old 
+
+    r = p/(1+ecc*np.cos(nu_new))
+    r0 = np.norm(r_old)
+
+    f = 1-r/p*(1-cos(delta_nu))
+    g = (r*r0/np.sqrt(mu*p))*np.sin(delta_nu)
+
+    f_dot = (np.dot(r_old,v_old)/(p*r0)*(1-np.cos(delta_nu)))-(1/r0*np.sqrt(mu/p)*np.sin(delta_nu))
+    g_dot = 1-r0/p*(1-np.cos(delta_nu))
+
+    r_new = f*r_old +g*v_old
+    v_new = f_dot*r_old + g_dot*v_old
+    
+    return r_new, v_new, f, g, f_dot, g_dot, delta_nu
+
+# TODO Add unit tests
+def fg_velocity(r1, r2, delta_nu, p, mu):
+    """F and G function using delta true anomaly
+
+    Purpose: 
+        - Solves for new velocity vectors using f and g functions adn a
+        change in true anomaly
+
+    [v1 v2 f g f_dot g_dot] = fg_nu(r1,r2,dnu,p,mu)
+
+    Inputs: 
+        - r1 - initial position vector (1x3 or 3x1) in km
+        - r2 - final position vector ( same size as r1) in km
+        - dnu - delta true anomaly between r1 and r2
+        - p - semi-parameter of orbit in km
+        - mu - gravitational parameter in km^3/sec^2
+
+    Outputs: 
+        - v1 - initial velocity vector in km/sec
+        - v2 - final velocity vector in km/sec
+        - f - f function 
+        - g - g function
+        - f_dot - f dot function
+        - g_dot - g dot function
+
+    Dependencies: 
+        - none
+
+    Author: 
+        - Shankar Kulumani 5 Nov 2012
+            - list revisions
+
+    References
+        - AAE532 LSN 18  
+    """
+    r = np.linalg.norm(r2)
+    r0 = np.linalg.norm(r1)
+
+    f = 1-(r/p)*(1-np.cos(delta_nu))
+    g = (r*r0/np.sqrt(mu*p))*np.sin(delta_nu)
+
+    v1 = (r2-f*r1)/g
+
+    f_dot = (np.dot(r1,v1)/(p*r0)*(1-np.cos(delta_nu)))-(1/r0*np.sqrt(mu/p)*np.sin(delta_nu))
+    g_dot = 1-r0/p*(1-np.cos(delta_nu))
+
+    v2 = f_dot*r1+g_dot*v1
+
+    return v1, v2, f, g, f_dot, g_dot
+
 # TODO Add unit tests
 def period2sma(period, mu):
     """Convert period to semi major axis
