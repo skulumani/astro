@@ -56,7 +56,7 @@ def crash_check(r1, v1, r2, v2, mu, r_body):
         rp = a*(ecc-1)
     elif sme < 0:
         a = -mu/(2*sme)
-        h = np.norm(np.cross(r1,v1))
+        h = np.linalg.norm(np.cross(r1,v1))
         
         p = h**2/mu
         
@@ -153,7 +153,7 @@ def lambert_universal(r1, r2, direction, num_rev, tof, mu, r_body):
     #        tmin  = ((2.0*nrev+1.0)*pi-betam + sin(betam))/sqrt(mu);
 
     # -------  determine if  the orbit is possible at all ---------
-    if ( np.abssolute( vara ) > tol ):
+    if ( np.absolute( vara ) > tol ):
         loops  = 0
         ynegktr= 1  # y neg ktr
         dtnew = -10.0
@@ -228,7 +228,7 @@ def lambert_universal(r1, r2, direction, num_rev, tof, mu, r_body):
 
     crash_check(r1,v1,r2,v2,mu,r_body)
 
-    return v1, v2, errorl
+    return v1, v2
 
 # TODO Add unit test
 def findc2c3(psi):
@@ -341,7 +341,7 @@ def lambert_minenergy(r1, r2, r_body, mu_body, direction):
     alpha = 2*np.arcsin(np.sqrt(s/(2*a)))
     beta = 2*np.arcsin(np.sqrt((s-c)/(2*a)))
 
-    p = 4*a*(s-mag_r1)*(s-mag_r2)/c**2*(sin(1/2*(alpha + beta))**2)
+    p = 4*a*(s-mag_r1)*(s-mag_r2)/c**2*(np.sin(1/2*(alpha + beta))**2)
 
     # Transfer orbit physical properties
 
@@ -360,9 +360,9 @@ def lambert_minenergy(r1, r2, r_body, mu_body, direction):
     B = 2*np.arcsin(np.sqrt((s-c)/s))
     if delta_nu > pi:
         B = -B
-    tof = np.sqrt(a**3/mu_body)*(pi - B + np.sin(B))
+    tof = np.sqrt(a**3/mu_body)*(np.pi - B + np.sin(B))
 
     # Check for crash
     crash_check(r1,v1,r2,v2,mu_body,r_body)
 
-    return v1, v2, a, p, ecc
+    return v1, v2, tof, a, p, ecc
