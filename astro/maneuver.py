@@ -396,3 +396,33 @@ def plane_change(v1, v2, delta_inc):
     """
     delta_v = np.sqrt(v2**2+v1**2-2*v2*v1*np.cos(delta_inc))
     return delta_v
+
+
+def ideal_rocket(dv,isp,finert,go,m_pay)
+    """Ideal rocket equation
+    
+    mprop = ideal_rocket(dv, isp, finert, go, m_pay)
+
+    Purpose: 
+        - Compute mass of propellant required for a given DV
+
+    Inputs: 
+        - dv - delta v in km/sec
+        - isp - Specific Impulse of rocket in sec
+        - finert - Inert mass ratio 
+        - go - Gravitatationl constant acceleration
+        - m_pay - mass  of payload
+
+    Outputs: 
+        - mprop - mass of propellant required 
+
+    Author: 
+        - Shankar Kulumani 17 Oct 2012
+        - Shankar Kulumani 4 Jan 2018
+            - in Python
+
+    References
+        - SPAD 
+    """
+    m_prop = (m_pay*(np.exp(dv/(isp*go))-1)*(1-finert))/(1-finert*np.exp(dv/(isp*go)))
+    return m_prop
