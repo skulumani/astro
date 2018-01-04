@@ -85,3 +85,26 @@ class TestEarthVenusLongTransfer():
 
     def test_v2(self):
         np.testing.assert_allclose(self.v2_act, self.v2, rtol=1e-3)
+
+class TestEarthVenusShortTransfer():
+
+    # Earth and SC velocity wrt to sun
+    r1 = np.array([-40907159.776698,  -146166176.029225,  2524.752269])
+    v1 = np.array([26.151206,  -6.439026,  -0.747977])
+    # Venus
+    r2 = np.array([21214945.229277,  105654723.068676,  221755.525408])
+    v2 = np.array([-36.925365,  8.695987,  1.053181])
+
+    tof = 145 * 86400
+    v1_act, v2_act = lambert.universal(r1, r2, 'long', 0, tof, constants.sun.mu,
+                                       constants.sun.radius)
+    v1_min, v2_min, tof_min, a, p, ecc = lambert.minenergy(r1, r2,
+                                                           constants.sun.radius,
+                                                           constants.sun.mu,
+                                                           'short')
+
+    def test_v1(self):
+        np.testing.assert_allclose(self.v1_act, self.v1, rtol=1e-3)
+
+    def test_v2(self):
+        np.testing.assert_allclose(self.v2_act, self.v2, rtol=1e-3)
