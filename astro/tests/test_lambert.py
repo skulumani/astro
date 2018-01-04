@@ -101,7 +101,7 @@ class TestEarthVenusShortTransfer():
     v1_min, v2_min, tof_min, a, p, ecc = lambert.minenergy(r1, r2,
                                                            constants.sun.radius,
                                                            constants.sun.mu,
-                                                           'short')
+                                                           'long')
 
     def test_v1(self):
         np.testing.assert_allclose(self.v1_act, self.v1, rtol=1e-3)
