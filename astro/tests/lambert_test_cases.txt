@@ -1,0 +1,78 @@
+Planet 1:      Earth             Planet 2:    Mars
+Departure JD:  2454367.90000     Arrival JD:  2454577.90000
+Transfer Duration: 210.00000 days (1.81440000e+007 seconds)
+-------------------------------------------------------------
+Earth's Position at JD1:    [150064539.403983  2267759.896369  -276.754311] km wrt the Sun
+Earth's Velocity at JD1:    [-0.935067  29.673807  -0.000519] km/s wrt the Sun
+Mars' Position at JD2:      [-207818935.305987  136713926.487051  7968576.434594] km wrt the Sun
+Mars' Velocity at JD2:      [-12.404508  -18.175755  -0.076153] km/s wrt the Sun
+Spacecraft Velocity at JD1: [-0.075289  33.476420  1.907380] km/s wrt the Sun
+Spacecraft Velocity at JD2: [-14.189471  -14.839340  -0.833227] km/s wrt the Sun
+Spacecraft V-inf out:       [0.859778  3.802612  1.907899] km/s wrt Earth
+Spacecraft V-inf in:        [-1.784964  3.336414  -0.757073] km/s wrt Mars
+C3 at Launch:   18.839158 km^2/s^2     |V-inf| at Arrival:  3.858875 km/s
+
+
+
+Planet 1:      Earth             Planet 2:    Venus
+Departure JD:  2454367.90000     Arrival JD:  2454577.90000
+Transfer Duration: 210.00000 days (1.81440000e+007 seconds)
+-------------------------------------------------------------
+Earth's Position at JD1:    [150064539.403983  2267759.896369  -276.754311] km wrt the Sun
+Earth's Velocity at JD1:    [-0.935067  29.673807  -0.000519] km/s wrt the Sun
+Venus'  Position at JD2:    [108502685.373919  981095.895427  -6248799.806056] km wrt the Sun
+Venus'  Velocity at JD2:    [-0.465174  34.859502  0.504045] km/s wrt the Sun
+Spacecraft Velocity at JD1: [23.041751  0.806102  4.344444] km/s wrt the Sun
+Spacecraft Velocity at JD2: [34.742706  0.947442  4.007763] km/s wrt the Sun
+Spacecraft V-inf out:       [23.976818  -28.867706  4.344962] km/s wrt Earth
+Spacecraft V-inf in:        [35.207880  -33.912060  3.503718] km/s wrt Venus
+C3 at Launch:   1427.110960 km^2/s^2     |V-inf| at Arrival:  49.009169 km/s
+
+
+
+Planet 1:      Earth             Planet 2:    Venus
+Departure JD:  2454257.00000     Arrival JD:  2454402.00000
+Transfer Duration: 145.00000 days (1.25280000e+007 seconds)
+-------------------------------------------------------------
+Earth's Position at JD1:    [-40907159.776698  -146166176.029225  2524.752269] km wrt the Sun
+Earth's Velocity at JD1:    [28.201602  -8.140052  0.000094] km/s wrt the Sun
+Venus'  Position at JD2:    [21214945.229277  105654723.068676  221755.525408] km wrt the Sun
+Venus'  Velocity at JD2:    [-34.453939  6.720951  2.080517] km/s wrt the Sun
+Spacecraft Velocity at JD1: [26.151206  -6.439026  -0.747977] km/s wrt the Sun
+Spacecraft Velocity at JD2: [-36.925365  8.695987  1.053181] km/s wrt the Sun
+Spacecraft V-inf out:       [-2.050396  1.701026  -0.748071] km/s wrt Earth
+Spacecraft V-inf in:        [-2.471426  1.975036  -1.027336] km/s wrt Venus
+C3 at Launch:   7.657223 km^2/s^2     |V-inf| at Arrival:  3.326279 km/s
+
+
+
+Planet 1:      Earth             Planet 2:    Jupiter
+Departure JD:  2454208.00000     Arrival JD:  2455648.00000
+Transfer Duration: 1440.00000 days (1.24416000e+008 seconds)
+-------------------------------------------------------------
+Earth's Position at JD1:    [-133790709.833879  -68187957.669580  1327.392275] km wrt the Sun
+Earth's Velocity at JD1:    [13.041750  -26.652198  0.000422] km/s wrt the Sun
+Jupiter's Position at JD2:  [713873801.986079  196242257.471874  -16779211.940408] km wrt the Sun
+Jupiter's Velocity at JD2:  [-3.622026  13.220510  0.026292] km/s wrt the Sun
+Spacecraft Velocity at JD1: [9.811753  -37.136284  -4.217053] km/s wrt the Sun
+Spacecraft Velocity at JD2: [-6.852424  6.013385  0.951383] km/s wrt the Sun
+Spacecraft V-inf out:       [-3.229997  -10.484087  -4.217474] km/s wrt Earth
+Spacecraft V-inf in:        [-3.230398  -7.207125  0.925092] km/s wrt Jupiter
+C3 at Launch:   138.136042 km^2/s^2     |V-inf| at Arrival:  7.951975 km/s
+
+
+
+Planet 1:      Earth             Planet 2:    Saturn
+Departure JD:  2454400.00000     Arrival JD:  2456850.00000
+Transfer Duration: 2450.00000 days (2.11680000e+008 seconds)
+-------------------------------------------------------------
+Earth's Position at JD1:    [125312162.328009  80094189.561700  -1620.778825] km wrt the Sun
+Earth's Velocity at JD1:    [-16.527724  24.988254  -0.000417] km/s wrt the Sun
+Saturn's Position at JD2:   [-916332981.031387  -1169747308.621389  56877707.789551] km wrt the Sun
+Saturn's Velocity at JD2:   [7.056768  -5.985045  -0.176776] km/s wrt the Sun
+Spacecraft Velocity at JD1: [-26.139293  30.300255  -4.576393] km/s wrt the Sun
+Spacecraft Velocity at JD2: [3.406155  -2.080308  0.414463] km/s wrt the Sun
+Spacecraft V-inf out:       [-9.611569  5.312002  -4.575976] km/s wrt Earth
+Spacecraft V-inf in:        [-3.650613  3.904737  0.591239] km/s wrt Saturn
+C3 at Launch:   141.539187 km^2/s^2     |V-inf| at Arrival:  5.378058 km/s
+
