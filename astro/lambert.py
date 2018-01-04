@@ -68,7 +68,7 @@ def crash_check(r1, v1, r2, v2, mu, r_body):
 
     return rp
 
-def lambert_universal(r1, r2, direction, num_rev, tof, mu, r_body):
+def universal(r1, r2, direction, num_rev, tof, mu, r_body):
     """Lambert solver using universal variables
 
     ( v1,v2,errorl ) = lambert_universal ( r1,r2, direction, num_rev, tof,mu)
@@ -273,7 +273,7 @@ def findc2c3(psi):
 
     return c2, c3
 
-def lambert_minenergy(r1, r2, r_body, mu_body, direction):
+def minenergy(r1, r2, r_body, mu_body, direction):
     """Lambert minimum energy ellipse
 
    ( v1 v2 a p ecc ) = lambert_minenergy(r1,r2,r_body,mu_body)
