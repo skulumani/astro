@@ -398,7 +398,7 @@ def plane_change(v1, v2, delta_inc):
     return delta_v
 
 
-def ideal_rocket(dv,isp,finert,go,m_pay)
+def ideal_rocket(dv,isp,finert,go,m_pay):
     """Ideal rocket equation
     
     mprop = ideal_rocket(dv, isp, finert, go, m_pay)
