@@ -105,3 +105,4 @@ setup(
     python_requires='>=3',
 
 )
+# vim: ts=8 et sw=4 sts=4
