@@ -479,6 +479,31 @@ def parse_args(args):
     
     return args.output, args.list
 
+def get_sat(norad_id):
+    """Download a TLE and plot it
+    """
+    from spacetrack import SpaceTrackClient
+    logger = logging.getLogger(__name__)
+    
+    logger.info('Getting SpaceTrack password and connecting')
+    username = input('Enter SpaceTrack.org username: ')
+    password = getpass.getpass('Enter SpaceTrack.org password: ')
+    st = SpaceTrackClient(username, password)
+    
+    lines = [l for l in st.tle_latest(iter_lines=True, norad_cat_id=norad_id,
+                                      ordinal=1, format='3le')]
+
+    # parse the tle
+    if validtle(lines[0], lines[1], lines[2]):
+        # now we parse the tle
+        elements = parsetle(lines[0], lines[1], lines[2])
+        # final check to see if we got a good TLE
+        if elements.good:
+            # instantiate a bunch of instances of a Satellite class
+            sat = Satellite(elements)
+    
+    return sat
+
 if __name__ == '__main__': 
     ofile, sat_list = parse_args(sys.argv[1:])
     print("""
