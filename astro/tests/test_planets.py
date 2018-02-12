@@ -2,7 +2,7 @@
 """
 import numpy as np
 
-from astro import planets, time
+from astro import planets, time, constants
 import pdb
 
 
@@ -37,7 +37,7 @@ class TestMercuryCOE():
     raanexp = 4.830876318589697e+01
     argpexp = 2.917536389390346e+01
     nuexp = 2.786392215752991e+01
-    pexp = 3.870982978406551e-1 * (1 - eccexp**2) 
+    pexp = 3.870982978406551e-1 * (1 - eccexp**2) * constants.au2km
 
     def test_p(self):
         np.testing.assert_allclose(self.coe.p, self.pexp, rtol=rtol)
@@ -66,7 +66,7 @@ class TestVenusCOE():
     raanexp = 7.662882872939052e+01
     argpexp = 5.473647539038130e+01
     nuexp = 1.975782148111063e+02
-    pexp = 7.233262662615381e-01 * (1 - eccexp**2) 
+    pexp = 7.233262662615381e-01 * (1 - eccexp**2) * constants.au2km 
 
     def test_p(self):
         np.testing.assert_allclose(self.coe.p, self.pexp, rtol=rtol)
@@ -96,7 +96,7 @@ class TestEarthCOE():
     raanexp = 1.482633325004871e+02
     argpexp = 3.153399510406209e+02
     nuexp = 1.688484428230512e+02
-    pexp = 1.000936277866668e+00 * (1 - eccexp**2) 
+    pexp = 1.000936277866668e+00 * (1 - eccexp**2) * constants.au2km
 
     def test_p(self):
         np.testing.assert_allclose(self.coe.p, self.pexp, rtol=rtol)
@@ -125,7 +125,7 @@ class TestMarsCOE():
     raanexp = 4.950693065746390e+01
     argpexp = 2.866247286888100e+02
     nuexp = 1.327364669246639e+02
-    pexp = 1.523603073362533e+00 * (1 - eccexp**2) 
+    pexp = 1.523603073362533e+00 * (1 - eccexp**2)  * constants.au2km
 
     def test_p(self):
         np.testing.assert_allclose(self.coe.p, self.pexp, rtol=rtol)
@@ -154,7 +154,7 @@ class TestJupiterCOE():
     raanexp = 1.005110590888574e+02
     argpexp = 2.737359701611508e+02
     nuexp = 1.895852218694279e+02
-    pexp = 5.202296207914233e+00 * (1 - eccexp**2) 
+    pexp = 5.202296207914233e+00 * (1 - eccexp**2)  * constants.au2km
 
     def test_p(self):
         np.testing.assert_allclose(self.coe.p, self.pexp, rtol=rtol)
@@ -183,7 +183,7 @@ class TestSaturnCOE():
     raanexp = 1.135815401076222e+02
     argpexp = 3.402669207862293e+02
     nuexp = 1.706484255046402e+02
-    pexp = 9.568736466329314e+00 * (1 - eccexp**2) 
+    pexp = 9.568736466329314e+00 * (1 - eccexp**2)  * constants.au2km
 
     def test_p(self):
         np.testing.assert_allclose(self.coe.p, self.pexp, rtol=rtol)
@@ -212,7 +212,7 @@ class TestUranusCOE():
     raanexp = 7.413417028463512e+01
     argpexp = 9.896398369052795e+01
     nuexp = 2.118953182102191e+02
-    pexp = 1.913027860362278e+01 * (1 - eccexp**2) 
+    pexp = 1.913027860362278e+01 * (1 - eccexp**2)  * constants.au2km
 
     def test_p(self):
         np.testing.assert_allclose(self.coe.p, self.pexp, rtol=rtol)
@@ -241,7 +241,7 @@ class TestNeptuneCOE():
     raanexp = 1.317099904241699e+02
     argpexp = 2.795450061842975e+02
     nuexp = 2.909187977999030e+02
-    pexp = 3.001973084229905e+01 * (1 - eccexp**2) 
+    pexp = 3.001973084229905e+01 * (1 - eccexp**2)  * constants.au2km
 
     def test_p(self):
         np.testing.assert_allclose(self.coe.p, self.pexp, rtol=rtol)
@@ -270,7 +270,7 @@ class TestPlutoCOE():
     raanexp = 1.102980595626739e+02
     argpexp = 1.121586170630204e+02
     nuexp = 6.522471039312354e+01
-    pexp = 3.929274514682939e+01 * (1 - eccexp**2) 
+    pexp = 3.929274514682939e+01 * (1 - eccexp**2)  * constants.au2km
 
     def test_p(self):
         np.testing.assert_allclose(self.coe.p, self.pexp, rtol=rtol)

@@ -194,23 +194,23 @@ def planet_coe(JD_curr, planet_flag):
     argp = lonperi - raan
     M = L - lonperi + b * T**2 + c * np.cos(f * T) + s * np.sin(f * T)
 
-    M = attitude.normalize(M, -180, 180)
+    # M = attitude.normalize(M, -180, 180)
     # solve kepler's equation to compute E and v
     E, nu, count = kepler.kepler_eq_E(np.deg2rad(M), ecc)
-    
+    argp = attitude.normalize(np.deg2rad(argp), 0, 2 * np.pi)[0]
     # package into a vector and output
     p = a * (1 - ecc**2)
     
-    coe = COE(p=p, ecc=ecc, inc=np.deg2rad(inc), raan=np.deg2rad(raan),
-           argp=attitude.normalize(np.deg2rad(argp), 0, 2*np.pi), nu=nu)
+    au2km = constants.au2km
+    coe = COE(p=p*au2km, ecc=ecc, inc=np.deg2rad(inc), raan=np.deg2rad(raan),
+              argp=argp, nu=nu)
 
     # convert to position and velocity vectors in J2000 ecliptic and J2000
     # Earth equatorial (ECI) reference frame
     # need to convert distances to working units of kilometers
-    au2km = constants.au2km
     
-    r_ecliptic, v_ecliptic, r_pqw, v_pqw = kepler.coe2rv(p * au2km, ecc, inc,
-                                                         raan, argp, nu.item(),
+    r_ecliptic, v_ecliptic, r_pqw, v_pqw = kepler.coe2rv(coe.p, coe.ecc, coe.inc,
+                                                         coe.raan, coe.argp, coe.nu.item(),
                                                          constants.sun.mu)
 
     # convert to the Earth J2000 frame (ECI) need to rotate by the obliquity of
