@@ -52,3 +52,9 @@ with SPICE.
 * ``spiceypy``
 * ``spacetrack``
 * ``kinematics``
+
+Contributors
+============
+
+* [JayHensley](https://github.com/JayHensley)
+
