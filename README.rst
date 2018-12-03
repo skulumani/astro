@@ -25,21 +25,16 @@ Installation
 Install ``astro`` by running : ``pip install astro`` to install from pypi
 
 To install a development version (for local testing), you can clone the 
-repository and run 
+repository and run::
 
-~~~
-pip install -e .[dev,test]
-~~~
+    pip install -e .[dev,test]
 
 from the source directory.
 
-You can use Anaconda_ to build a development enviornment as well:
+You can use `Anaconda <https://anaconda.org>`_  to build a development enviornment as well::
 
-.. _Anaconda: https://anaconda.org
 
-~~~
-conda env create -f enviornment.yml
-~~~
+    conda env create -f enviornment.yml
 
 Documentation
 =============
@@ -70,7 +65,6 @@ with SPICE.
 Contributors
 ============
 
-* _JayHensley
+* `JayHensley <https://github.com/JayHensley>`_
   
-.. _JayHensley: https://github.com/JayHensley
 
