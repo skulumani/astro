@@ -9,7 +9,8 @@ Welcome to astro's documentation!
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
-
+    
+   about_me.rst
 
 
 Indices and tables
