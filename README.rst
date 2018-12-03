@@ -33,7 +33,9 @@ pip install -e .[dev,test]
 
 from the source directory.
 
-You can use [Anaconda](https://anaconda.org)  to build a development enviornment as well:
+You can use Anaconda_ to build a development enviornment as well:
+
+.. _Anaconda: https://anaconda.org
 
 ~~~
 conda env create -f enviornment.yml
@@ -68,5 +70,7 @@ with SPICE.
 Contributors
 ============
 
-* [JayHensley](https://github.com/JayHensley)
+* _JayHensley
+  
+.. _JayHensley: https://github.com/JayHensley
 
