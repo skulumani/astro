@@ -1,19 +1,21 @@
-name: orbit_gui
+name: astro
 channels:
-- anaconda
 - defaults
 dependencies:
+- python=3
 - numpy
 - pip
 - matplotlib
 - ipython
+- scipy
+- pytest
+- pytest-cov
+- coverage
 - pip:
-    - astro
     - kinematics
     - spacetrack
     - spiceypy
     - sphinx
     - sphinx-autobuild
     - twine
-prefix: /home/shankar/anaconda3/envs/orbit_gui
 
