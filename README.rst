@@ -66,5 +66,5 @@ Contributors
 ============
 
 * `JayHensley <https://github.com/JayHensley>`_
-  
+* `not7cd <https://github.com/not7cd>`_
 
