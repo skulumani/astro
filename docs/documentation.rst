@@ -23,3 +23,8 @@ kepler module
    :undoc-members:
    :show-inheritance:
 
+astro
+------------
+.. automodule:: astro
+    :members:
+
