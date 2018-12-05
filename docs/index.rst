@@ -13,7 +13,6 @@ Welcome to astro's documentation!
    about_me.rst
    documentation.rst
 
-
 Indices and tables
 ==================
 
