@@ -11,6 +11,7 @@ Welcome to astro's documentation!
    :caption: Contents:
     
    about_me.rst
+   documentation.rst
 
 
 Indices and tables
