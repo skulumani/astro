@@ -9,50 +9,30 @@ Notes
 
 To use these constants in your scripts/functions, simply import this module
 
-from astro import constants
+    ``from astro import constants``
 
 Then use any of the attributes as:
 
-deg2rad = constants.deg2rad
+    ``deg2rad = constants.deg2rad``
 
-Attributes
-----------
-constants : module level attributes broken down by planetary body
-    rot_per : axial rotational period in rev/day
-    radius : mean equatorial radius in km
-    mu : graviational parameter in km^3/sec^2
-    orbit_sma : semi-major axis of orbit in km
-    orbit_per : period of orbit in sec
-    orbit_ecc : eccentricity of orbit
-    orbit_inc : inclination of orbit in deg
-    mass : body mass (derived from mu and G) in kg
-    G : universal graviational constant in km^3/kg*sec^2
-
-Author
-------
-Shankar Kulumani 1 Sept 2012
-    list revisions
-Shankar Kulumani 19 Sept 2012
-    added distance conversions
-    added time conversions
-Shankar Kulumani 30 Oct 2012
-    added semiparamter to constants
-Shankar Kulumani 21 June 2017
-    Created for MAE3145 in Python
+Constants are defined for each planetary body in the solar system, as well as
+many moons. Each body is defined as a ``namedtuple`` with all of the parameters
+as member attributes.
 
 References
 ----------
-Astro 321 USAFA 2007
-AAE 532 Purdue 2012 planetary_constants.pdf (from AAE532 supplements)
 
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 from collections import namedtuple
 import numpy as np
 
-# HALFPI,PI2           PI/2, & 2PI in various names
 halfpi = np.pi / 2.0
+r"""float: pi/2 constant
+"""
 twopi = 2.0 * np.pi
+r"""float: 2 times pi
+"""
 
 zero_inc_ecc = 0.015                # Small number for incl & ecc purposes
 small = 1.0E-6                  # Small number used for tolerance purposes
