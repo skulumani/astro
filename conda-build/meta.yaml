@@ -1,0 +1,54 @@
+{% set name = "astro" %}
+# {% set version = "0.2.7" %}
+{% set data = load_setup_py_data() %}
+
+package:
+  name: "{{ name|lower }}"
+  version: "{{ data['version'] }}"
+
+source:
+  path: ..
+
+build:
+  number: 0
+  script: python setup.py install --single-version-externally-managed --record=record.txt
+
+requirements:
+  build:
+    - python >=3.3
+    - setuptools
+    - numpy >=1.12
+    - kinematics
+    # - matplotlib
+    # - pip
+    # - scipy
+    # - spacetrack
+    # - spiceypy
+  run:
+    - python >=3.3
+    - kinematics
+    - matplotlib
+    - numpy >=1.12
+    - scipy
+    - spacetrack
+    - spiceypy
+
+# test:
+#   imports:
+#     - astro
+#     - astro.tests
+#   requires:
+#     - pytest
+
+# about:
+#   home: https://github.com/skulumani/astro
+#   license: GNU General Public v3 (GPLv3)
+#   license_family: GPL3
+#   license_file: 
+#   summary: A package of astrodynamic functions
+#   doc_url: 
+#   dev_url: 
+
+# extra:
+#   recipe-maintainers:
+#     - your-github-id-here
