@@ -38,13 +38,11 @@ before_install:
     # Useful for debugging any issues with conda
   - conda info -a
     # build a python enviornment matching travis python version
-  - conda create -q -n test_environment python=$PYTHON_VERSION pip setuptools wheel numpy scipy pytest pytest-cov 
+  - conda create -q -n test_environment python=$PYTHON_VERSION pip setuptools wheel numpy>=1.12 scipy pytest pytest-cov 
   - source activate test_environment
-  - conda install -q -y conda-build anaconda-client
-  - pip install coveralls twine
+  - conda install -q -y -c skulumani conda-build anaconda-client matplotlib kinematics coveralls twine 
   - pip install spiceypy --no-cache-dir
-  - pip install twine
-  - pip install -r requirements.txt
+  - pip install spacetrack
 install:
 - python setup.py install
 script:
