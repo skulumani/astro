@@ -1,6 +1,8 @@
 name: astro
 channels:
 - defaults
+- skulumani
+- conda-forge
 dependencies:
 - python=3
 - numpy>=1.12
@@ -11,10 +13,10 @@ dependencies:
 - pytest
 - pytest-cov
 - coverage
+- kinematics
+- spiceypy
 - pip:
-    - kinematics
     - spacetrack
-    - spiceypy
     - sphinx
     - sphinx-autobuild
     - twine
