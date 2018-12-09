@@ -30,11 +30,6 @@ before_install:
     elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
     wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O ${HOME}/miniconda.sh;
     fi
-    # - if [[ "$PYTHON_VERSION" == "2.7" ]]; then
-    #   wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O ${HOME}/miniconda.sh;
-    #   else
-    #   wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ${HOME}/miniconda.sh;
-    #   fi
   - bash ${HOME}/miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
   - hash -r
@@ -47,10 +42,6 @@ before_install:
   - source activate test_environment
   - conda install -q -y conda-build anaconda-client
   - pip install coveralls twine
-    # - pip install --upgrade pip setuptools wheel
-    # - pip install --only-binary=numpy,scipy numpy scipy
-    # - pip install twine
-    # - pip install -r requirements.txt
   - pip install spiceypy --no-cache-dir
   - pip install twine
   - pip install -r requirements.txt

@@ -15,17 +15,17 @@ build:
 
 requirements:
   build:
-    - python >=3.3
+    - python {{ PY_VER }}*,>=3.4
     - setuptools
     - numpy >=1.12
     - kinematics
+    - spiceypy
     # - matplotlib
     # - pip
     # - scipy
     # - spacetrack
-    # - spiceypy
   run:
-    - python >=3.3
+    - python >=3.4
     - kinematics
     - matplotlib
     - numpy >=1.12
@@ -33,21 +33,23 @@ requirements:
     - spacetrack
     - spiceypy
 
-# test:
-#   imports:
-#     - astro
-#     - astro.tests
-#   requires:
-#     - pytest
+test:
+  imports:
+    - astro
+    - astro.tests
+  requires:
+    - pytest
+    - pytest-cov
+    - coverage
 
-# about:
-#   home: https://github.com/skulumani/astro
-#   license: GNU General Public v3 (GPLv3)
-#   license_family: GPL3
-#   license_file: 
-#   summary: A package of astrodynamic functions
-#   doc_url: 
-#   dev_url: 
+about:
+  home: https://github.com/skulumani/astro
+  license: GNU General Public v3 (GPLv3)
+  license_family: GPL3
+  license_file: LICENSE
+  summary: A package of astrodynamic functions
+  doc_url: 
+  dev_url: 
 
 # extra:
 #   recipe-maintainers:
