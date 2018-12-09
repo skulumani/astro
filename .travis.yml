@@ -1,25 +1,59 @@
-language: python
-sudo: false
-# TODO Implement mac os x testing
+language: generic
+sudo: true
 matrix:
-    include:
-        - os: linux
-          dist: xenial
-          python: 3.5
-        - os: linux
-          dist: xenial
-          python: 3.6
-        - os: linux
-          dist: xenial
-          python: 3.7
+  include:
+    - os: linux
+      dist: xenial
+      env: PACKAGE_NAME=kinematics PYTHON_VERSION=3.4 OS_PATH=linux-64
+    - os: linux
+      dist: xenial
+      env: PACKAGE_NAME=kinematics PYTHON_VERSION=3.5 OS_PATH=linux-64
+    - os: linux
+      dist: xenial
+      env: PACKAGE_NAME=kinematics PYTHON_VERSION=3.6 OS_PATH=linux-64
+    - os: linux
+      dist: xenial
+      env: PACKAGE_NAME=kinematics PYTHON_VERSION=3.7 OS_PATH=linux-64
+    - os: osx
+      env: PACKAGE_NAME=kinematics PYTHON_VERSION=3.4 OS_PATH=osx-64
+    - os: osx
+      env: PACKAGE_NAME=kinematics PYTHON_VERSION=3.5 OS_PATH=osx-64
+    - os: osx
+      env: PACKAGE_NAME=kinematics PYTHON_VERSION=3.6 OS_PATH=osx-64
+    - os: osx
+      env: PACKAGE_NAME=kinematics PYTHON_VERSION=3.7 OS_PATH=osx-64
 
 # TODO Use a conda setup script like in my other repo
 before_install:
-- pip install --upgrade pip setuptools wheel pytest
-- pip install --only-binary=numpy,scipy numpy scipy
-- pip install spiceypy --no-cache-dir
-- pip install twine
-- pip install -r requirements.txt
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+    wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ${HOME}/miniconda.sh;
+    elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+    wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O ${HOME}/miniconda.sh;
+    fi
+    # - if [[ "$PYTHON_VERSION" == "2.7" ]]; then
+    #   wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O ${HOME}/miniconda.sh;
+    #   else
+    #   wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ${HOME}/miniconda.sh;
+    #   fi
+  - bash ${HOME}/miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+    # Useful for debugging any issues with conda
+  - conda info -a
+    # build a python enviornment matching travis python version
+  - conda create -q -n test_environment python=$PYTHON_VERSION pip setuptools wheel numpy scipy pytest pytest-cov 
+  - source activate test_environment
+  - conda install -q -y conda-build anaconda-client
+  - pip install coveralls twine
+    # - pip install --upgrade pip setuptools wheel
+    # - pip install --only-binary=numpy,scipy numpy scipy
+    # - pip install twine
+    # - pip install -r requirements.txt
+  - pip install spiceypy --no-cache-dir
+  - pip install twine
+  - pip install -r requirements.txt
 install:
 - python setup.py install
 script:
@@ -27,12 +61,13 @@ script:
 after_success:
 - coveralls
 deploy:
-  provider: pypi
-  user: skulumani
-  password:
-    secure: u3QpDzRUyFQDStc+ZLNKNHafSj+DFnjPxjbaylljdcU12a97FBgR9iK+QAODt0qsF86i3hIZwPgvLJ0ibD4s/EFfKgQPSpYPPzQsnQOYu6szjU8b1V4TT8JaRCW3qofFC6IRVxxWAdECx1MebtpeDO7Ab7U+M3fFMXjQbM3vOYZHiM5ynB3nvRfxFuLg44M9cU0hQdhVYWz3L9CylNgHsXBDL1VLufjY+5uXZmq/UnvXNjXuuv0D7bNM+opCkr8gzAvtZhr94G6AbAmRRfSWFJtHQuV8yNIf9jOC7vR5JhBJ8mos9ljVZIYevA4rf+ejB58AUP8dwBso1zMArgW+bAgjQjSsYIILDtc8CX4TPPLKJIcpwdFfhSICa2EzmCFba8fUwWQH9k9vXyx8IFMbMoyvDoG5yrlRGMtKTjJDrPJVHoS18t+YBlrqCN71ylMmTd98Isc8ERM89bPRcBnU8BD5sBu82wSkCeS7FozhgGZ9L14q91R8nQ0sf3dkLUcHPRq4rDYTKOlkW48qWxmXbdd6FJCH/HY9RBVCj1Xxqfnkt5AWoC0MIw62JccTXBvyQizgHeEsENz17K5Gg6yTkpIW8zHaX6+VlXmP791F6xaMgv+WebpAO/TKw6VmUOB9Mm6RmEF30T81ne4WWv1+m8ZNTEJz7RozLlDi75JX0AM=
-  on:
-    tags: true
-    branch: master
-    # distributions: sdist bdist_wheel
-    # python: '3.6'
+  - provider: pypi
+    user: skulumani
+    password:
+      secure: u3QpDzRUyFQDStc+ZLNKNHafSj+DFnjPxjbaylljdcU12a97FBgR9iK+QAODt0qsF86i3hIZwPgvLJ0ibD4s/EFfKgQPSpYPPzQsnQOYu6szjU8b1V4TT8JaRCW3qofFC6IRVxxWAdECx1MebtpeDO7Ab7U+M3fFMXjQbM3vOYZHiM5ynB3nvRfxFuLg44M9cU0hQdhVYWz3L9CylNgHsXBDL1VLufjY+5uXZmq/UnvXNjXuuv0D7bNM+opCkr8gzAvtZhr94G6AbAmRRfSWFJtHQuV8yNIf9jOC7vR5JhBJ8mos9ljVZIYevA4rf+ejB58AUP8dwBso1zMArgW+bAgjQjSsYIILDtc8CX4TPPLKJIcpwdFfhSICa2EzmCFba8fUwWQH9k9vXyx8IFMbMoyvDoG5yrlRGMtKTjJDrPJVHoS18t+YBlrqCN71ylMmTd98Isc8ERM89bPRcBnU8BD5sBu82wSkCeS7FozhgGZ9L14q91R8nQ0sf3dkLUcHPRq4rDYTKOlkW48qWxmXbdd6FJCH/HY9RBVCj1Xxqfnkt5AWoC0MIw62JccTXBvyQizgHeEsENz17K5Gg6yTkpIW8zHaX6+VlXmP791F6xaMgv+WebpAO/TKw6VmUOB9Mm6RmEF30T81ne4WWv1+m8ZNTEJz7RozLlDi75JX0AM=
+    on:
+      tags: true
+      branch: master
+      condition: ${TRAVIS_OS_NAME} == "linux" && ${PYTHON_VERSION} == "3.7"
+    distributions: "sdist bdist_wheel"
+    python: "${PYTHON_VERSION}"
