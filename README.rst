@@ -68,3 +68,12 @@ Contributors
 * `JayHensley <https://github.com/JayHensley>`_
 * `not7cd <https://github.com/not7cd>`_
 
+To Do
+============
+* Explain what the program can do to Jay
+* Installation instructions
+* Later on - create single executable file
+* Constellation planner and visualizer
+* Trajectories from The Expanse
+* Mission planner to utilize gravity assists, etc.
+
